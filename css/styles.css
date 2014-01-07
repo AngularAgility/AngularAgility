@@ -1,0 +1,50 @@
+/*some classes to customize the look and feel of validation*/
+input.ng-dirty.ng-valid, select.ng-dirty.ng-valid {
+    border:1px solid Green;
+}
+input.ng-dirty.ng-invalid, select.ng-dirty.ng-invalid {
+    border:1px solid Red;
+}
+div.validation-icons {
+    margin-top: 5px;
+    margin-left: -40px;
+}
+
+div.validation-icons i.fa-check  {
+    color: green;
+}
+
+div.validation-icons i.fa-exclamation-circle {
+    color: red;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/*demo specific stuff*/
+body {
+    padding-top: 50px;
+}
+.starter-template {
+    padding: 40px 15px;
+    text-align: center;
+}
+
+div.info {
+    text-align: left;
+    margin-left: 190px;
+    margin-top: -15px;
+    margin-bottom: 15px;
+}
+
+
+
+

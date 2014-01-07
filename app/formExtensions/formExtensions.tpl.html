@@ -1,0 +1,164 @@
+<div>
+    <div class="alert alert-info">
+        <p>
+            Try interacting with the fields below and trying to submit the form at various stages of
+            being valid/invalid.
+        </p>
+
+        <p>
+            Note that the red/green box color and icons are implemented with CSS but rest is Angular + aa.formExtensions
+        </p>
+    </div>
+
+    <div ng-form="exampleForm" class="form-horizontal">
+
+        <!-- FIRST NAME -->
+        <div class="form-group">
+            <label for="firstName" class="col-sm-2 control-label">First Name *</label>
+            <div class="col-sm-3">
+                <input type="text" class="form-control" id="firstName"
+                	required="" ng-minlength="2" ng-maxlength="30"
+            		aa-val-msg=""
+                	ng-model="person.firstName"
+                    name="firstName"
+                    aa-valid-icon="" />
+            </div>
+        </div>
+        <div class="info">
+            <div class="validations">
+                Required field, min 2, max 30
+            </div>
+            <div class="helpers">
+                Label specified manually with a 'for', auto validation message using label name with 'aa-val-msg'. Valid icon with 'aa-valid-icon'.
+            </div>
+        </div>
+
+        <pre>
+            {{exampleForm.firstName.$error | json}}
+        </pre>
+
+        <pre>
+            {{exampleForm.$aaFormExtensions | json}}
+        </pre>
+
+
+        <!-- LAST NAME -->
+        <div class="form-group">
+            <div class="col-sm-3">
+                <input type="text"
+                       class="form-control"
+                       name="lastName"
+                       aa-label="Last Name"
+                       ng-model="person.lastName"
+                       aa-val-msg=""
+                       aa-valid-icon=""
+                       required="">
+            </div>
+        </div>
+        <div class="info">
+            <div class="validations">
+                Required field
+            </div>
+            <div class="helpers">
+                Label auto-generated with "aa-label", auto validation message with 'aa-val-msg'. Valid icon with 'aa-valid-icon'.
+            </div>
+        </div>
+
+
+        <!-- EMAIL -->
+        <div class="form-group">
+            <div class="col-sm-3">
+                <input type="email" class="form-control" aa-auto-field="person.email" />
+            </div>
+        </div>
+        <div class="info">
+            <div class="validations">
+                Not required field, must be an email address if filled in
+            </div>
+            <div class="helpers">
+                <strong>Automatically generated</strong> ng-model, name, label and validation message with 'aa-auto-field'.
+            </div>
+        </div>
+
+
+        <!-- GENDER -->
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Gender *</label>
+            <div class="col-sm-1">
+                <label class="radio-inline">
+                    <input type="radio" name="gender" required="" ng-model="person.gender" value="male"> Male
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="gender" required="" ng-model="person.gender" value="female"> Female
+                </label>
+            </div>
+        </div>
+        <div class="info">
+            <div class="validations">
+                Required field
+            </div>
+            <div class="helpers">
+                Auto validation message with 'aa-val-msg'.
+            </div>
+        </div>
+
+
+        <!-- FAVORITE NUMBER -->
+        <div class="form-group">
+            <div class="col-sm-1">
+                <input type="number" class="form-control" aa-auto-field="person.favoriteNumber" required="">
+            </div>
+            <div class="col-sm-3">
+                Favorte number must be a number not a letter
+            </div>
+        </div>
+        <div class="info">
+            <div class="validations">
+                Required field, must be a number
+            </div>
+            <div class="helpers">
+                <strong>Automatically generated</strong> ng-model, name, label and validation message with 'aa-auto-field'
+            </div>
+        </div>
+
+
+        <!-- FAVORITE LETTER -->
+        <div class="form-group">
+            <div class="col-sm-1">
+                <input type="text" class="form-control" aa-auto-field="person.favoriteLetter" required=""
+                       maxlength="1" ng-pattern="/^[A-Za-z]$/">
+            </div>
+        </div>
+        <div class="info">
+            <div class="validations">
+                Required field, must be one letter (regex validated)
+            </div>
+            <div class="helpers">
+                <strong>Automatically generated</strong> ng-model, name, label and validation message with 'aa-auto-field'
+            </div>
+        </div>
+
+
+        <!-- FAVORITE WEBSITE -->
+        <div class="form-group">
+            <div class="col-sm-3">
+                <input type="url" class="form-control" aa-auto-field="person.favoriteWebsite" required="">
+            </div>
+        </div>
+        <div class="info">
+            <div class="validations">
+                Required field, must be a website
+            </div>
+            <div class="helpers">
+                <strong>Automatically generated</strong> ng-model, name, label and validation message with 'aa-auto-field'
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-3">
+                <button aa-save-form="save()" class="btn btn-default">Sign in</button>
+            </div>
+        </div>
+    </div>
+</div>
