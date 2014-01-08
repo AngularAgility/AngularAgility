@@ -9,12 +9,11 @@
 
                     ensureaaFormExtensions(ngForm);
 
-
-                    scope.$watch(function () {
-                        return ngForm.$invalid;
-                    }, function (val) {
-                        element.toggleClass("disabled", val);
-                    });
+//                    scope.$watch(function () {
+//                        return ngForm.$invalid;
+//                    }, function (val) {
+//                        element.toggleClass("disabled", val);
+//                    });
 
                     element.on('click', function () {
                         scope.$apply(function () {
@@ -35,72 +34,78 @@
         .directive('ngModel', ['aaFormExtensions', '$document', '$timeout', function (aaFormExtensions, $document, $timeout) {
             return {
                 require: ['ngModel', '^form'],
-                compile: function (element, attrs) {
-                    return function (scope, element, attrs, controllers) {
+                priority: 1,
+                link: function (scope, element, attrs, controllers) {
+                    var ngModel = controllers[0],
+                        ngForm = controllers[1],
+                        fieldName = "This field";
 
-                        var ngModel = controllers[0],
-                            ngForm = controllers[1]
-                            element = element[0]
-                            fieldName = "This field";
+                    var errorMessages = [];
+                    ensureaaFormExtensions(ngForm);
+                    ngForm.$aaFormExtensions[ngModel.$name] = {
+                        $errorMessages: errorMessages
+                    }
+                    ngForm.$aaFormExtensions[ngModel.$name].$element = element;
 
-                        var errorMessages = [];
-                        ensureaaFormExtensions(ngForm);
-                        ngForm.$aaFormExtensions[ngModel.$name] = {
-                            $errorMessages: errorMessages
-                        }
-                        ngForm.$aaFormExtensions[ngModel.$name].$element = element;
+                    if(attrs.aaLabel) {
+                        //use default label
+                        fieldName = attrs.aaLabel;
 
+                    } else if(element[0].id){
 
-                        //want this LINK to run after all other links (label generating ones for example) another way?
-                        $timeout(function() {
-
-                            if(element.id) {
-
-                                //is there a label for this field?
-                                angular.forEach($document.find('label'), function(label) {
-                                    if(label.getAttribute("for") === element.id) {
-                                        fieldName = (label.innerHTML || "").replace('*', '').trim();
-                                    }
-                                })
+                        //is there a label for this field?
+                        angular.forEach($document.find('label'), function(label) {
+                            if(label.getAttribute("for") === element[0].id) {
+                                fieldName = (label.innerHTML || "").replace('*', '').trim();
                             }
+                        });
+                    }
 
-                            ngModel.$viewChangeListeners.push(function() {
+                    //need this to run AFTER angular's 'ngModel' runs... another way?
+                    $timeout(calcErrorMessages, 0);
 
-                                errorMessages.length = 0;
+                    ngModel.$viewChangeListeners.push(calcErrorMessages); //subsequent runs
 
-                                if(ngModel.$pristine || ngModel.$valid) {
-                                    return;
+                    function calcErrorMessages() {
+                        errorMessages.length = 0;
+
+                        for (var key in ngModel.$error) {
+                            if(ngModel.$error[key]) {
+
+                                if(key === 'minlength') {
+                                    errorMessages.push(
+                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.ngMinlength)
+                                    )
+                                } else if (key === 'maxlength') {
+                                    errorMessages.push(
+                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.ngMaxlength)
+                                    )
+                                } else {
+                                    errorMessages.push(
+                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName)
+                                    )
                                 }
-
-                                for (var key in ngModel.$error) {
-                                    if(ngModel.$error[key]) {
-
-                                        if(key === 'minlength') {
-                                            errorMessages.push(
-                                                stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.ngMinlength)
-                                            )
-                                        } else if (key === 'maxlength') {
-                                            errorMessages.push(
-                                                stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.ngMaxlength)
-                                            )
-                                        } else {
-                                            errorMessages.push(
-                                                stringFormat(aaFormExtensions.validationMessages[key], fieldName)
-                                            )
-                                        }
-                                    }
-                                }
-                            })
-                        })
+                            }
+                        }
                     }
                 }
             };
         }])
 
-        /*.directive('aaValMsg', function() {
+        .directive('aaValMsg', function() {
 
         })
-         */
+
+        .directive('aaValMsgFor', function() {
+            //generate the validation message for a particular form field here
+            return {
+                link: function(scope, element, attrs) {
+
+                },
+                template: ''
+            }
+        })
+
         //generate a label for an input generating an ID for it if it doesn't already exist
         .directive('aaLabel', ['aaFormExtensions', function (aaFormExtensions) {
             return {

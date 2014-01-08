@@ -1,0 +1,11 @@
+{
+    "name": "angular-agility",
+    "version": "0.0.1",
+    "dependencies": {
+        "connect": "*"
+    },
+    "repository" : {
+        "type" : "git",
+        "url" : "https://github.com/AngularAgility/AngularAgility.git"
+    }
+}
