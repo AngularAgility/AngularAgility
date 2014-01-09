@@ -88,7 +88,7 @@
             <label class="col-sm-2 control-label">Gender *</label>
             <div class="col-sm-1">
                 <label class="radio-inline">
-                    <input type="radio" name="gender" required="" ng-model="person.gender" value="male"> Male
+                    <input type="radio" name="gender" required="" aa-val-msg="" ng-model="person.gender" value="male"> Male
                 </label>
                 <label class="radio-inline">
                     <input type="radio" name="gender" required="" ng-model="person.gender" value="female"> Female
@@ -156,8 +156,7 @@
         <!-- FAVORITE FOOD -->
         <div class="form-group">
             <div class="col-sm-3">
-                TODO: this has issues still
-                <select class="form-control" ng-model="favoriteFood" ng-options="c.name for c in colors">
+                <select class="form-control" aa-auto-field="person.favoriteColor" ng-options="c.name for c in colors" required="">
                     <option value="">Select...</option>
                 </select>
             </div>

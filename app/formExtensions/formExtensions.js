@@ -7,10 +7,10 @@ angular
         }
 
         $scope.colors = [
-            {name:'black', shade:'dark'},
-            {name:'white', shade:'light'},
-            {name:'red', shade:'dark'},
-            {name:'blue', shade:'dark'},
-            {name:'yellow', shade:'light'}
+            {name:'black'},
+            {name:'white'},
+            {name:'red'},
+            {name:'blue'},
+            {name:'yellow'}
         ];
     }]);

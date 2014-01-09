@@ -1,9 +1,11 @@
 /*some classes to customize the look and feel of aa.formExtensions validation*/
+/*AKA you might want to use these....*/
 input.ng-dirty.ng-valid, select.ng-dirty.ng-valid {
     border:1px solid Green;
 }
 input.ng-dirty.ng-invalid, select.ng-dirty.ng-invalid,
-input.ng-invalid.aa-invalid-attempt, select.ng-invalid.aa-invalid-attempt {
+input.ng-invalid.aa-invalid-attempt, select.ng-invalid.aa-invalid-attempt,
+input.ng-invalid.aa-had-focus, select.ng-invalid.aa-had-focus {
     border:1px solid Red;
 }
 
@@ -12,18 +14,21 @@ div.validation-icons {
     margin-left: -40px;
 }
 
-div.validation-icons i.fa-check  {
+div.validation-icons i.fa-check  { /*requires font awesome*/
     color: green;
 }
 
-div.validation-icons i.fa-exclamation-circle {
+div.validation-icons i.fa-exclamation-circle { /*requires font awesome*/
     color: red;
 }
 
 div.validation-error {
     color: red;
-    font: bold;
+    font-weight: bold;
+    width: 300px;
+    text-align: left;
 }
+/*END what you might want to use*/
 
 
 
@@ -33,7 +38,7 @@ div.validation-error {
 
 
 
-/*demo specific stuff*/
+/*demo specific stuff AKA probably not worth using*/
 body {
     padding-top: 50px;
 }

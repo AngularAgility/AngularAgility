@@ -52,7 +52,6 @@
                                 fieldName = (label.innerHTML || "").replace('*', '').trim();
                             }
                         });
-
                     }
 
                     ensureaaFormExtensionsFieldExists(ngForm, ngModel.$name);
@@ -78,12 +77,9 @@
                     $timeout(calcErrorMessages, 0);
 
                     //subsequent runs after value changes in GUI...
-                    //might need to get more elaborate with this
-
-                    //TODO: this breaks ng-options
                     ngModel.$parsers.push(calcErrorMessages);
 
-                    function calcErrorMessages() {
+                    function calcErrorMessages(val) {
                         var errorMessages = ngForm.$aaFormExtensions[ngModel.$name].$errorMessages;
                         errorMessages.length = 0;
 
@@ -105,6 +101,7 @@
                                 }
                             }
                         }
+                        return val;
                     }
                 }
             };
@@ -112,7 +109,7 @@
 
         //place on an element with ngModel to generate validation messages for it
         //will use the default configured validation message placement strategy unless a custom strategy is passed in
-        .directive('aaValMsg', ['$compile', function($compile) {
+        .directive('aaValMsg', ['$compile', 'aaFormExtensions', function($compile, aaFormExtensions) {
             return {
                 require: ['ngModel', '^form'],
                 link: function(scope, element, attrs, ctrls) {
@@ -120,10 +117,10 @@
                     var ngModel = ctrls[0];
                     var form = ctrls[1];
 
-                    //TODO allow for strategy selection in attrs.aaValMsg's value
-                    //TODO use a provider strategy rather than hardcoded
-                    var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}"></div>', form.$name, attrs.name));
-                    element.after(msgElement);
+                    var msgElement = aaFormExtensions.valMsgPlacementStrategies[attrs.aaValMsg ||  aaFormExtensions.defaultValMsgPlacementStrategy](
+                        element, form.$name, attrs.name
+                    )
+
                     $compile(msgElement)(scope);
                 }
             };
@@ -131,7 +128,7 @@
 
         //if used directly rather than passively with aaValMsg allows for direct placement of validation messages
         //for a given form field. ex. pass "myForm.myFieldName"
-        .directive('aaValMsgFor', function() {
+        .directive('aaValMsgFor', ['aaFormExtensions', function(aaFormExtensions) {
             //generate the validation message for a particular form field here
             return {
                 require: ['^form'],
@@ -171,10 +168,10 @@
                         }
                     );
                 },
-                template: '<div class="validation-error" ng-show="showMessages" ng-repeat="msg in errorMessages">{{msg}}</div>',
+                template: aaFormExtensions.valMsgForTemplate,
                 replace: true
             };
-        })
+        }])
 
         //generate a label for an input generating an ID for it if it doesn't already exist
         .directive('aaLabel', ['aaFormExtensions', function (aaFormExtensions) {
@@ -248,7 +245,7 @@
                     invalidIcon[0].style.display = 'none';
 
                     return function(scope, element, attrs, ngModel) {
-                        ngModel.$parsers.push(function() {
+                        ngModel.$parsers.push(function(val) {
 
                             if(ngModel.$valid) {
                                 validIcon[0].style.display = '';
@@ -257,6 +254,8 @@
                                 validIcon[0].style.display = 'none';
                                 invalidIcon[0].style.display = '';
                             }
+
+                            return val;
                         });
                     }
                 }
@@ -310,7 +309,32 @@
             };
             this.setDefaultLabelStrategy = function(strategyName) {
                 this.defaultLabelStrategy = strategyName;
-            }
+            };
+
+
+            this.defaultValMsgPlacementStrategy = "default";
+            this.valMsgPlacementStrategies = {
+
+                default: function(formFieldElement, formName, formFieldName) {
+
+                    var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}"></div>', formName, formFieldName));
+                    var fieldType = formFieldElement[0].type.toLowerCase();
+
+                    if(fieldType === 'radio') {
+                        //radios tend to be wrapped, go up a few levels (of course you can customize this with your own strategy)
+                        formFieldElement.parent().parent().append(msgElement);
+
+                    } else {
+                        formFieldElement.after(msgElement);
+                    }
+
+                    return msgElement;
+                }
+            };
+            this.registerValMsgPlacementStrategy = function(name, strategy) {
+                this.valMsgPlacementStrategies[name] = strategy;
+            };
+
 
             //bootstrap 3 + font awesome
             this.validIconStrategy = {
@@ -321,10 +345,10 @@
                     element.parent().after(ele)
                     return ele;
                 }
-            }
+            };
             this.setValidIconStrategy = function(strategy) {
                 self.validIconStrategy = strategy;
-            }
+            };
 
 
             this.validationMessages = {
@@ -335,22 +359,29 @@
                 pattern: "{0} is invalid.",
                 url: "{0} must be a valid URL.",
                 number: "{0} must be number."
-            }
+            };
             this.setValidationMessage = function(directiveName, message) {
                 self.validationMessages[directiveName] = message;
-            }
+            };
             this.setValidationMessages = function(messages) {
                 self.validationMessages = messages;
-            }
+            };
 
+            this.valMsgForTemplate ='<div class="validation-error" ng-show="showMessages" ng-repeat="msg in errorMessages">{{msg}}</div>';
+            this.setValMsgForTemplate = function(valMsgForTemplate) {
+                this.valMsgForTemplate = valMsgForTemplate;
+            };
 
             this.$get = function () {
                 return {
                     defaultLabelStrategy: self.defaultLabelStrategy,
                     labelStrategies: self.labelStrategies,
                     validIconStrategy: self.validIconStrategy,
-                    validationMessages: self.validationMessages
-                }
+                    validationMessages: self.validationMessages,
+                    valMsgForTemplate: self.valMsgForTemplate,
+                    valMsgPlacementStrategies: self.valMsgPlacementStrategies,
+                    defaultValMsgPlacementStrategy: self.defaultValMsgPlacementStrategy
+                };
             };
         });
 
