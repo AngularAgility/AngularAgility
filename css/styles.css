@@ -1,10 +1,12 @@
-/*some classes to customize the look and feel of validation*/
+/*some classes to customize the look and feel of aa.formExtensions validation*/
 input.ng-dirty.ng-valid, select.ng-dirty.ng-valid {
     border:1px solid Green;
 }
-input.ng-dirty.ng-invalid, select.ng-dirty.ng-invalid {
+input.ng-dirty.ng-invalid, select.ng-dirty.ng-invalid,
+input.ng-invalid.aa-invalid-attempt, select.ng-invalid.aa-invalid-attempt {
     border:1px solid Red;
 }
+
 div.validation-icons {
     margin-top: 5px;
     margin-left: -40px;
@@ -22,9 +24,6 @@ div.validation-error {
     color: red;
     font: bold;
 }
-
-
-
 
 
 

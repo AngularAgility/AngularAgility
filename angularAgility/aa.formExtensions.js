@@ -29,8 +29,9 @@
             };
         })
 
-        //generate validation messages for all ngModels at form.$aaFormExtensions.
-        //messages can be used there manually or emitted automatically with aaGenValMsg
+        //constructs myForm.$aaFormExtensions.myFieldName object
+        //including validation messages for all ngModels at form.$aaFormExtensions.
+        //messages can be used there manually or emitted automatically with aaValMsg
         .directive('ngModel', ['aaFormExtensions', '$document', '$timeout', function (aaFormExtensions, $document, $timeout) {
             return {
                 require: ['ngModel', '^form'],
@@ -40,37 +41,50 @@
                         ngForm = controllers[1],
                         fieldName = "This field";
 
-                    var errorMessages = [];
-                    ensureaaFormExtensions(ngForm);
-                    ngForm.$aaFormExtensions[ngModel.$name] = {
-                        $errorMessages: errorMessages
-                    }
-                    ngForm.$aaFormExtensions[ngModel.$name].$element = element;
-
                     if(attrs.aaLabel) {
                         //use default label
                         fieldName = attrs.aaLabel;
 
                     } else if(element[0].id){
-
                         //is there a label for this field?
                         angular.forEach($document.find('label'), function(label) {
                             if(label.getAttribute("for") === element[0].id) {
                                 fieldName = (label.innerHTML || "").replace('*', '').trim();
                             }
                         });
+
                     }
 
-                    //need this to run AFTER angular's 'ngModel' runs... another way?
+                    ensureaaFormExtensionsFieldExists(ngForm, ngModel.$name);
+                    ngForm.$aaFormExtensions[ngModel.$name].$element = element;
+                    element.on('blur', function() {
+
+                        scope.$apply(function() {
+                            ngForm.$aaFormExtensions[ngModel.$name].$hadFocus = true;
+                            element.addClass('aa-had-focus');
+                        });
+                    });
+
+
+                    scope.$watch(function() {
+                        return ngForm.$aaFormExtensions.$invalidAttempt;
+                    }, function(val) {
+                        if(val) {
+                            element.addClass('aa-invalid-attempt');
+                        }
+                    });
+
+                    //need this to run AFTER Angular's 'ngModel' runs... another way?
                     $timeout(calcErrorMessages, 0);
 
                     //subsequent runs after value changes in GUI...
                     //might need to get more elaborate with this
+
+                    //TODO: this breaks ng-options
                     ngModel.$parsers.push(calcErrorMessages);
 
-                    //TODO some sort of a has had focus to turn on message display before submit
-
                     function calcErrorMessages() {
+                        var errorMessages = ngForm.$aaFormExtensions[ngModel.$name].$errorMessages;
                         errorMessages.length = 0;
 
                         for (var key in ngModel.$error) {
@@ -96,6 +110,8 @@
             };
         }])
 
+        //place on an element with ngModel to generate validation messages for it
+        //will use the default configured validation message placement strategy unless a custom strategy is passed in
         .directive('aaValMsg', ['$compile', function($compile) {
             return {
                 require: ['ngModel', '^form'],
@@ -109,11 +125,12 @@
                     var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}"></div>', form.$name, attrs.name));
                     element.after(msgElement);
                     $compile(msgElement)(scope);
-
                 }
             };
         }])
 
+        //if used directly rather than passively with aaValMsg allows for direct placement of validation messages
+        //for a given form field. ex. pass "myForm.myFieldName"
         .directive('aaValMsgFor', function() {
             //generate the validation message for a particular form field here
             return {
@@ -122,18 +139,39 @@
                 scope: true,
                 link: function($scope, element, attrs) {
 
-                    var fullFieldPath = attrs.aaValMsgFor;
-                    var formObjName = fullFieldPath.substring(0, fullFieldPath.indexOf('.'));
+                    var fullFieldPath = attrs.aaValMsgFor,
+                        fieldInForm = $scope.$eval(fullFieldPath),
+                        formObj = $scope.$eval(fullFieldPath.substring(0, fullFieldPath.indexOf('.')));
 
                     //could nest multiple forms so can't trust directive require and have to eval to handle edge cases...
-                    ensureaaFormExtensions($scope.$eval(formObjName));
-                    var formExtensionsFieldErrorsPath = fullFieldPath.replace('.', '.$aaFormExtensions.') + ".$errorMessages"
+                    ensureaaFormExtensionsFieldExists(formObj, fieldInForm.$name);
+                    var fieldInFormExtensions = $scope.$eval(fullFieldPath.replace('.', '.$aaFormExtensions.'));
 
-                    $scope.$watchCollection(formExtensionsFieldErrorsPath, function(val) {
-                        $scope.errorMessages = val;
-                    })
+                    $scope.$watchCollection(
+                        function() {
+                            return fieldInFormExtensions.$errorMessages;
+                        },
+                        function(val) {
+                            $scope.errorMessages = val;
+                        }
+                    );
+
+                    $scope.$watchCollection(
+                        function() {
+                            return [
+                                formObj.$aaFormExtensions.$invalidAttempt,
+                                fieldInFormExtensions.$hadFocus
+                            ];
+                        },
+                        function(watches) {
+                            var invalidAttempt = watches[0],
+                                hadFocus = watches[1];
+
+                            $scope.showMessages = invalidAttempt || hadFocus;
+                        }
+                    );
                 },
-                template: '<div class="validation-error" ng-repeat="msg in errorMessages">{{msg}}</div>',
+                template: '<div class="validation-error" ng-show="showMessages" ng-repeat="msg in errorMessages">{{msg}}</div>',
                 replace: true
             };
         })
@@ -203,21 +241,14 @@
 
                     var validIcon = angular.element(aaFormExtensions.validIconStrategy.validIcon)
                     container.append(validIcon);
+                    validIcon[0].style.display = 'none';
 
                     var invalidIcon = angular.element(aaFormExtensions.validIconStrategy.invalidIcon)
                     container.append(invalidIcon);
+                    invalidIcon[0].style.display = 'none';
 
                     return function(scope, element, attrs, ngModel) {
-
-                        scope.$watch(function() {
-                            return ngModel.$modelValue;
-                        }, function() {
-
-                            if(ngModel.$pristine) {
-                                validIcon[0].style.display = 'none';
-                                invalidIcon[0].style.display = 'none';
-                                return
-                            }
+                        ngModel.$parsers.push(function() {
 
                             if(ngModel.$valid) {
                                 validIcon[0].style.display = '';
@@ -226,8 +257,7 @@
                                 validIcon[0].style.display = 'none';
                                 invalidIcon[0].style.display = '';
                             }
-                        })
-
+                        });
                     }
                 }
             };
@@ -360,9 +390,21 @@
         });
     };
 
-    function ensureaaFormExtensions(obj) {
-        if(!obj.$aaFormExtensions) {
-            obj.$aaFormExtensions = {};
+    function ensureaaFormExtensions(form) {
+        if(!form.$aaFormExtensions) {
+            form.$aaFormExtensions = {};
+        }
+    }
+    
+    function ensureaaFormExtensionsFieldExists(form, fieldName) {
+        ensureaaFormExtensions(form);
+
+        if(!form.$aaFormExtensions[fieldName]) {
+            form.$aaFormExtensions[fieldName] = {
+                $hadFocus: false,
+                $errorMessages: [],
+                $element: null
+            };
         }
     }
 })()

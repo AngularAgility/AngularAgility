@@ -6,5 +6,11 @@ angular
             alert("save called successfully")
         }
 
-        $scope.foods = [{name: "Pizza"},{name: "Cookies"}];
+        $scope.colors = [
+            {name:'black', shade:'dark'},
+            {name:'white', shade:'light'},
+            {name:'red', shade:'dark'},
+            {name:'blue', shade:'dark'},
+            {name:'yellow', shade:'light'}
+        ];
     }]);

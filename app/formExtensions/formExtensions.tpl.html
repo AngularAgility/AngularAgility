@@ -75,7 +75,7 @@
         </div>
         <div class="info">
             <div class="validations">
-                Not required field, must be an email address if filled in
+                <strong>Not required field</strong>, must be an email address if filled in
             </div>
             <div class="helpers">
                 <strong>Automatically generated</strong> ng-model, name, label and validation message with 'aa-auto-field'.
@@ -110,13 +110,10 @@
             <div class="col-sm-1">
                 <input type="number" class="form-control" aa-auto-field="person.favoriteNumber" required="">
             </div>
-            <div class="col-sm-3">
-                Favorte number must be a number not a letter
-            </div>
         </div>
         <div class="info">
             <div class="validations">
-                Required field, must be a number
+                Required field, must be a and NOT a letter
             </div>
             <div class="helpers">
                 <strong>Automatically generated</strong> ng-model, name, label and validation message with 'aa-auto-field'
@@ -159,7 +156,8 @@
         <!-- FAVORITE FOOD -->
         <div class="form-group">
             <div class="col-sm-3">
-                <select class="form-control" aa-auto-field="person.favoriteFood" ng-options="food.name for food in foods" required="">
+                TODO: this has issues still
+                <select class="form-control" ng-model="favoriteFood" ng-options="c.name for c in colors">
                     <option value="">Select...</option>
                 </select>
             </div>
@@ -176,7 +174,7 @@
 
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-3">
-                <button aa-save-form="save()" class="btn btn-default">Sign in</button>
+                <button aa-save-form="save()" class="btn btn-default">Save</button>
             </div>
         </div>
     </div>

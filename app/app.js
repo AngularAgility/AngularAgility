@@ -39,4 +39,12 @@ angular
     }])
     .run(['$rootScope', '$state', function ($rootScope, $state) {
         $rootScope.$state = $state;
+
+        $rootScope.colors = [
+            {name:'black', shade:'dark'},
+            {name:'white', shade:'light'},
+            {name:'red', shade:'dark'},
+            {name:'blue', shade:'dark'},
+            {name:'yellow', shade:'light'}
+        ];
     }]);
