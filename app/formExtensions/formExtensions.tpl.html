@@ -10,6 +10,7 @@
         </p>
     </div>
 
+    <div ng-form="testParent">
     <div ng-form="exampleForm" class="form-horizontal">
 
         <!-- FIRST NAME -->
@@ -155,11 +156,29 @@
             </div>
         </div>
 
+        <!-- FAVORITE FOOD -->
+        <div class="form-group">
+            <div class="col-sm-3">
+                <select class="form-control" aa-auto-field="person.favoriteFood" ng-options="food.name for food in foods" required="">
+                    <option value="">Select...</option>
+                </select>
+            </div>
+        </div>
+        <div class="info">
+            <div class="validations">
+                Required field
+            </div>
+            <div class="helpers">
+                <strong>Automatically generated</strong> ng-model, name, label and validation message with 'aa-auto-field'
+            </div>
+        </div>
+
 
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-3">
                 <button aa-save-form="save()" class="btn btn-default">Sign in</button>
             </div>
         </div>
+    </div>
     </div>
 </div>

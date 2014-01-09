@@ -64,7 +64,11 @@
                     //need this to run AFTER angular's 'ngModel' runs... another way?
                     $timeout(calcErrorMessages, 0);
 
-                    ngModel.$viewChangeListeners.push(calcErrorMessages); //subsequent runs
+                    //subsequent runs after value changes in GUI...
+                    //might need to get more elaborate with this
+                    ngModel.$parsers.push(calcErrorMessages);
+
+                    //TODO some sort of a has had focus to turn on message display before submit
 
                     function calcErrorMessages() {
                         errorMessages.length = 0;
@@ -92,18 +96,46 @@
             };
         }])
 
-        .directive('aaValMsg', function() {
+        .directive('aaValMsg', ['$compile', function($compile) {
+            return {
+                require: ['ngModel', '^form'],
+                link: function(scope, element, attrs, ctrls) {
 
-        })
+                    var ngModel = ctrls[0];
+                    var form = ctrls[1];
+
+                    //TODO allow for strategy selection in attrs.aaValMsg's value
+                    //TODO use a provider strategy rather than hardcoded
+                    var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}"></div>', form.$name, attrs.name));
+                    element.after(msgElement);
+                    $compile(msgElement)(scope);
+
+                }
+            };
+        }])
 
         .directive('aaValMsgFor', function() {
             //generate the validation message for a particular form field here
             return {
-                link: function(scope, element, attrs) {
+                require: ['^form'],
+                priority: 1,
+                scope: true,
+                link: function($scope, element, attrs) {
 
+                    var fullFieldPath = attrs.aaValMsgFor;
+                    var formObjName = fullFieldPath.substring(0, fullFieldPath.indexOf('.'));
+
+                    //could nest multiple forms so can't trust directive require and have to eval to handle edge cases...
+                    ensureaaFormExtensions($scope.$eval(formObjName));
+                    var formExtensionsFieldErrorsPath = fullFieldPath.replace('.', '.$aaFormExtensions.') + ".$errorMessages"
+
+                    $scope.$watchCollection(formExtensionsFieldErrorsPath, function(val) {
+                        $scope.errorMessages = val;
+                    })
                 },
-                template: ''
-            }
+                template: '<div class="validation-error" ng-repeat="msg in errorMessages">{{msg}}</div>',
+                replace: true
+            };
         })
 
         //generate a label for an input generating an ID for it if it doesn't already exist
@@ -121,7 +153,7 @@
 
                     aaFormExtensions.labelStrategies[strategyName](element, attrs.aaLabel, isRequiredField);
                 }
-            }
+            };
         }])
 
         .directive('aaAutoField', ['$compile', function ($compile) {
@@ -148,6 +180,8 @@
                         element.attr('aa-label', toTitleCase(splitCamelCase(lastPartOfName)))
                     }
 
+                    element.attr("aa-val-msg", "")
+
                     element.removeAttr('aa-auto-field');
 
                     element.replaceWith(outerHTML(element[0]));
@@ -156,7 +190,7 @@
                         $compile(element)(scope);
                     }
                 }
-            }
+            };
         }])
 
         .directive('aaValidIcon', ['aaFormExtensions', function(aaFormExtensions) {
@@ -196,7 +230,7 @@
 
                     }
                 }
-            }
+            };
         }])
 
         .provider('aaFormExtensions', function () {
@@ -221,10 +255,10 @@
                         'hidden',
                         'radio',
                         'submit'
-                    ]
+                    ];
 
                     if(unsupported.indexOf(ele[0].type) !== -1) {
-                        throw "Generating a label for and input type " + ele[0].type + " is unsupported."
+                        throw "Generating a label for and input type " + ele[0].type + " is unsupported.";
                     }
 
                     ele.parent().parent().prepend(label);
@@ -265,14 +299,18 @@
 
             this.validationMessages = {
                 required: "{0} is required.",
-                email: "{0} must be an email.",
+                email: "The field {0} must be an email.",
                 minlength: "{0} must be at least {1} character(s).",
                 maxlength: "{0} must be less than {1} characters.",
                 pattern: "{0} is invalid.",
                 url: "{0} must be a valid URL.",
                 number: "{0} must be number."
             }
-            this.setValidationMessage = function(directiveName, messages) {
+            this.setValidationMessage = function(directiveName, message) {
+                self.validationMessages[directiveName] = message;
+            }
+            this.setValidationMessages = function(messages) {
+                self.validationMessages = messages;
             }
 
 

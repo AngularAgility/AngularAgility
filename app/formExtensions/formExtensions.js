@@ -5,4 +5,6 @@ angular
         $scope.save = function() {
             alert("save called successfully")
         }
+
+        $scope.foods = [{name: "Pizza"},{name: "Cookies"}];
     }]);

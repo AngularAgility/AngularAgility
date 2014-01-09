@@ -18,6 +18,11 @@ div.validation-icons i.fa-exclamation-circle {
     color: red;
 }
 
+div.validation-error {
+    color: red;
+    font: bold;
+}
+
 
 
 
