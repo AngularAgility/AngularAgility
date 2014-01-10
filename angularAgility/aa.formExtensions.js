@@ -1,3 +1,14 @@
+/*
+ * AngularAgility Form Extensions
+ *
+ * http://www.johnculviner.com
+ *
+ * Copyright (c) 2014 - John Culviner
+ *
+ * Licensed under the MIT license:
+ *   http://www.opensource.org/licenses/mit-license.php
+ */
+
 (function () {
     var formExtensions = angular.module('aa.formExtensions', [])
 
@@ -8,12 +19,6 @@
                 link: function (scope, element, attrs, ngForm) {
 
                     ensureaaFormExtensions(ngForm);
-
-//                    scope.$watch(function () {
-//                        return ngForm.$invalid;
-//                    }, function (val) {
-//                        element.toggleClass("disabled", val);
-//                    });
 
                     element.on('click', function () {
                         scope.$apply(function () {

@@ -15,36 +15,12 @@ angular
                     controller: 'formExtensions'
                 })
 
-
-            //register an example label generation strategy
-            //that's for bootstrap but required fields are red
-            aaFormExtensionsProvider.registerLabelStrategy("bootstrapRedRequired",
-
-            function (ele, labelText, isRequired) {
-
-                var label = angular.element('<label>')
-                    .attr('for', ele.id)
-                    .addClass('col-sm-2 control-label')
-                    .html(labelText)
-
-                if(isRequired) {
-                    label.css('color', 'red')
-                }
-
-                ele.parent().parent().prepend(label);
-            })
-
             //a built in label strategy that works with bootstrap
             aaFormExtensionsProvider.setDefaultLabelStrategy('bootstrap3InlineForm')
     }])
+
+//    .directive('htmlViewer', fun)
+
     .run(['$rootScope', '$state', function ($rootScope, $state) {
         $rootScope.$state = $state;
-
-        $rootScope.colors = [
-            {name:'black', shade:'dark'},
-            {name:'white', shade:'light'},
-            {name:'red', shade:'dark'},
-            {name:'blue', shade:'dark'},
-            {name:'yellow', shade:'light'}
-        ];
     }]);

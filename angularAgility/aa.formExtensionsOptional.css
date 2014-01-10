@@ -1,5 +1,4 @@
-/*some classes to customize the look and feel of aa.formExtensions validation*/
-/*AKA you might want to use these....*/
+/*some optional CSS that will make your aa.formExtensions experience a little prettier*/
 input.ng-dirty.ng-valid, select.ng-dirty.ng-valid {
     border:1px solid Green;
 }
@@ -28,7 +27,6 @@ div.validation-error {
     width: 300px;
     text-align: left;
 }
-/*END what you might want to use*/
 
 
 
