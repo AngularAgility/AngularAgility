@@ -12,8 +12,11 @@
 (function () {
     var formExtensions = angular.module('aa.formExtensions', [])
 
-        .directive('aaSaveForm', function () {
+        .directive('aaSaveForm', ['aaFormExtensions', function (aaFormExtensions) {
             return {
+                scope: {
+                    onInvalidAttempt: '='
+                },
                 restrict: 'A',
                 require: '^form',
                 link: function (scope, element, attrs, ngForm) {
@@ -27,12 +30,35 @@
                                 scope.$eval(attrs.aaSaveForm);
                             } else {
                                 ngForm.$aaFormExtensions.$invalidAttempt = true;
+
+                                var hasScopeFunction = typeof scope.onInvalidAttempt === 'function';
+                                var hasGlobalFunction = typeof aaFormExtensions.defaultOnInvalidAttempt === 'function'
+
+                                if(hasScopeFunction || hasGlobalFunction) {
+                                    //calc error messages
+
+                                    var errorMessages = [];
+
+                                    angular.forEach(ngForm.$aaFormExtensions, function(fieldObj, fieldName) {
+
+                                        if(fieldName.indexOf('$') === 0){ return; }
+
+                                        errorMessages = errorMessages.concat(fieldObj.$errorMessages);
+                                    });
+
+                                    if(hasScopeFunction) {
+                                        scope.onInvalidAttempt(errorMessages, ngForm);
+                                        return;
+                                    }
+
+                                    aaFormExtensions.defaultOnInvalidAttempt(errorMessages, ngForm);
+                                }
                             }
                         });
                     });
                 }
             };
-        })
+        }])
 
         //constructs myForm.$aaFormExtensions.myFieldName object
         //including validation messages for all ngModels at form.$aaFormExtensions.
@@ -272,6 +298,9 @@
             var self = this;
 
             this.defaultLabelStrategy = "default";
+            this.setDefaultLabelStrategy = function(strategyName) {
+                this.defaultLabelStrategy = strategyName;
+            };
             this.labelStrategies = {
 
                 //create a bootstrap3 style label
@@ -312,12 +341,13 @@
             this.registerLabelStrategy = function (name, strategy) {
                 this.labelStrategies[name] = strategy;
             };
-            this.setDefaultLabelStrategy = function(strategyName) {
-                this.defaultLabelStrategy = strategyName;
-            };
+
 
 
             this.defaultValMsgPlacementStrategy = "default";
+            this.setDefaultValMsgPlacementStrategy = function(strategyName) {
+                this.defaultValMsgPlacementStrategy = strategyName;
+            };
             this.valMsgPlacementStrategies = {
 
                 default: function(formFieldElement, formName, formFieldName) {
@@ -377,6 +407,13 @@
                 this.valMsgForTemplate = valMsgForTemplate;
             };
 
+            this.defaultOnInvalidAttempt = function() {
+                //todo integrate with 'growl like' notifications
+            };
+            this.setDefaultOnInvalidAttempt = function(func) {
+                this.defaultOnInvalidAttempt = func;
+            };
+
             this.$get = function () {
                 return {
                     defaultLabelStrategy: self.defaultLabelStrategy,
@@ -385,7 +422,8 @@
                     validationMessages: self.validationMessages,
                     valMsgForTemplate: self.valMsgForTemplate,
                     valMsgPlacementStrategies: self.valMsgPlacementStrategies,
-                    defaultValMsgPlacementStrategy: self.defaultValMsgPlacementStrategy
+                    defaultValMsgPlacementStrategy: self.defaultValMsgPlacementStrategy,
+                    defaultOnInvalidAttempt: self.defaultOnInvalidAttempt
                 };
             };
         });
