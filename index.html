@@ -8,8 +8,11 @@
     <meta name="author" content="">
     <title>Starter Template for Bootstrap</title>
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/shCore.css"/>
+    <link rel="stylesheet" href="css/shThemeRDark.css"/>
+
     <link href="angularAgility/aa.formExtensionsOptional.css" rel="stylesheet" />
-    <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
 </head>
 
 <body ng-app="angularAgilityDemo">
@@ -42,15 +45,23 @@
         </div>
     </div>
 
+    <!-- syntaxhighligher -->
     <script src="lib/shCore.js"></script>
-    <script src="lib/shLegacy.js"></script>
     <script src="lib/shAutoloader.js"></script>
     <script src="lib/shBrushJScript.js"></script>
     <script src="lib/shBrushXml.js"></script>
+    <script>
+        SyntaxHighlighter.all();
+    </script>
+
+    <!-- demo code -->
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.js"></script>
-    <script src="angularAgility/aa.formExtensions.js"></script>
     <script src="lib/angular-ui-router.js"></script>
     <script src="app/app.js"></script>
     <script src="app/formExtensions/formExtensions.js"></script>
+
+
+    <!-- Angular Agility code -->
+    <script src="angularAgility/aa.formExtensions.js"></script>
 </body>
 </html>
