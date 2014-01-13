@@ -7,13 +7,15 @@ body {
     text-align: center;
 }
 
-div.info {
+.alert {
     text-align: left;
-    margin-left: 190px;
-    margin-top: -15px;
-    margin-bottom: 15px;
 }
 
+.alert.alert-info.example {
+    margin-top: -11px;
+    padding: 5px 20px 0px 20px;
+}
 
-
-
+.syntaxhighlighter {
+    padding-top: 2px;
+}

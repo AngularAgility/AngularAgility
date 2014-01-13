@@ -125,6 +125,12 @@
                                     errorMessages.push(
                                         stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.ngMaxlength)
                                     )
+                                } else if (key === 'required' && element[0].type === 'number') {
+                                    //angular doesn't correctly flag numbers as invalid rather as required when something wrong is filled in
+                                    //hack around it
+                                    errorMessages.push(
+                                        stringFormat(aaFormExtensions.validationMessages['number'], fieldName)
+                                    )
                                 } else {
                                     errorMessages.push(
                                         stringFormat(aaFormExtensions.validationMessages[key], fieldName)
