@@ -2,7 +2,7 @@
 
 A set of useful Angular extensions to improve productivity
 
-Note all JavaScript/CSS that you might want to use is located in /angularAgility/*.* The remainder of the application is for the demo.
+Note all JavaScript/CSS that you might want to use is located in /src/*.*
 
 ##Form Extensions
 Angular.js form validation is likely the best take on form validation I've seen. Unfortuantely I have often found
