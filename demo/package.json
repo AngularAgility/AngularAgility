@@ -2,7 +2,7 @@
     "name": "angular-agility",
     "version": "0.0.1",
     "dependencies": {
-        "connect": "*"
+        "express": "*"
     },
     "repository" : {
         "type" : "git",

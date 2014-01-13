@@ -13,11 +13,13 @@ div.validation-icons {
     margin-left: -40px;
 }
 
-div.validation-icons i.fa-check  { /*requires font awesome*/
+/*requires font awesome*/
+div.validation-icons i.fa-check  {
     color: green;
 }
 
-div.validation-icons i.fa-exclamation-circle { /*requires font awesome*/
+/*requires font awesome*/
+div.validation-icons i.fa-exclamation-circle {
     color: red;
 }
 
@@ -27,31 +29,3 @@ div.validation-error {
     width: 300px;
     text-align: left;
 }
-
-
-
-
-
-
-
-
-
-/*demo specific stuff AKA probably not worth using*/
-body {
-    padding-top: 50px;
-}
-.starter-template {
-    padding: 40px 15px;
-    text-align: center;
-}
-
-div.info {
-    text-align: left;
-    margin-left: 190px;
-    margin-top: -15px;
-    margin-bottom: 15px;
-}
-
-
-
-
