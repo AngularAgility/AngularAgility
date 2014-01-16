@@ -21,7 +21,7 @@ can be automatically generated based on the ng-model objects bound.
 * A bunch more stuff I'm probably forgetting. Download the source and try it out, you'll like it!
 
 ###Demo
-* Extensive demo: Download the source code, demo folder and run "node server.js". I will have a full blown CI deploy of this soon online.
+* Extensive demo: Download the source code, demo folder and run "node server.js". There will be a full blown CI deploy of this online soon for easy previewing.
 * [Basic demo BEFORE Form Extensions](http://plnkr.co/edit/PS0sNo?p=preview)
 * [Basic demo AFTER Form Extensions](http://plnkr.co/edit/e8YiZ0?p=preview)
 
