@@ -4,6 +4,8 @@ A set of useful Angular extensions to improve productivity
 
 Note all JavaScript/CSS that you might want to use is located in /src/*.*
 
+##[Live demo of this exact source here](http://angularagility.herokuapp.com/)
+
 ##Form Extensions
 Angular.js form validation is likely one of the best takes on form validaiton out there. Unfortuantely it can often be a little TOO flexible for many applications where you want basic error message display and generation
 witout having to dive into the form object model and manually construct basic messages for each field.
@@ -21,7 +23,8 @@ can be automatically generated based on the ng-model objects bound.
 * A bunch more stuff I'm probably forgetting. Download the source and try it out, you'll like it!
 
 ###Demo
-* Extensive demo: Download the source code, demo folder and run "node server.js". There will be a full blown CI deploy of this online soon for easy previewing.
+* [Live demo of this exact source](http://angularagility.herokuapp.com/)
+* Local demo: Download the source code, demo folder and run "node server.js".
 * [Basic demo BEFORE Form Extensions](http://plnkr.co/edit/PS0sNo?p=preview)
 * [Basic demo AFTER Form Extensions](http://plnkr.co/edit/e8YiZ0?p=preview)
 

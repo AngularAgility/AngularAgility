@@ -15,7 +15,8 @@
         .directive('aaSaveForm', ['aaFormExtensions', function (aaFormExtensions) {
             return {
                 scope: {
-                    onInvalidAttempt: '='
+                    onInvalidAttempt: '&',
+                    aaSaveForm: '&'
                 },
                 restrict: 'A',
                 require: '^form',
@@ -27,7 +28,7 @@
                         scope.$apply(function () {
                             if (ngForm.$valid) {
                                 ngForm.$aaFormExtensions.$invalidAttempt = false;
-                                scope.$eval(attrs.aaSaveForm);
+                                scope.aaSaveForm();
                             } else {
                                 ngForm.$aaFormExtensions.$invalidAttempt = true;
 
