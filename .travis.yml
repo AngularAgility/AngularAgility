@@ -5,6 +5,6 @@ deploy:
   provider: heroku
   api_key:
     secure: XFHH0v7DBjhQg2MohB1NLn/mpIay54D+hf/vlOjzu0farW+//3OKI5hogRLSR9camV68fD5D1iyzYOg6rLXhL+3WPG3Sdi9xbzisHZo+/3Fwok+XEJH5bokepDuLjh835gBe5PBtASjyIqJ3ooJz0MsPFCNA6s5pYsGy3RPJKR8=
-  app: AngularAgility
+  app: angular-agility
   on:
     repo: AngularAgility/AngularAgility
