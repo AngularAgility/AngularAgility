@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+- 0.1
+deploy:
+  provider: heroku
+  api_key:
+    secure: AI/DhZzUnj33wyi80k6mOCXCIyc1eQMyRq2HrjJlasge29I6TT3Qkc2pcdMmMo0nsFA2CMLpZ7UOKcBAMzgfhDXxP0n/eOOoFld4MrJkooajF6EN4zcWc2yeEUUrEHjXjSx+FSTwkVKgPVUtGCjY+guhYEI1r/v/sQ4u7ccde2g=
+  app: AngularAgility
+  on:
+    repo: AngularAgility/AngularAgility
