@@ -321,9 +321,7 @@
 
                     var unsupported = [
                         'button',
-                        'checkbox',
                         'hidden',
-                        'radio',
                         'submit'
                     ];
 
