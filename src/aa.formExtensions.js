@@ -9,7 +9,7 @@
  *   http://www.opensource.org/licenses/mit-license.php
  */
 
-(function () {
+;(function () {
     var formExtensions = angular.module('aa.formExtensions', [])
 
         .directive('aaSaveForm', ['aaFormExtensions', function (aaFormExtensions) {
@@ -33,7 +33,7 @@
                                 ngForm.$aaFormExtensions.$invalidAttempt = true;
 
                                 var hasScopeFunction = typeof scope.onInvalidAttempt === 'function';
-                                var hasGlobalFunction = typeof aaFormExtensions.defaultOnInvalidAttempt === 'function'
+                                var hasGlobalFunction = typeof aaFormExtensions.defaultOnInvalidAttempt === 'function';
 
                                 if(hasScopeFunction || hasGlobalFunction) {
                                     //calc error messages
@@ -121,21 +121,21 @@
                                 if(key === 'minlength') {
                                     errorMessages.push(
                                         stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.ngMinlength)
-                                    )
+                                    );
                                 } else if (key === 'maxlength') {
                                     errorMessages.push(
                                         stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.ngMaxlength)
-                                    )
+                                    );
                                 } else if (key === 'required' && element[0].type === 'number') {
                                     //angular doesn't correctly flag numbers as invalid rather as required when something wrong is filled in
                                     //hack around it
                                     errorMessages.push(
                                         stringFormat(aaFormExtensions.validationMessages['number'], fieldName)
-                                    )
-                                } else {
+                                    );
+                                } else if (aaFormExtensions.validationMessages[key]) {
                                     errorMessages.push(
                                         stringFormat(aaFormExtensions.validationMessages[key], fieldName)
-                                    )
+                                    );
                                 }
                             }
                         }
@@ -157,7 +157,7 @@
 
                     var msgElement = aaFormExtensions.valMsgPlacementStrategies[attrs.aaValMsg ||  aaFormExtensions.defaultValMsgPlacementStrategy](
                         element, form.$name, attrs.name
-                    )
+                    );
 
                     $compile(msgElement)(scope);
                 }
@@ -250,10 +250,10 @@
 
                     //if no label and "no-label" don't calc one
                     if (!attrs.aaLabel && attrs.noLabel === undefined) {
-                        element.attr('aa-label', toTitleCase(splitCamelCase(lastPartOfName)))
+                        element.attr('aa-label', toTitleCase(splitCamelCase(lastPartOfName)));
                     }
 
-                    element.attr("aa-val-msg", "")
+                    element.attr("aa-val-msg", "");
 
                     element.removeAttr('aa-auto-field');
 
@@ -261,7 +261,7 @@
 
                     return function(scope, element, attrs) {
                         $compile(element)(scope);
-                    }
+                    };
                 }
             };
         }])
@@ -274,11 +274,11 @@
 
                     var container = aaFormExtensions.validIconStrategy.getContainer(element);
 
-                    var validIcon = angular.element(aaFormExtensions.validIconStrategy.validIcon)
+                    var validIcon = angular.element(aaFormExtensions.validIconStrategy.validIcon);
                     container.append(validIcon);
                     validIcon[0].style.display = 'none';
 
-                    var invalidIcon = angular.element(aaFormExtensions.validIconStrategy.invalidIcon)
+                    var invalidIcon = angular.element(aaFormExtensions.validIconStrategy.invalidIcon);
                     container.append(invalidIcon);
                     invalidIcon[0].style.display = 'none';
 
@@ -295,7 +295,7 @@
 
                             return val;
                         });
-                    }
+                    };
                 }
             };
         }])
@@ -321,7 +321,6 @@
 
                     var unsupported = [
                         'button',
-                        'hidden',
                         'submit'
                     ];
 
@@ -381,8 +380,8 @@
                 validIcon: '<i class="fa fa-check fa-lg"></i>',
                 invalidIcon: '<i class="fa fa-exclamation-circle fa-lg"></i>',
                 getContainer: function(element) {
-                    var ele = angular.element('<div class="col-xs-1 validation-icons"></span>')
-                    element.parent().after(ele)
+                    var ele = angular.element('<div class="col-xs-1 validation-icons"></span>');
+                    element.parent().after(ele);
                     return ele;
                 }
             };
@@ -435,7 +434,7 @@
 
     //utility
     function guid(a) {
-        return a ? (a ^ Math.random() * 16 >> a / 4).toString(16) : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, guid)
+        return a ? (a ^ Math.random() * 16 >> a / 4).toString(16) : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, guid);
     }
 
     function toTitleCase(str) {
@@ -486,4 +485,4 @@
             };
         }
     }
-})()
+})();
