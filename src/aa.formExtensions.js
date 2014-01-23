@@ -66,12 +66,15 @@
         //messages can be used there manually or emitted automatically with aaValMsg
         .directive('ngModel', ['aaFormExtensions', '$document', '$timeout', function (aaFormExtensions, $document, $timeout) {
             return {
-                require: ['ngModel', '^form'],
+                require: ['ngModel', '?^form'],
                 priority: 1,
                 link: function (scope, element, attrs, controllers) {
                     var ngModel = controllers[0],
                         ngForm = controllers[1],
                         fieldName = "This field";
+
+                    if(!ngForm)
+                        return; //only for validation with forms
 
                     if(attrs.aaLabel) {
                         //use default label
