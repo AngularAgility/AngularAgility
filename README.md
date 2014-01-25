@@ -22,7 +22,7 @@ can be automatically generated based on the ng-model objects bound.
 * Keeps track of field blurs and display errors appropriately
 * Block invalid save attempts using aa-save-form to prevent invalid data submissions and also serving as a validation message display trigger.
 * A rich overridable strategy approach to configuration of everything above using aaFormExtensionsProvider. You can customize almost anything but comes with resonable defaults out of the box. No assembly (necessarily) required!
-* A bunch more stuff I'm probably forgetting. Download the source and try it out, you'll like it!
+* A bunch more stuff take a look below!
 
 ###Demo
 * [Live demo of this exact source](http://angularagility.herokuapp.com/)
