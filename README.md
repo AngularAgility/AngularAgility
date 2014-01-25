@@ -7,6 +7,7 @@ Note all JavaScript/CSS that you might want to use is located in /src/*.*
 ##[Live demo of this exact source here](http://angularagility.herokuapp.com/)
 
 ##Form Extensions
+[Blog post outlining it's functionality here](http://johnculviner.com/introducing-angularagility-formextensions/)
 Angular.js form validation is likely one of the best takes on form validaiton out there. Unfortuantely it can often be a little TOO flexible for many applications where you want basic error message display and generation
 witout having to dive into the form object model and manually construct basic messages for each field.
 
