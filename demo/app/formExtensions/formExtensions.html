@@ -1,5 +1,12 @@
 <h1>aa.formExtensions Demo</h1>
 
+<p>
+    <strong>
+        <a href="http://johnculviner.com/introducing-angularagility-formextensions/">Click here</a>
+        for a detailed blog post covering aa.formExtensions
+    </strong>
+</p>
+
 <div>
     <div class="alert alert-success">
         <p>
@@ -29,7 +36,41 @@
 
     <div ng-form="exampleForm" class="form-horizontal">
 
-
+        <!-- EMAIL -->
+        <div class="form-group">
+            <div class="col-sm-3">
+                <input type="email" class="form-control" aa-auto-field="person.email" />
+            </div>
+        </div>
+        <div ng-hide="hideExamples" class="alert alert-info example">
+            <div syntax-toggler-for="HTML">
+                <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
+                        <div class="form-group">
+                            <div class="col-sm-3">
+                                <input type="email" class="form-control" aa-auto-field="person.email" />
+                            </div>
+                        </div>
+                        ]]></script>
+            </div>
+            <div class="validations">
+                <i class="fa fa-check-square"></i>
+                Must be an email address, <strong>NOT required</strong>
+            </div>
+            <div class="helpers">
+                <div>
+                    <i class="fa fa-cogs"></i>
+                    Woah! It generated almost everything for you with only one directive!
+                </div>
+                <ul>
+                    <li>aa-auto-field="person.Email" generates:</li>
+                    <ul>
+                        <li>A name="..." for the field (for use with ng-form) based on the ng-model binding</li>
+                        <li>An overridable "aa-label" directive that follows a camel cased spacing pattern based on the ng-model binding (also 508 compliant)</li>
+                        <li>A 'aa-val-msg' directive for auto generation of validation messages</li>
+                    </ul>
+                </ul>
+            </div>
+        </div>
 
         <!-- FIRST NAME -->
         <div class="form-group">
@@ -62,7 +103,7 @@
             <div class="helpers">
                 <div>
                     <i class="fa fa-cogs"></i>
-                    It's generating validation messages but not much else. That's handy. <strong>Just wait it does a whole lot more.</strong>
+                    It's generating validation messages but not much else. That's handy.
                 </div>
                 <ul>
                     <li>Label is created manually in HTML with a 'for' corresponding to a manual 'id' on the input for 508 compliance.</li>
@@ -109,45 +150,6 @@
                     <li>Label for / element ID are generated automatically for 508 compliance</li>
                     <li>Auto validation message using label name with 'aa-val-msg' directive</li>
                     <li>Valid icon with 'aa-valid-icon' directive</li>
-                </ul>
-            </div>
-        </div>
-
-
-
-
-        <!-- EMAIL -->
-        <div class="form-group">
-            <div class="col-sm-3">
-                <input type="email" class="form-control" aa-auto-field="person.email" />
-            </div>
-        </div>
-        <div ng-hide="hideExamples" class="alert alert-info example">
-            <div syntax-toggler-for="HTML">
-                <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
-                    <div class="form-group">
-                        <div class="col-sm-3">
-                            <input type="email" class="form-control" aa-auto-field="person.email" />
-                        </div>
-                    </div>
-                    ]]></script>
-            </div>
-            <div class="validations">
-                <i class="fa fa-check-square"></i>
-                        Must be an email address, <strong>NOT required</strong>
-            </div>
-            <div class="helpers">
-                <div>
-                    <i class="fa fa-cogs"></i>
-                    Woah! It generated almost everything for you with only one directive!
-                </div>
-                <ul>
-                    <li>aa-auto-field="person.Email" generates:</li>
-                    <ul>
-                        <li>A name="..." for the field (for use with ng-form) based on the ng-model binding</li>
-                        <li>An overridable "aa-label" directive that follows a camel cased spacing pattern based on the ng-model binding (also 508 compliant)</li>
-                        <li>A 'aa-val-msg' directive for auto generation of validation messages</li>
-                    </ul>
                 </ul>
             </div>
         </div>
