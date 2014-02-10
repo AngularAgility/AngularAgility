@@ -19,3 +19,8 @@ body {
 .syntaxhighlighter {
     padding-top: 2px;
 }
+
+.form-group.select2 {
+    padding-top: 25px;
+    padding-bottom: 25px;
+}

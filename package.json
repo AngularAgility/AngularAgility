@@ -2,7 +2,8 @@
   "name": "angular-agility",
   "version": "0.0.1",
   "dependencies": {
-    "express": "*"
+    "express": "*",
+    "lodash": "*"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

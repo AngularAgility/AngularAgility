@@ -38,7 +38,10 @@
                         <a ui-sref="home">Home</a>
                     </li>
                     <li ng-class="{ active: $state.includes('formExtensions') }">
-                        <a ui-sref="formExtensions">aa.formExtensions</a>
+                        <a ui-sref="formExtensions">Form Extensions</a>
+                    </li>
+                    <li ng-class="{ active: $state.includes('select2') }">
+                        <a ui-sref="select2">Select2</a>
                     </li>
                     <li>
                         <a>More coming soon...</a>
@@ -62,13 +65,21 @@
         SyntaxHighlighter.all();
     </script>
 
+    <!-- for select2 only-->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.5/select2.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/3.4.5/select2.css"/>
+
+
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.js"></script>
     <!-- Angular Agility code -->
     <script src="/src/aa.formExtensions.js"></script>
+    <script src="/src/aa.select2.js"></script>
 
     <!-- demo code -->
     <script src="lib/angular-ui-router.js"></script>
     <script src="app/app.js"></script>
     <script src="app/formExtensions/formExtensions.js"></script>
+    <script src="app/select2/select2.js"></script>
 </body>
 </html>

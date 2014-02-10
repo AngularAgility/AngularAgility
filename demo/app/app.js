@@ -1,5 +1,5 @@
 angular
-    .module('angularAgilityDemo', ['ui.router', 'aa.formExtensions'])
+    .module('angularAgilityDemo', ['ui.router', 'aa.formExtensions', 'aa.select2'])
     .config(['$urlRouterProvider', '$stateProvider', 'aaFormExtensionsProvider',
         function($urlRouterProvider, $stateProvider, aaFormExtensionsProvider) {
 
@@ -13,6 +13,10 @@ angular
                     url: '/formExtensions',
                     templateUrl: 'app/formExtensions/formExtensions.html',
                     controller: 'formExtensions'
+                })
+                .state('select2', {
+                    url: '/select2',
+                    templateUrl: 'app/select2/select2.html'
                 })
 
             //a built in label strategy that works with bootstrap
