@@ -41,16 +41,7 @@ angular
                     //run a query to get options (search)
                     if(inAjaxMode) {
                         userOpts.query = function(query) {
-                            var text = query.term;
-
-                            if(!query.term) {
-                                query.callback({
-                                    results: []
-                                });
-                                return;
-                            }
-
-                            userOpts.$settings.options(text)
+                            userOpts.$settings.options(query.term)
                                 .success(function (data) {
                                     lastAjaxResult = data;
                                     query.callback({

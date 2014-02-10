@@ -48,6 +48,7 @@ angular
                 options: function(searchText) {
                     return $http.get('/searchStates/' + searchText);
                 }
-            }
+            },
+            minimumInputLength: 2
         };
     });
