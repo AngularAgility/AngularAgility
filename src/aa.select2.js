@@ -16,7 +16,7 @@ angular
 
         return {
             require: 'ngModel',
-            template: '<input type="hidden" style="width: 220px;" />', //todo un-hardcode width
+            template: '<input type="hidden" />',
             link: function (scope, element, attrs, ngModel) {
 
                 var userOpts = scope.$eval(attrs.aaSelect2) || {},
