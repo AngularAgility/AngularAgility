@@ -1,4 +1,4 @@
-<h1>Select2 - Under construction!</h1>
+<h1>Select2</h1>
 
 <!--<p>-->
 <!--<strong>-->
@@ -10,13 +10,13 @@
 <div>
     <div class="alert alert-success">
         <p>
-            There are a few other Select2 directives out there. This one is specifically designed to
+            First of there are a few other Select2 directives out there. This one is different in that it is specifically designed to
             <strong>easily</strong>
             work with binding ids, objects, arrays, AJAX queries etc. for some pretty common use cases (see examples!)
         </p><br/>
         <p>
             It abstracts away the complicated Select2 API with a $settings object (lots of examples below!) and should make it
-            pretty easy to do a lot of things.
+            pretty easy to do a lot of things without writing a bunch of hacks.
         </p><br/>
         <p>
             It offers no support for the basic 'replace a &lt;select&gt; list and &lt;option&gt;' functionality.
@@ -27,7 +27,7 @@
     </div>
 
 
-    <div ng-controller="select2example1">
+    <div ng-controller="select2basicId">
         <h1>Basic Id Example</h1>
         <div class="form-group select2">
             <label class="col-sm-2 control-label">State: </label>
@@ -37,9 +37,7 @@
         </div>
         <br/>
         <div class="alert alert-info">
-            <p>
-                $scope.selectedStateAbbreviation = {{ selectedStateAbbreviation }}
-            </p>
+            <pre>$scope.selectedStateAbbreviation = {{ selectedStateAbbreviation | json }}</pre>
 
             <p>
                 Very basic. The bound ng-model value selectedStateAbbreviation is just the "abbreviation" for the state.
@@ -49,7 +47,7 @@
     </div>
 
 
-    <div ng-controller="select2example2">
+    <div ng-controller="select2basicObject">
         <h1>Basic Object Example</h1>
         <div class="form-group select2">
             <label class="col-sm-2 control-label">State: </label>
@@ -59,22 +57,35 @@
         </div>
         <br/>
         <div class="alert alert-info">
-            <p>
-                $scope.selectedStateObject = {{ selectedStateObject | json }}
-            </p>
+            <pre>$scope.selectedStateObject = {{ selectedStateObject | json }}</pre>
 
             <p>
                 A little more complicated. ng-model is bound to "selectedStateObject" which is an object representing
-                the currently selected state. This is called 'object' mode by the directive since we are binding full objects
+                the currently selected state. This is called 'object' mode by the directive since we are binding full objects.
             </p>
         </div>
     </div>
 
-    <div ng-controller="select2example3">
-        <h1>TODO: AJAX Id Example</h1>
+    <div ng-controller="select2ajaxId">
+        <h1>AJAX Id Example</h1>
+        <div class="form-group select2">
+            <label class="col-sm-2 control-label">State: </label>
+            <div class="col-sm-3">
+                <div aa-select2="select2Config" ng-model="selectedStateAbbreviation"></div>
+            </div>
+        </div>
+        <br/>
+        <div class="alert alert-info">
+            <pre>$scope.selectedStateAbbreviation = {{ selectedStateAbbreviation | json }}</pre>
+
+            <p>
+                Using AJAX search for a state as it is typed. The bound ng-model value selectedStateAbbreviation is just the "abbreviation" for the state.
+                Ex "MN". This is called 'id' mode by the directive since we are just storing the id.
+            </p>
+        </div>
     </div>
 
-    <div ng-controller="select2example4">
+    <div ng-controller="select2ajaxObject">
         <h1>AJAX Object Example</h1>
         <div class="form-group select2">
             <label class="col-sm-2 control-label">State: </label>
@@ -84,13 +95,27 @@
         </div>
         <br/>
         <div class="alert alert-info">
-            <p>
-                $scope.selectedStateObject = {{ selectedStateObject | json }}
-            </p>
-
+            <pre>$scope.selectedStateObject = {{ selectedStateObject | json }}</pre>
             <p>
                 Using AJAX search for a state as it is typed. ng-model is bound to "selectedStateObject" which is an object representing
-                the currently selected state. This is called 'object' mode by the directive since we are binding full objects
+                the currently selected state. This is called 'object' mode by the directive since we are binding full objects.
+            </p>
+        </div>
+    </div>
+
+    <div ng-controller="select2tagsBasic">
+        <h1>Tags Basic Example</h1>
+        <div class="form-group select2">
+            <label class="col-sm-2 control-label">Favorite Foods:</label>
+            <div class="col-sm-3">
+                <div aa-select2="select2Config" ng-model="favoriteFoods" style="width: 300px;"></div>
+            </div>
+        </div>
+        <br/>
+        <div class="alert alert-info">
+            <pre>$scope.favoriteFoods = {{ favoriteFoods | json }}</pre>
+            <p>
+                Some pre-selected tags in the ng-model bound favoriteFoods are set. You can type in your own and it will update favoriteFoods.
             </p>
         </div>
     </div>

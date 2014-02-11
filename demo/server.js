@@ -23,3 +23,6 @@ app.get('/searchStates/:nameStartsWith', function(req, res) {
         return state.name.toUpperCase().indexOf(req.params.nameStartsWith.toUpperCase()) === 0
     }))
 });
+app.get('/states/:id', function(req, res) {
+    return res.send(_.find(usStates, {abbreviation: req.params.id}));
+});
