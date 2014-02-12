@@ -32,7 +32,7 @@
                             } else {
                                 ngForm.$aaFormExtensions.$invalidAttempt = true;
 
-                                var hasScopeFunction = typeof scope.onInvalidAttempt === 'function';
+                                var hasScopeFunction = typeof scope.onInvalidAttempt() === 'function';
                                 var hasGlobalFunction = typeof aaFormExtensions.defaultOnInvalidAttempt === 'function';
 
                                 if(hasScopeFunction || hasGlobalFunction) {

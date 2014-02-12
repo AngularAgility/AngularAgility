@@ -19,15 +19,16 @@ angular
         return {
             require: 'ngModel',
             template: '<input type="hidden" />',
+            replace: true,
             link: function (scope, element, attrs, ngModel) {
 
-                    //native select2 options directly from the user. always takes prescedence
+                //native select2 options directly from the user. always takes prescedence
                 var userOpts = scope.$eval(attrs.aaSelect2) || {},
 
-                    //possible select2 options derived from user selections on $settings
+                //possible select2 options derived from user selections on $settings
                     derivedOpts = {},
 
-                    //directive settings (aka nice wrapper for select2)
+                //directive settings (aka nice wrapper for select2)
                     settings = userOpts.$settings,
                     inAjaxMode = settings ? angular.isFunction(settings.options) : false,
                     inLocalArrayMode = settings ? angular.isArray(settings.options) : false,
@@ -72,15 +73,12 @@ angular
 
 
                         if(modelValue && inIdMode) {
-                            if(inIdMode) {
-
-                                derivedOpts.initSelection = function(e, callback) {
-                                    settings.textLookup(modelValue)
-                                        .success(function(data) {
-                                            callback(data);
-                                        })
-                                };
-                            }
+                            derivedOpts.initSelection = function(e, callback) {
+                                settings.textLookup(modelValue)
+                                    .success(function(data) {
+                                        callback(data);
+                                    })
+                            };
                         }
                     }
 
@@ -112,16 +110,8 @@ angular
                 //setup select2 with options
                 element.select2(opts);
 
-
                 //programmatic changes to the model
-                var firstRun = true;
                 ngModel.$render = function () {
-                    if(inAjaxMode && firstRun && inIdMode) {
-                        //the initial value is set with "initSelection"
-                        //this causes multiple textLookup queries in ajax id mode
-                        firstRun = false;
-                        return;
-                    }
 
                     if(!ngModel.$modelValue) {
                         element.select2('val', "");
