@@ -59,7 +59,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-karma');
 
     grunt.registerTask('test', ['jshint', 'karma:continuous']);
+    grunt.registerTask('build', ['test', 'concat', 'uglify']);
 
-    grunt.registerTask('default', ['test', 'concat', 'uglify']);
+    grunt.registerTask('default', ['build']);
 
 };

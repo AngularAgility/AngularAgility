@@ -75,7 +75,7 @@ angular
                                         var newData = [];
                                         angular.forEach(data, function(str) {
                                             newData.push({id: str, text: str});
-                                        })
+                                        });
                                         data = newData;
                                     }
 
@@ -98,7 +98,7 @@ angular
                                 settings.textLookup(modelValue)
                                     .success(function(data) {
                                         callback(data);
-                                    })
+                                    });
                             };
                         }
                     }
@@ -124,7 +124,7 @@ angular
 
                 var staticOpts = {
                     width: 'resolve'
-                }
+                };
 
                 //order of prescedence
                 //static opts loses first
@@ -149,7 +149,7 @@ angular
 
                     } else if(inObjectMode) {
 
-                        element.select2('data', ngModel.$modelValue)
+                        element.select2('data', ngModel.$modelValue);
 
                     }
                 };

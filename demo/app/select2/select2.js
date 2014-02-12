@@ -34,7 +34,7 @@ angular
 
     .controller('select2ajaxId', function($scope, $http) {
 
-        $scope.selectedStateAbbreviation = "MN"
+        $scope.selectedStateAbbreviation = "MN";
 
         $scope.select2Config = {
             $settings: {
@@ -57,7 +57,7 @@ angular
 
     .controller('select2ajaxNameAndIdSame', function($scope, $http) {
 
-        $scope.selectedStateName = "Minnesota"
+        $scope.selectedStateName = "Minnesota";
 
         $scope.select2Config = {
             $settings: {
