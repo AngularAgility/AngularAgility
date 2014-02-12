@@ -78,7 +78,81 @@ angular
 
         $scope.select2Config = {
             $settings: {
-                mode: 'tags'
+                mode: 'tags-id'
             }
+        };
+    })
+
+    .controller('select2tagsIdConstrained', function($scope, select2States) {
+
+        $scope.favoriteStates = ["MN", "WI"];
+
+        $scope.select2Config = {
+            $settings: {
+                mode: 'tags-id',
+                id: 'abbreviation',
+                text: 'name',
+                options: select2States
+            }
+        };
+    })
+
+    .controller('select2tagObjectsConstrained', function($scope, select2States) {
+
+        $scope.favoriteStates = [
+            { name: "Minnesota", abbreviation: "MN" },
+            { name: "Wisconsin", abbreviation: "WI" }
+        ];
+
+        $scope.select2Config = {
+            $settings: {
+                mode: 'tags-object',
+                id: 'abbreviation',
+                text: 'name',
+                options: select2States
+            }
+        };
+    })
+
+    .controller('select2tagIdAjaxConstrained', function($scope, $http) {
+
+        $scope.favoriteStates = [ "MN", "WI" ];
+
+        $scope.select2Config = {
+            $settings: {
+                mode: 'tags-id',
+                id: 'abbreviation',
+                text: 'name',
+                textLookup: function(id) {
+                    //find the text for the selected id
+                    //looks at 'text' field above (name)
+                    return $http.get('/states/' + id);
+                },
+                options: function(searchText) {
+                    //search for options with AJAX
+                    return $http.get('/searchStates/' + searchText);
+                }
+            },
+            minimumInputLength: 2
+        };
+    })
+
+    .controller('select2tagObjectsAjaxConstrained', function($scope, $http) {
+
+        $scope.favoriteStates = [
+            { name: "Minnesota", abbreviation: "MN" },
+            { name: "Wisconsin", abbreviation: "WI" }
+        ];
+
+        $scope.select2Config = {
+            $settings: {
+                mode: 'tags-object',
+                id: 'abbreviation',
+                text: 'name',
+                options: function(searchText) {
+                    return $http.get('/searchStates/' + searchText);
+                }
+            },
+            minimumInputLength: 2
         };
     });

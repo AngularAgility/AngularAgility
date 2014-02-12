@@ -26,3 +26,6 @@ app.get('/searchStates/:nameStartsWith', function(req, res) {
 app.get('/states/:id', function(req, res) {
     return res.send(_.find(usStates, {abbreviation: req.params.id}));
 });
+//app.get('/multipleStates/:id', function(req, res) {
+//    return res.send(_.find(usStates, {abbreviation: req.params.id}));
+//});

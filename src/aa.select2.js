@@ -30,21 +30,28 @@ angular
                     //directive settings (aka nice wrapper for select2)
                     settings = userOpts.$settings,
                     inAjaxMode = settings ? angular.isFunction(settings.options) : false,
-                    inArrayMode = settings ? angular.isArray(settings.options) : false,
-                    lastAjaxResult = null;
+                    inLocalArrayMode = settings ? angular.isArray(settings.options) : false,
+                    inIdMode = settings && settings.mode ? settings.mode.indexOf('id') != -1 : false,
+                    inObjectMode = settings && settings.mode ? settings.mode.indexOf('object') != -1 : false,
+                    inTagsMode = settings && settings.mode ? settings.mode.indexOf('tags') != -1 : false;
 
                 delete userOpts.$settings; // no longer needed
 
                 var modelValue = scope.$eval(attrs.ngModel);
 
                 //configure select2's options per passed $settings
-                if(settings && (settings.mode === 'id' || settings.mode === 'object')) {
+                if(settings) {
+
+                    if(inObjectMode) {
+                        settings.id = settings.id || 'id';
+                        settings.text = settings.text || 'text';
+                    }
 
                     //allow for flexibility of mapping ajax object back to the bound ng-model
                     settings.ajaxMap = derivedOpts.ajaxMap || function(ajaxResultObject) { return ajaxResultObject;};
 
                     //have 'options' client side in an array
-                    if(inArrayMode) {
+                    if(inLocalArrayMode) {
                         derivedOpts.data = derivedOpts.data || {};
                         derivedOpts.data.text = settings.text;
                         derivedOpts.data.results = settings.options;
@@ -56,7 +63,6 @@ angular
                         derivedOpts.query = function(query) {
                             settings.options(query.term)
                                 .success(function (data) {
-                                    lastAjaxResult = data;
                                     query.callback({
                                         results: data,
                                         text: settings.text
@@ -65,31 +71,32 @@ angular
                         };
 
 
-                        //init with an initial value given our object
-                        if(settings.mode === 'object' && modelValue) {
+                        if(modelValue && inIdMode) {
+                            if(inIdMode) {
 
-                            derivedOpts.initSelection = function(e, callback) {
-                                callback(modelValue);
-                            };
-
-                        } else if (settings.mode === 'id' && modelValue) {
-
-                            derivedOpts.initSelection = function(e, callback) {
-                                settings.textLookup(modelValue)
-                                    .success(function(data) {
-                                        callback(data);
-                                    })
-                            };
+                                derivedOpts.initSelection = function(e, callback) {
+                                    settings.textLookup(modelValue)
+                                        .success(function(data) {
+                                            callback(data);
+                                        })
+                                };
+                            }
                         }
                     }
 
-                    derivedOpts.id = settings.id;
-                    //song and dance for select2 to display the right text
-                    derivedOpts.formatSelection = function(obj) { return obj[settings.text];};
-                    derivedOpts.formatResult = function(obj) { return obj[settings.text];};
+                    if(settings.id) {
+                        derivedOpts.id = settings.id;
+                    }
 
-                } else if(settings && settings.mode === 'tags') {
-                    derivedOpts.tags = modelValue || [];
+                    if(settings.text) {
+                        derivedOpts.formatSelection = function(obj) { return obj[settings.text];};
+                        derivedOpts.formatResult = function(obj) { return obj[settings.text];};
+                    }
+
+                    if(inTagsMode) {
+                        derivedOpts.tags = modelValue || [];
+                    }
+
                 }
 
                 var staticOpts = {
@@ -109,25 +116,26 @@ angular
                 //programmatic changes to the model
                 var firstRun = true;
                 ngModel.$render = function () {
-                    if(inAjaxMode && firstRun) {
+                    if(inAjaxMode && firstRun && inIdMode) {
                         //the initial value is set with "initSelection"
                         //this causes multiple textLookup queries in ajax id mode
                         firstRun = false;
                         return;
                     }
 
-                    if(settings && settings.mode === 'id') {
+                    if(!ngModel.$modelValue) {
+                        element.select2('val', "");
+                        return;
+                    }
+
+                    if(inIdMode) {
+
                         element.select2('val', ngModel.$modelValue);
 
-                    } else if(settings && settings.mode === 'object') {
-                        if(ngModel.$modelValue) {
-                            element.select2('val', ngModel.$modelValue[settings.id] || "");
-                        } else {
-                            element.select2('val', "");
-                        }
+                    } else if(inObjectMode) {
 
-                    } else if(settings.mode === 'tags') {
-                        element.select2('val', ngModel.$modelValue);
+                        element.select2('data', ngModel.$modelValue)
+
                     }
                 };
 
@@ -141,41 +149,23 @@ angular
                             return;
                         }
 
-                        if(settings) {
-                            if(settings.mode === 'id') {
-                                ngModel.$setViewValue(val);
+                        if(inIdMode) {
 
-                            } else if(settings.mode === 'object' && inArrayMode) {
+                            ngModel.$setViewValue(val);
 
-                                //lookup the object value in the underlying array by the passed 'id'
-                                var found;
-                                var data = derivedOpts.data.results;
-                                for(var i=0; i < data.length; i++) {
-                                    if(data[i][settings.id] === val) {
-                                        found = data[i];
-                                        break;
-                                    }
-                                }
-                                ngModel.$setViewValue(found);
+                        } else if (inObjectMode) {
 
-                            } else if(settings.mode === 'object' && inAjaxMode) {
-
-                                //lookup the object value in the last ajax results by the passed 'id'
-                                var found;
-                                var data = lastAjaxResult;
-                                for(var i=0; i < data.length; i++) {
-                                    if(data[i][settings.id] === val) {
-                                        found = data[i];
-                                        break;
-                                    }
-                                }
-                                ngModel.$setViewValue(settings.ajaxMap(found));
-
-                            } else if (settings.mode === 'tags') {
-                                ngModel.$setViewValue(val);
-                            }
+                            var valObj = element.select2('data');
+                            ngModel.$setViewValue(valObj);
                         }
                     });
+                });
+
+
+
+                //other stuff
+                element.bind("$destroy", function() {
+                    element.select2("destroy");
                 });
             }
         };

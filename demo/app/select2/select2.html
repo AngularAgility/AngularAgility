@@ -26,7 +26,6 @@
         Take a look at the examples below to see what this one does readily and feel free to copy paste!
     </div>
 
-
     <div ng-controller="select2basicId">
         <h1>Basic Id Example</h1>
         <div class="form-group select2">
@@ -115,7 +114,75 @@
         <div class="alert alert-info">
             <pre>$scope.favoriteFoods = {{ favoriteFoods | json }}</pre>
             <p>
-                Some pre-selected tags in the ng-model bound favoriteFoods are set. You can type in your own and it will update favoriteFoods.
+                Some pre-selected tags in the ng-model bound favoriteFoods are set. You can type in your own (whatever you want) and it will update favoriteFoods.
+            </p>
+        </div>
+    </div>
+
+    <div ng-controller="select2tagsIdConstrained">
+        <h1>Constrained Tags Id Example</h1>
+        <div class="form-group select2">
+            <label class="col-sm-2 control-label">Favorite States:</label>
+            <div class="col-sm-3">
+                <div aa-select2="select2Config" ng-model="favoriteStates" style="width: 300px;"></div>
+            </div>
+        </div>
+        <br/>
+        <div class="alert alert-info">
+            <pre>$scope.favoriteStates = {{ favoriteStates | json }}</pre>
+            <p>
+                Some pre-selected tags in the ng-model bound favoriteStates are set. You can add more from a constrained list.
+            </p>
+        </div>
+    </div>
+
+    <div ng-controller="select2tagObjectsConstrained">
+        <h1>Constrained Tags Object Example</h1>
+        <div class="form-group select2">
+            <label class="col-sm-2 control-label">Favorite States:</label>
+            <div class="col-sm-3">
+                <div aa-select2="select2Config" ng-model="favoriteStates" style="width: 300px;"></div>
+            </div>
+        </div>
+        <br/>
+        <div class="alert alert-info">
+            <pre>$scope.favoriteStates = {{ favoriteStates | json }}</pre>
+            <p>
+                Some pre-selected tags in the ng-model bound favoriteStates are set. You can add more from a constrained client-side list.
+            </p>
+        </div>
+    </div>
+
+    <div ng-controller="select2tagIdAjaxConstrained">
+        <h1>TODO: Constrained Tags Id AJAX Example</h1>
+        <div class="form-group select2">
+            <label class="col-sm-2 control-label">Favorite States:</label>
+            <div class="col-sm-3">
+                <div aa-select2="select2Config" ng-model="favoriteStates" style="width: 300px;"></div>
+            </div>
+        </div>
+        <br/>
+        <div class="alert alert-info">
+            <pre>$scope.favoriteStates = {{ favoriteStates | json }}</pre>
+            <p>
+                Some pre-selected tags in the ng-model bound favoriteStates are set. You can add more from a constrained AJAX list.
+            </p>
+        </div>
+    </div>
+
+    <div ng-controller="select2tagObjectsAjaxConstrained">
+        <h1>Constrained Tags Object AJAX Example</h1>
+        <div class="form-group select2">
+            <label class="col-sm-2 control-label">Favorite States:</label>
+            <div class="col-sm-3">
+                <div aa-select2="select2Config" ng-model="favoriteStates" style="width: 300px;"></div>
+            </div>
+        </div>
+        <br/>
+        <div class="alert alert-info">
+            <pre>$scope.favoriteStates = {{ favoriteStates | json }}</pre>
+            <p>
+                Some pre-selected tags in the ng-model bound favoriteStates are set. You can add more from a constrained AJAX list.
             </p>
         </div>
     </div>
