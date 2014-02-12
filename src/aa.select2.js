@@ -34,7 +34,8 @@ angular
                     inLocalArrayMode = settings ? angular.isArray(settings.options) : false,
                     inIdMode = settings && settings.mode ? settings.mode.indexOf('id') != -1 : false,
                     inObjectMode = settings && settings.mode ? settings.mode.indexOf('object') != -1 : false,
-                    inTagsMode = settings && settings.mode ? settings.mode.indexOf('tags') != -1 : false;
+                    inTagsMode = settings && settings.mode ? settings.mode.indexOf('tags') != -1 : false,
+                    inThisMode = settings && settings.id === "@this" && settings.text === "@this";
 
                 delete userOpts.$settings; // no longer needed
 
@@ -42,6 +43,11 @@ angular
 
                 //configure select2's options per passed $settings
                 if(settings) {
+
+                    if(inThisMode) {
+                        settings.id = 'id';
+                        settings.text = 'text';
+                    }
 
                     if(inObjectMode) {
                         settings.id = settings.id || 'id';
@@ -64,6 +70,15 @@ angular
                         derivedOpts.query = function(query) {
                             settings.options(query.term)
                                 .success(function (data) {
+
+                                    if(inThisMode) {
+                                        var newData = [];
+                                        angular.forEach(data, function(str) {
+                                            newData.push({id: str, text: str});
+                                        })
+                                        data = newData;
+                                    }
+
                                     query.callback({
                                         results: data,
                                         text: settings.text
@@ -74,6 +89,12 @@ angular
 
                         if(modelValue && inIdMode) {
                             derivedOpts.initSelection = function(e, callback) {
+
+                                if(inThisMode) {
+                                    callback({id: modelValue, text: modelValue});
+                                    return;
+                                }
+
                                 settings.textLookup(modelValue)
                                     .success(function(data) {
                                         callback(data);
@@ -87,8 +108,12 @@ angular
                     }
 
                     if(settings.text) {
-                        derivedOpts.formatSelection = function(obj) { return obj[settings.text];};
-                        derivedOpts.formatResult = function(obj) { return obj[settings.text];};
+                        derivedOpts.formatSelection = function(obj) {
+                            return obj[settings.text];
+                        };
+                        derivedOpts.formatResult = function(obj) {
+                            return obj[settings.text];
+                        };
                     }
 
                     if(inTagsMode) {

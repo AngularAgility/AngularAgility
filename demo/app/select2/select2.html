@@ -84,6 +84,25 @@
         </div>
     </div>
 
+    <div ng-controller="select2ajaxNameAndIdSame">
+        <h1>AJAX Text and Id Same Example</h1>
+        <div class="form-group select2">
+            <label class="col-sm-2 control-label">State: </label>
+            <div class="col-sm-3">
+                <div aa-select2="select2Config" ng-model="selectedStateName" style="width: 220px;"></div>
+            </div>
+        </div>
+        <br/>
+        <div class="alert alert-info">
+            <pre>$scope.selectedStateName = {{ selectedStateName | json }}</pre>
+
+            <p>
+                Using AJAX search for a state as it is typed. The bound ng-model value is the full name of the state and
+                <strong>so is the display text.</strong>
+            </p>
+        </div>
+    </div>
+
     <div ng-controller="select2ajaxObject">
         <h1>AJAX Object Example</h1>
         <div class="form-group select2">

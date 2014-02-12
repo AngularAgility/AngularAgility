@@ -55,6 +55,24 @@ angular
         };
     })
 
+    .controller('select2ajaxNameAndIdSame', function($scope, $http) {
+
+        $scope.selectedStateName = "Minnesota"
+
+        $scope.select2Config = {
+            $settings: {
+                mode: 'id',
+                id: '@this',
+                text: '@this',
+                options: function(searchText) {
+                    //search for options with AJAX
+                    return $http.get('/searchStatesJustName/' + searchText);
+                }
+            },
+            minimumInputLength: 2
+        };
+    })
+
     .controller('select2ajaxObject', function($scope, select2States, $http) {
 
         $scope.selectedStateObject = { name: "Minnesota", abbreviation: "MN" };

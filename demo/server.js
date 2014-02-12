@@ -26,6 +26,17 @@ app.get('/searchStates/:nameStartsWith', function(req, res) {
 app.get('/states/:id', function(req, res) {
     return res.send(_.find(usStates, {abbreviation: req.params.id}));
 });
+app.get('/searchStatesJustName/:nameStartsWith', function(req, res) {
+    return res.send(
+        _(usStates)
+            .filter(function(state) {
+                    return state.name.toUpperCase().indexOf(req.params.nameStartsWith.toUpperCase()) === 0
+            })
+            .map(function(state) { return state.name; })
+            .value()
+    );
+});
+
 //app.get('/multipleStates/:id', function(req, res) {
 //    return res.send(_.find(usStates, {abbreviation: req.params.id}));
 //});
