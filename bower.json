@@ -1,0 +1,23 @@
+{
+  "name": "AngularAgility",
+  "version": "0.1.0",
+  "homepage": "https://github.com/AngularAgility/AngularAgility",
+  "authors": [
+    "John Culviner <john@johnculviner.com>"
+  ],
+  "description": "A set of useful Angular extensions to improve productivity",
+  "main": "dist/angular-agility.min.js",
+  "keywords": [
+    "angular",
+    "forms"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/components",
+    "test",
+    "tests"
+  ]
+}
