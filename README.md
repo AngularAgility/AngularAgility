@@ -1,4 +1,5 @@
 #AngularAgility
+![Build Status](https://travis-ci.org/AngularAgility/AngularAgility.png)
 
 A set of useful Angular extensions to improve productivity
 
