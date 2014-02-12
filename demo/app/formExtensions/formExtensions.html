@@ -39,7 +39,7 @@
         <!-- EMAIL -->
         <div class="form-group">
             <div class="col-sm-3">
-                <input type="email" class="form-control" aa-auto-field="person.email" />
+                <input type="email" class="form-control" aa-auto-field="person.email" required="" />
             </div>
         </div>
         <div ng-hide="hideExamples" class="alert alert-info example">
@@ -54,7 +54,7 @@
             </div>
             <div class="validations">
                 <i class="fa fa-check-square"></i>
-                Must be an email address, <strong>NOT required</strong>
+                Must be an email address
             </div>
             <div class="helpers">
                 <div>
@@ -64,8 +64,9 @@
                 <ul>
                     <li>aa-auto-field="person.Email" generates:</li>
                     <ul>
-                        <li>A name="..." for the field (for use with ng-form) based on the ng-model binding</li>
+                        <li>An automatic name="..." for the field (for use with ng-form) based on the ng-model binding</li>
                         <li>An overridable "aa-label" directive that follows a camel cased spacing pattern based on the ng-model binding (also 508 compliant)</li>
+                        <li>Label generated/positioned using a configurable labelStrategy that also produced the required star *</li>
                         <li>A 'aa-val-msg' directive for auto generation of validation messages</li>
                     </ul>
                 </ul>
@@ -200,7 +201,7 @@
         <!-- FAVORITE NUMBER -->
         <div class="form-group">
             <div class="col-sm-1">
-                <input type="number" class="form-control" aa-auto-field="person.favoriteNumber" required="">
+                <input type="number" class="form-control" aa-auto-field="person.favoriteNumber">
             </div>
         </div>
         <div ng-hide="hideExamples" class="alert alert-info example">
@@ -215,16 +216,45 @@
             </div>
             <div class="validations">
                 <i class="fa fa-check-square"></i>
-                Required field, must be a NUMBER and NOT a letter
+                Required field, must be a NUMBER and NOT a letter. <strong>Not required.</strong>
             </div>
             <div class="helpers">
                 <div>
                     <i class="fa fa-cogs"></i>
                     aa-auto-field works on input type="number" generating the correct message as well
+                    <ul>
+                        <li>Note: since this field isn't required there is no 'required *'</li>
+                    </ul>
                 </div>
             </div>
         </div>
 
+
+        <!-- AGE -->
+        <div class="form-group">
+            <div class="col-sm-1">
+                <input type="number" class="form-control" aa-auto-field="person.age" min="0" max="140" required="">
+            </div>
+        </div>
+        <div ng-hide="hideExamples" class="alert alert-info example">
+            <div syntax-toggler-for="HTML">
+                <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
+                <div class="col-sm-1">
+                    <input type="number" class="form-control" aa-auto-field="person.age" min="0" max="140" required="">
+                </div>
+                ]]></script>
+            </div>
+            <div class="validations">
+                <i class="fa fa-check-square"></i>
+                Required field, must be >= 0 and <= 140 (maybe need to update sometime...ha)
+            </div>
+            <div class="helpers">
+                <div>
+                    <i class="fa fa-cogs"></i>
+                    aa-auto-field works on input type="number" generating the correct message for the range values as well
+                </div>
+            </div>
+        </div>
 
 
         <!-- FAVORITE LETTER -->
@@ -287,6 +317,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- FAVORITE FOOD -->
         <div class="form-group">

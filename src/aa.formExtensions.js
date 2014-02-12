@@ -129,6 +129,14 @@
                                     errorMessages.push(
                                         stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.ngMaxlength)
                                     );
+                                } else if (key === 'min') {
+                                    errorMessages.push(
+                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.min)
+                                    );
+                                } else if (key === 'max') {
+                                    errorMessages.push(
+                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.max)
+                                    );
                                 } else if (key === 'required' && element[0].type === 'number') {
                                     //angular doesn't correctly flag numbers as invalid rather as required when something wrong is filled in
                                     //hack around it
@@ -399,6 +407,8 @@
                 email: "The field {0} must be an email.",
                 minlength: "{0} must be at least {1} character(s).",
                 maxlength: "{0} must be less than {1} characters.",
+                min: "{0} must be at least {1}.",
+                max: "{0} must be at most {1}.",
                 pattern: "{0} is invalid.",
                 url: "{0} must be a valid URL.",
                 number: "{0} must be number."
