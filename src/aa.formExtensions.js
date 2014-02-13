@@ -234,8 +234,21 @@
         .directive('aaLabel', ['aaFormExtensions', function (aaFormExtensions) {
             return {
                 link: function (scope, element, attrs) {
+                    var strategy = aaFormExtensions.labelStrategies[attrs.aaLabelStrategy];
 
-                    var strategyName = attrs.aaLabelStrategy || aaFormExtensions.defaultLabelStrategy;
+                    //this could be a one off strategy on scope. lets try...
+                    if(!strategy) {
+                        var maybe = scope.$eval(attrs.aaLabelStrategy);
+                        if(angular.isFunction(maybe)){
+                            strategy = maybe;
+                        }
+                    }
+
+                    //use default
+                    if(!strategy) {
+                        strategy = aaFormExtensions.labelStrategies[aaFormExtensions.defaultLabelStrategy];
+                    }
+
                     var isRequiredField = (attrs.required !== undefined);
 
                     //auto generate an ID for compliant label names
@@ -243,7 +256,7 @@
                         element[0].id = guid();
                     }
 
-                    aaFormExtensions.labelStrategies[strategyName](element, attrs.aaLabel, isRequiredField);
+                    strategy(element, attrs.aaLabel, isRequiredField);
                 }
             };
         }])
