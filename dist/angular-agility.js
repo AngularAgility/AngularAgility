@@ -11,12 +11,18 @@
 
 ;(function () {
     var formExtensions = angular.module('aa.formExtensions', [])
-
-        .directive('aaSaveForm', ['aaFormExtensions', function (aaFormExtensions) {
+        .directive('aaSaveForm', function() {
+            return {
+                link: function() {
+                    throw "aaSaveForm has been deprecated in favor of a more sensically named aaSubmitForm";
+                }
+            };
+        })
+        .directive('aaSubmitForm', ['aaFormExtensions', function (aaFormExtensions) {
             return {
                 scope: {
                     onInvalidAttempt: '&',
-                    aaSaveForm: '&'
+                    aaSubmitForm: '&'
                 },
                 restrict: 'A',
                 require: '^form',
@@ -26,12 +32,12 @@
 
                     element.on('click', function () {
                         scope.$apply(function () {
-                            if (ngForm.$valid) {
-                                ngForm.$aaFormExtensions.$invalidAttempt = false;
-                                scope.aaSaveForm();
-                            } else {
-                                ngForm.$aaFormExtensions.$invalidAttempt = true;
 
+                            ngForm.$aaFormExtensions.$submitAttempt();
+
+                            if (ngForm.$valid) {
+                                scope.aaSubmitForm();
+                            } else {
                                 var hasScopeFunction = typeof scope.onInvalidAttempt() === 'function';
                                 var hasGlobalFunction = typeof aaFormExtensions.defaultOnInvalidAttempt === 'function';
 
@@ -57,6 +63,7 @@
                             }
                         });
                     });
+
                 }
             };
         }])
@@ -476,16 +483,29 @@
     function stringFormat(format) {
         var args = Array.prototype.slice.call(arguments, 1);
         return format.replace(/{(\d+)}/g, function(match, number) {
-            return typeof args[number] != 'undefined' ? args[number] : match;
+            return typeof args[number] !== 'undefined' ? args[number] : match;
         });
     }
 
     function ensureaaFormExtensions(form) {
         if(!form.$aaFormExtensions) {
-            form.$aaFormExtensions = {};
+            form.$aaFormExtensions = {
+                '$submitAttempt': function() {
+                    setAttemptRecursively(form, form.$invalid);
+                }
+            };
+        }
+
+        function setAttemptRecursively(form, isInvalid) {
+            form.$aaFormExtensions.$invalidAttempt = isInvalid;
+            angular.forEach(form, function(fieldVal, fieldName) {
+                if(fieldName.indexOf('$') !== 0 && form.constructor === fieldVal.constructor){
+                    setAttemptRecursively(fieldVal, isInvalid);
+                }
+            });
         }
     }
-    
+
     function ensureaaFormExtensionsFieldExists(form, fieldName) {
         ensureaaFormExtensions(form);
 

@@ -16,7 +16,7 @@
                 link: function() {
                     throw "aaSaveForm has been deprecated in favor of a more sensically named aaSubmitForm";
                 }
-            }
+            };
         })
         .directive('aaSubmitForm', ['aaFormExtensions', function (aaFormExtensions) {
             return {
@@ -483,7 +483,7 @@
     function stringFormat(format) {
         var args = Array.prototype.slice.call(arguments, 1);
         return format.replace(/{(\d+)}/g, function(match, number) {
-            return typeof args[number] != 'undefined' ? args[number] : match;
+            return typeof args[number] !== 'undefined' ? args[number] : match;
         });
     }
 
@@ -502,7 +502,7 @@
                 if(fieldName.indexOf('$') !== 0 && form.constructor === fieldVal.constructor){
                     setAttemptRecursively(fieldVal, isInvalid);
                 }
-            })
+            });
         }
     }
 
