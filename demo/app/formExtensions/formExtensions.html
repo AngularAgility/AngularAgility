@@ -352,7 +352,7 @@
 
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-3">
-                <button aa-save-form="save()" class="btn btn-default">Save</button>
+                <button aa-submit-form="save()" class="btn btn-default">Save</button>
             </div>
         </div>
         <div ng-hide="hideExamples" class="alert alert-info example">
@@ -360,7 +360,7 @@
                 <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-3">
-                        <button aa-save-form="save()" class="btn btn-default">Save</button>
+                        <button aa-submit-form="save()" class="btn btn-default">Save</button>
                     </div>
                 </div>
                 ]]></script>
@@ -368,7 +368,7 @@
             <div class="helpers">
                 <div>
                     <i class="fa fa-cogs"></i>
-                    This is using the "aa-save-form" directive which is essentially a "gated" ng-click:
+                    This is using the "aa-submit-form" directive which is essentially a "gated" ng-click:
                     <ul>
                         <li>It calls the underlying scope function (just like a ng-click) ONLY if the parent form is valid</li>
                         <li>If clicked when the form is invalid it triggers all validation messages to appear in the form</li>

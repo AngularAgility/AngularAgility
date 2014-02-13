@@ -23,7 +23,7 @@ can be automatically generated based on the ng-model objects bound.
 * Create all the above in 1 line using aa-auto-field="myField"
 * Keeps track of invalid submit attempts and display errors appropriately
 * Keeps track of field blurs and display errors appropriately
-* Block invalid save attempts using aa-save-form to prevent invalid data submissions and also serving as a validation message display trigger.
+* Block invalid save attempts using aa-submit-form to prevent invalid data submissions and also serving as a validation message display trigger.
 * A rich overridable strategy approach to configuration of everything above using aaFormExtensionsProvider. You can customize almost anything but comes with resonable defaults out of the box. No assembly (necessarily) required!
 * A bunch more stuff take a look below!
 
