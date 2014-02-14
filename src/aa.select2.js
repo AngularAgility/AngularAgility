@@ -98,11 +98,22 @@ angular
                                 //resolves promises and resolved values alike
                                 $q.when(settings.textLookup(modelValue))
                                     .then(function(data) {
+
+                                        var result;
                                         if(angular.isUndefined(data.data)) {
-                                            callback(data);
+                                            result = data;
                                         } else {
-                                            callback(data.data);
+                                            result = data.data;
                                         }
+
+                                        if(!angular.isObject(result)) {
+                                            //passed back just the text. resolve:
+                                            var newResult = {};
+                                            newResult[settings.id] = modelValue;
+                                            newResult[settings.text] = result;
+                                            result = newResult;
+                                        }
+                                        callback(result);
                                     });
                             };
                         }

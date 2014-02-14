@@ -3,8 +3,8 @@ angular
     .controller('formExtensions', ['$scope', function ($scope) {
 
         $scope.save = function() {
-            alert("save called successfully")
-        }
+            alert("save called successfully");
+        };
 
         $scope.colors = [
             {name:'black'},
