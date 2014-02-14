@@ -282,6 +282,11 @@
 
                     //if no label and "no-label" don't calc one
                     if (!attrs.aaLabel && attrs.noLabel === undefined) {
+
+                        //remove trailing "Id". Usually a label isn't "PersonId" it's Person
+                        if(lastPartOfName.lastIndexOf('Id') === lastPartOfName.length - 2)
+                            lastPartOfName = lastPartOfName.substring(0, lastPartOfName.length - 2);
+
                         element.attr('aa-label', toTitleCase(splitCamelCase(lastPartOfName)));
                     }
 
