@@ -14,7 +14,7 @@
 
 angular
     .module('aa.select2', [])
-    .directive('aaSelect2', function () {
+    .directive('aaSelect2', function ($q) {
 
         return {
             require: 'ngModel',
@@ -95,9 +95,14 @@ angular
                                     return;
                                 }
 
-                                settings.textLookup(modelValue)
-                                    .success(function(data) {
-                                        callback(data);
+                                //resolves promises and resolved values alike
+                                $q.when(settings.textLookup(modelValue))
+                                    .then(function(data) {
+                                        if(angular.isUndefined(data.data)) {
+                                            callback(data);
+                                        } else {
+                                            callback(data.data);
+                                        }
                                     });
                             };
                         }
