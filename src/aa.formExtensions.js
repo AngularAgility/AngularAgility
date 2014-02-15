@@ -280,8 +280,8 @@
                         element.attr("name", lastPartOfName);
                     }
 
-                    //assume type="text" (which a browser will do but many libraries ex. boostrap have styling that requires it)
-                    if(!attrs.type) {
+                    //assume input type="text" (which a browser will do but many libraries ex. boostrap have styling that requires it)
+                    if(!attrs.type && element.prop('tagName').toUpperCase() === 'INPUT') {
                         element.prop('type', 'text');
                     }
 
