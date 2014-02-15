@@ -23,7 +23,8 @@ angular
             link: function (scope, element, attrs, ngModel) {
 
                 //native select2 options directly from the user. always takes prescedence
-                var userOpts = scope.$eval(attrs.aaSelect2) || {},
+                //copy the object before we muck with it incase multiple select2s are sharing settings
+                var userOpts = angular.copy(scope.$eval(attrs.aaSelect2) || {}),
 
                 //possible select2 options derived from user selections on $settings
                     derivedOpts = {},
@@ -38,6 +39,12 @@ angular
                     inThisMode = settings && settings.id === "@this" && settings.text === "@this";
 
                 delete userOpts.$settings; // no longer needed
+
+                //need a placeholder for allow clear to work
+                //fix bug?/weird api odditiy
+                if(userOpts.allowClear && !userOpts.placeholder) {
+                    userOpts.placeholder = "Select...";
+                }
 
                 var modelValue = scope.$eval(attrs.ngModel);
 
