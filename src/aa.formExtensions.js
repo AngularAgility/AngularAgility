@@ -280,6 +280,11 @@
                         element.attr("name", lastPartOfName);
                     }
 
+                    //assume type="text" (which a browser will do but many libraries ex. boostrap have styling that requires it)
+                    if(!attrs.type) {
+                        element.prop('type', 'text');
+                    }
+
                     //if no label and "no-label" don't calc one
                     if (!attrs.aaLabel && attrs.noLabel === undefined) {
 
@@ -297,6 +302,28 @@
                     element.replaceWith(outerHTML(element[0]));
 
                     return function(scope, element, attrs) {
+                        $compile(element)(scope);
+                    };
+                }
+            };
+        }])
+
+        .directive('aaAutoFieldGroup', ['$compile', 'aaFormExtensions', function ($compile, aaFormExtensions) {
+            return {
+                restrict: 'A',
+                scope: false,
+                replace: true,
+                priority: 1100,
+                terminal: true,
+                compile: function(element, attrs) {
+
+                    element.removeAttr('aa-auto-field-group');
+                    element.attr("aa-auto-field", attrs.aaAutoFieldGroup);
+
+                    var strat = aaFormExtensions.autoFieldGroupStrategies[attrs.autoFieldGroupStrategy || aaFormExtensions.defaultAutoFieldGroupStrategy];
+                    strat(element);
+
+                    return function(scope, element) {
                         $compile(element)(scope);
                     };
                 }
@@ -341,6 +368,7 @@
 
             var self = this;
 
+            //LABEL STRATEGIES
             this.defaultLabelStrategy = "default";
             this.setDefaultLabelStrategy = function(strategyName) {
                 this.defaultLabelStrategy = strategyName;
@@ -384,7 +412,29 @@
             };
 
 
+            //AUTO FIELD GROUP STRATEGIES
+            this.defaultAutoFieldGroupStrategy = "bootstrap3InlineForm";
+            this.setDefaultAutoFieldGroupStrategy = function(strategyName) {
+                this.defaultAutoFieldGroupStrategy = strategyName;
+            };
+            this.autoFieldGroupStrategies = {
+                bootstrap3InlineForm: function (element) {
 
+                    //add form-control if it is missing
+                    if(!element.prop('class')) {
+                        element.addClass('form-control')
+                    }
+
+                    element.wrap('<div class="form-group"><div class="col-sm-3"></div></div>')
+                }
+            };
+            this.registerAutoFieldGroupStrategy = function (name, strategy) {
+                this.autoFieldGroupStrategies[name] = strategy;
+            };
+
+
+
+            //VALIDATION MESSAGE PLACEMENT STRATEGIES
             this.defaultValMsgPlacementStrategy = "default";
             this.setDefaultValMsgPlacementStrategy = function(strategyName) {
                 this.defaultValMsgPlacementStrategy = strategyName;
@@ -412,7 +462,8 @@
             };
 
 
-            //bootstrap 3 + font awesome
+
+            //VALID ICON STRATEGIES
             this.validIconStrategy = {
                 validIcon: '<i class="fa fa-check fa-lg"></i>',
                 invalidIcon: '<i class="fa fa-exclamation-circle fa-lg"></i>',
@@ -427,6 +478,7 @@
             };
 
 
+            //VALIDATION MESSAGES
             this.validationMessages = {
                 required: "{0} is required.",
                 email: "The field {0} must be an email.",
@@ -461,12 +513,18 @@
                 return {
                     defaultLabelStrategy: self.defaultLabelStrategy,
                     labelStrategies: self.labelStrategies,
+
+                    defaultAutoFieldGroupStrategy: self.defaultAutoFieldGroupStrategy,
+                    autoFieldGroupStrategies: self.autoFieldGroupStrategies,
+
+
                     validIconStrategy: self.validIconStrategy,
                     validationMessages: self.validationMessages,
+
                     valMsgForTemplate: self.valMsgForTemplate,
                     valMsgPlacementStrategies: self.valMsgPlacementStrategies,
                     defaultValMsgPlacementStrategy: self.defaultValMsgPlacementStrategy,
-                    defaultOnInvalidAttempt: self.defaultOnInvalidAttempt
+                    defaultOnInvalidAttempt: self.defaultOnInvalidAttempt,
                 };
             };
         });
