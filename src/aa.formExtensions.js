@@ -397,7 +397,7 @@
                 },
 
                 //create a no-frills label directly before the element
-                default: function (ele, labelText, isRequired) {
+                'default': function (ele, labelText, isRequired) {
                     ele[0].parentNode.insertBefore(
                         angular.element('<label>')
                             .attr('for', ele[0].id)
@@ -441,7 +441,7 @@
             };
             this.valMsgPlacementStrategies = {
 
-                default: function(formFieldElement, formName, formFieldName) {
+                'default': function(formFieldElement, formName, formFieldName) {
 
                     var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}"></div>', formName, formFieldName));
                     var fieldType = formFieldElement[0].type.toLowerCase();
