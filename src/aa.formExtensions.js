@@ -422,10 +422,10 @@
 
                     //add form-control if it is missing
                     if(!element.prop('class')) {
-                        element.addClass('form-control')
+                        element.addClass('form-control');
                     }
 
-                    element.wrap('<div class="form-group"><div class="col-sm-3"></div></div>')
+                    element.wrap('<div class="form-group"><div class="col-sm-3"></div></div>');
                 }
             };
             this.registerAutoFieldGroupStrategy = function (name, strategy) {
