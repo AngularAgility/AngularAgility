@@ -68,7 +68,16 @@ angular
                     if(inLocalArrayMode) {
                         derivedOpts.data = derivedOpts.data || {};
                         derivedOpts.data.text = settings.text;
-                        derivedOpts.data.results = settings.options;
+
+                        if(inThisMode) {
+                            var newData = [];
+                            angular.forEach(settings.options, function(obj) {
+                                newData.push({id: obj, text: obj});
+                            });
+                            derivedOpts.data.results = newData;
+                        } else {
+                            derivedOpts.data.results = settings.options;
+                        }
                     }
 
                     //AJAX MODE
@@ -77,7 +86,6 @@ angular
                         derivedOpts.query = function(query) {
                             settings.options(query.term)
                                 .success(function (data) {
-
                                     if(inThisMode) {
                                         var newData = [];
                                         angular.forEach(data, function(str) {
@@ -85,14 +93,12 @@ angular
                                         });
                                         data = newData;
                                     }
-
                                     query.callback({
                                         results: data,
                                         text: settings.text
                                     });
                                 });
                         };
-
 
                         if(modelValue && inIdMode) {
                             derivedOpts.initSelection = function(e, callback) {
