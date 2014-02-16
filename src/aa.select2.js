@@ -24,21 +24,23 @@ angular
 
                 //native select2 options directly from the user. always takes prescedence
                 //copy the object before we muck with it incase multiple select2s are sharing settings
-                var userOpts = angular.copy(scope.$eval(attrs.aaSelect2) || {}),
+                var userOpts = scope.$eval(attrs.aaSelect2);
+
+                if(!angular.isObject(userOpts) || isEmptyObject(userOpts)) {
+                    throw 'aa-select2 options must be specified. Ex: <div aa-select2="*options here*"...\r\n';
+                }
 
                 //possible select2 options derived from user selections on $settings
-                    derivedOpts = {},
+                var derivedOpts = {},
 
                 //directive settings (aka nice wrapper for select2)
                     settings = userOpts.$settings,
                     inAjaxMode = settings ? angular.isFunction(settings.options) : false,
                     inLocalArrayMode = settings ? angular.isArray(settings.options) : false,
-                    inIdMode = settings && settings.mode ? settings.mode.indexOf('id') != -1 : false,
-                    inObjectMode = settings && settings.mode ? settings.mode.indexOf('object') != -1 : false,
-                    inTagsMode = settings && settings.mode ? settings.mode.indexOf('tags') != -1 : false,
+                    inIdMode = settings && settings.mode ? settings.mode.indexOf('id') !== -1 : false,
+                    inObjectMode = settings && settings.mode ? settings.mode.indexOf('object') !== -1 : false,
+                    inTagsMode = settings && settings.mode ? settings.mode.indexOf('tags') !== -1 : false,
                     inThisMode = settings && settings.id === "@this" && settings.text === "@this";
-
-                delete userOpts.$settings; // no longer needed
 
                 //need a placeholder for allow clear to work
                 //fix bug?/weird api odditiy
@@ -51,14 +53,12 @@ angular
                 //configure select2's options per passed $settings
                 if(settings) {
 
+                    settings.id = settings.id || 'id';
+                    settings.text = settings.text || 'text';
+
                     if(inThisMode) {
                         settings.id = 'id';
                         settings.text = 'text';
-                    }
-
-                    if(inObjectMode) {
-                        settings.id = settings.id || 'id';
-                        settings.text = settings.text || 'text';
                     }
 
                     //allow for flexibility of mapping ajax object back to the bound ng-model
@@ -180,22 +180,28 @@ angular
                 //when select2 changes
                 element.bind("change", function () {
                     scope.$apply(function () {
-                        var val = element.select2('val');
+                        var select2Data = element.select2('data');
 
-                        if (val === "") {
-                            ngModel.$setViewValue(null);
-                            return;
+                        var ngValue = null;
+
+                        if (!select2Data) {
+                            ngValue = null;
+                        } else if(inObjectMode) {
+                            ngValue = select2Data;
+                        } else if(inIdMode) {
+
+                            if(angular.isArray(select2Data)) {
+
+                                ngValue = [];
+                                angular.forEach(select2Data, function(obj) {
+                                    ngValue.push(obj[settings.id]);
+                                });
+
+                            } else {
+                                ngValue = select2Data[settings.id];
+                            }
                         }
-
-                        if(inIdMode) {
-
-                            ngModel.$setViewValue(val);
-
-                        } else if (inObjectMode) {
-
-                            var valObj = element.select2('data');
-                            ngModel.$setViewValue(valObj);
-                        }
+                        ngModel.$setViewValue(ngValue);
                     });
                 });
 
@@ -205,6 +211,15 @@ angular
                 element.bind("$destroy", function() {
                     element.select2("destroy");
                 });
+
+                //util
+                //assumes object is defined
+                function isEmptyObject(obj) {
+                    if(!Object.keys) //<=IE 8
+                        return JSON.stringify(obj) === "{}";
+
+                    return Object.keys(obj).length === 0;
+                }
             }
         };
     });
