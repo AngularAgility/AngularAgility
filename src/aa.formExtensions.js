@@ -444,7 +444,8 @@
                 'default': function(formFieldElement, formName, formFieldName) {
 
                     var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}"></div>', formName, formFieldName));
-                    var fieldType = formFieldElement[0].type.toLowerCase();
+                    var fieldType = formFieldElement[0].type;
+                    fieldType = fieldType ? fieldType.toLowerCase() : 'text';
 
                     if(fieldType === 'radio') {
                         //radios tend to be wrapped, go up a few levels (of course you can customize this with your own strategy)
