@@ -99,11 +99,13 @@
                     ensureaaFormExtensionsFieldExists(ngForm, ngModel.$name);
                     ngForm.$aaFormExtensions[ngModel.$name].$element = element;
                     element.on('blur', function() {
-
-                        scope.$apply(function() {
-                            ngForm.$aaFormExtensions[ngModel.$name].$hadFocus = true;
-                            element.addClass('aa-had-focus');
-                        });
+                        ngForm.$aaFormExtensions[ngModel.$name].$hadFocus = true;
+                        element.addClass('aa-had-focus');
+                        
+                        if(!scope.$$phase) {
+                            //sometimes a blur can happen during a digest or apply...
+                            scope.$apply();
+                        }
                     });
 
 
