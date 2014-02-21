@@ -10,22 +10,21 @@ Note all JavaScript/CSS that you might want to use is located in /src/*.*
 ##[Live demo of this exact source here](http://angularagility.herokuapp.com/)
 
 ##Form Extensions
-[**Blog post outlining it's functionality in detail**](http://johnculviner.com/introducing-angularagility-formextensions/)
+[Blog Posts](http://johnculviner.com/category/form-extensions/) |
+[Source](https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.formExtensions.js) |
+[API Docs](https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.formExtensions.js)
 
-Angular.js form validation is likely one of the best takes on form validaiton out there. Unfortuantely it can often be a little TOO flexible for many applications where you want basic error message display and generation
+Angular.js form validation is likely one of the best takes on form validation out there. Unfortunately it can often be a little TOO flexible for many applications where you want basic error message display and generation
 witout having to dive into the form object model and manually construct basic messages for each field.
 
 This is where Form Extensions comes in. It will:
-* Automatically generate validation messages from applied validation rules and display them on screen when appropriate
-(they are also available in myForm.$aaFormExtensions for programmatic use)
-* Automatically generate labels and place them in the DOM using a customizable global default or specific strategy. Names
-can be automatically generated based on the ng-model objects bound.
-* Create all the above in 1 line using aa-auto-field="myField"
-* Keeps track of invalid submit attempts and display errors appropriately
-* Keeps track of field blurs and display errors appropriately
-* Block invalid save attempts using aa-submit-form to prevent invalid data submissions and also serving as a validation message display trigger.
-* A rich overridable strategy approach to configuration of everything above using aaFormExtensionsProvider. You can customize almost anything but comes with resonable defaults out of the box. No assembly (necessarily) required!
-* A bunch more stuff take a look below!
+* Drastically reduce the amount of boilerplate, repetitive, error-prone HTML required to produce forms and validation messages.
+* Automatically generate Angular.js fields for use in form validation AND their error messages
+* Form extensions programatically extends forms at myForm.$aaFormExtensions = {...}
+* Code is cleaner and easier to read. Form Extensions is DSL that distills your HTML down to only what is required.
+* Feel free to use full blown markup whenever you want complete control.
+* Mix and match the directive components of Form Extensions to get exactly what you'd like for each situation.
+* It does exactly what you want: Everything is overridable on a global and per-instance basis through a rich provider model.
 
 ###Demo
 * [Live demo of this exact source](http://angularagility.herokuapp.com/)
@@ -33,5 +32,37 @@ can be automatically generated based on the ng-model objects bound.
 * [Basic demo BEFORE Form Extensions](http://plnkr.co/edit/PS0sNo?p=preview)
 * [Basic demo AFTER Form Extensions](http://plnkr.co/edit/e8YiZ0?p=preview)
 
+###In a nutshell
+####With Form Extensions:
+
+```html
+<input type="number" aa-field-group="person.age" min="0" max="140" required>
+```
+
+####Without Form Extensions:
+
+```html
+<div class="form-group">
+    <label for="age" class="col-sm-2 control-label">
+        Age *
+    </label>
+    <div class="col-sm-3">
+        <input type="number" required class="form-control" ng-model="person.age" name="age" id="age" />
+
+        <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.number">
+            Age must be a number
+        </div>
+        <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.min">
+            Age must be at least 0.
+        </div>
+        <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.max">
+            Age must be at most 140.
+        </div>
+        <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.required">
+            Age is required.
+        </div>
+    </div>
+</div>
+```
 
 

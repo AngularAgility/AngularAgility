@@ -1,0 +1,31 @@
+<input type="email" aa-field-group="person.email" required/>
+
+<input aa-field-group="person.firstName" required ng-minlength="2" ng-maxlength="30"/>
+
+<input aa-field-group="person.lastName" aa-label="Last Name Custom" required ng-minlength="2" ng-maxlength="30"/>
+
+<input type="number" aa-field-group="person.favoriteNumber">
+
+<input type="number" aa-field-group="person.age" min="0" max="140" required>
+
+<input type="text" class="form-control" aa-field-group="person.favoriteLetter"
+       maxlength="1" ng-pattern="/^[A-Za-z]$/" required>
+
+<input type="url" aa-field-group="person.favoriteWebsite" required>
+
+<select aa-field-group="person.favoriteColor" ng-options="c.name for c in colors" required>
+    <option value="">Select...</option>
+</select>
+
+<div class="form-group">
+    <label class="col-sm-2 control-label">Gender *</label>
+
+    <div class="col-sm-1">
+        <label class="radio-inline">
+            <input type="radio" name="gender" required aa-val-msg ng-model="person.gender" value="male"> Male
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="gender" required ng-model="person.gender" value="female"> Female
+        </label>
+    </div>
+</div>

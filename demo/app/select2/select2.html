@@ -1,31 +1,38 @@
-<h1>Select2</h1>
+<div class="jumbotron">
+    <div class="container">
+        <h1>Select2 Demo</h1>
 
-<!--<p>-->
-<!--<strong>-->
-<!--<a href="http://johnculviner.com/">Click here</a>-->
-<!--for a detailed blog post covering Select2-->
-<!--</strong>-->
-<!--</p>-->
-
-<div>
-    <div class="alert alert-success">
-        <p>
-            First of there are a few other Select2 directives out there. This one is different in that it is specifically designed to
-            <strong>easily</strong>
-            work with binding ids, objects, arrays, AJAX queries etc. for some pretty common use cases (see examples!)
-        </p><br/>
-        <p>
-            It abstracts away the complicated Select2 API with a $settings object (lots of examples below!) and should make it
-            pretty easy to do a lot of things without writing a bunch of hacks.
-        </p><br/>
-        <p>
-            It offers no support for the basic 'replace a &lt;select&gt; list and &lt;option&gt;' functionality.
-            If you want that take a look at <a href="https://github.com/angular-ui/ui-select2">this one</a>.
-        </p><br/>
-
-        Take a look at the examples below to see what this one does readily and feel free to copy paste!
+        <p class="lead">Headache free use of Select2 with Angular for most common tasks</p>
+        <p class="lead">
+            <a href="https://github.com/AngularAgility/AngularAgility/wiki/select2-API-Docs">API Docs</a>
+            |
+            <a href="https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.select2.js">Source</a>
+            |
+            <a href="http://johnculviner.com/category/select2/">Blog Posts</a>
+        </p>
     </div>
+</div>
 
+<div class="container">
+<div class="well">
+    <p class="lead">Some background:</p>
+    <p>
+        First of there are a few other Select2 directives out there. This one is different in that it is specifically designed to
+        <strong>easily</strong>
+        work with binding ids, objects, arrays, AJAX queries etc. for some pretty common use cases (see examples!)
+    </p>
+    <p>
+        It abstracts away the complicated Select2 API with a $settings object (lots of examples below!) and should make it
+        pretty easy to do a lot of things without writing a bunch of hacks.
+    </p>
+    <p>
+        It offers no support for the basic 'replace a &lt;select&gt; list and &lt;option&gt;' functionality:
+        This is desgined for working with JavaScript object data (as you generally do with Angular).
+        Not what you want? Take a look at <a href="https://github.com/angular-ui/ui-select2">this one</a>.
+    </p>
+
+    Take a look at the examples below to see what this one does readily and feel free to copy paste!
+</div>
     <div ng-controller="select2basicId">
         <h1>Basic Id Example</h1>
         <div class="form-group select2">

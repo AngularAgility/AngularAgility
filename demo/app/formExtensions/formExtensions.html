@@ -1,380 +1,633 @@
-<h1>Form Extensions Demo</h1>
+<div class="jumbotron">
+    <div class="container">
+        <h1>Form Extensions Demo</h1>
 
-<p>
-    <strong>
-        <a href="http://johnculviner.com/introducing-angularagility-formextensions/">Click here</a>
-        for a detailed blog post covering Form Extensions
-    </strong>
-</p>
-
-<div>
-    <div class="alert alert-success">
-        <p>
-            Try interacting with the fields and form below. Some ideas:
-            <ul>
-                <li>Click into a required field and leave without typing anything.</li>
-                <li>Change a field that was once valid to be invalid.</li>
-                <li>Attempt to submit the form without all the fields being valid.</li>
-                <li ng-hide="hideExamples">If the blue notes below each field are distracting <a href="" ng-click="hideExamples = true">hide them</a></li>
-                <li ng-show="hideExamples">I hid the blue notes and I want them back! <a href="" ng-click="hideExamples = false">show them</a></li>
-            </ul>
+        <p class="lead">Generate Angular.js form fields, labels and rich validation messages in one line of HTML</p>
+        <p class="lead">
+            <a href="https://github.com/AngularAgility/AngularAgility/wiki/Form-Extensions-API-Docs">API Docs</a>
+            |
+            <a href="https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.formExtensions.js">Source</a>
+            |
+            <a href="http://johnculviner.com/category/form-extensions/">Blog Posts</a>
         </p>
     </div>
+</div>
 
-    <div class="alert alert-warning">
-        <p>
-            To view the original code for each example click "Show Initial HTML". Using a browser inspector will show you the HTML <strong>after</strong> FormExtensions mutates it.
-        </p>
-        <p>
-            Feel free to use a browser inspector to check out all the work FormExtensions did for you for free!
-        </p>
+<div class="container">
+<div class="well">
+    <p class="lead">Form Extensions does a whole lot:</p>
+    <ul>
+        <li>Drastically reduce the amount of boilerplate, repetitive, error-prone HTML required to produce forms and validation messages.</li>
+        <li>Automatically generate Angular.js fields for use in form validation AND their error messages.</li>
+        <li>Form extensions programatically extends forms at myForm.$aaFormExtensions = {...}</li>
+        <li>Code is cleaner and easier to read. Form Extensions is DSL that distills your HTML down to only what is required.</li>
+        <li>Feel free to use full blown markup whenever you want complete control.</li>
+        <li>Mix and match the directive components of Form Extensions to get exactly what you'd like for each situation.</li>
+        <li>It does exactly what you want: Everything is overridable on a global and per-instance basis through a rich provider model.</li>
+    </ul>
+</div>
+
+<div class="well">
+    <p class="lead">Minify your HTML + make it MORE readable!</p>
+    <ul>
+        <li>You minify your JavaScript for the best client experience. Why not your HTML?</li>
+        <li>Using the HTML for the demo form below</li>
+    </ul>
+    <p>
+        <a target="_blank" href="/app/formExtensions/beforeFormExtensions.txt">Before Form Extensions</a>
+        <div><strong>Normal:</strong> 7,138 bytes</div>
+        <div><strong>Gzipped:</strong> 929 bytes</div>
+    </p>
+    <p>
+        <a target="_blank" href="/app/formExtensions/afterFormExtensions.txt">After Form Extensions</a>
+        <div><strong>Normal:</strong> 1,204 bytes <strong style="color: red;">(83% smaller)</strong></div>
+        <div><strong>Gzipped:</strong> 454 bytes <strong style="color: red;">(51% smaller)</strong></div>
+    </p>
+</div>
+
+<div class="well">
+    <p class="lead">What should I look for below?</p>
+    <ul>
+        <li>Click into a required field and leave without typing anything.</li>
+        <li>Change a field that was once valid to be invalid.</li>
+        <li>Attempt to submit the form without all the fields being valid.</li>
+        <li ng-hide="hideExamples"><a href="" ng-click="hideExamples = true">Hide all blue notes</a></li>
+        <li ng-show="hideExamples"><a href="" ng-click="hideExamples = false">Show all blue notes</a></li>
+
+    </ul>
+</div>
+
+
+
+
+<div ng-form="exampleForm" class="form-horizontal">
+
+<!-- EMAIL -->
+<input type="email" aa-field-group="person.email" required/>
+<!--/ EMAIL -->
+
+<div ng-hide="hideExamples" class="alert alert-info example">
+    <h4>What you typed:</h4>
+
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter"><![CDATA[
+                            <input type="email" aa-field-group="person.email" required />
+                        ]]>
+        </script>
     </div>
 
-
-
-
-
-    <div ng-form="exampleForm" class="form-horizontal">
-
-        <!-- EMAIL -->
-        <div class="form-group">
-            <div class="col-sm-3">
-                <input type="email" class="form-control" aa-auto-field="person.email" required="" />
-            </div>
+    <div class="validations">
+        <i class="fa fa-check-square"></i>
+        Must be an email address
+    </div>
+    <div class="helpers">
+        <div>
+            <i class="fa fa-cogs"></i>
+            Woah! It generated <strong>everything</strong> for you with only one directive!
         </div>
-        <div ng-hide="hideExamples" class="alert alert-info example">
-            <div syntax-toggler-for="HTML">
-                <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
-                        <div class="form-group">
-                            <div class="col-sm-3">
-                                <input type="email" class="form-control" aa-auto-field="person.email" />
+        <ul>
+            <li>aa-field-group="person.Email" generates:</li>
+            <ul>
+                <li>An overridable/configurable bootsrap wrapper for the form field</li>
+                <li>A ng-model="person.Email" on the element</li>
+                <li>An overridable "aa-label" directive that follows a camel cased spacing pattern based on the ng-model
+                    binding (also 508 compliant)
+                </li>
+                <li>* on the label because the field is required</li>
+                <li>Label generated/positioned using a configurable labelStrategy that also produced the required star
+                    *
+                </li>
+                <li>An automatic name for the field (for use with ng-form) based on the ng-model binding</li>
+                <li>A 'aa-val-msg' directive for auto generation of validation messages</li>
+            </ul>
+        </ul>
+    </div>
+
+    <h4>What you <strong>DIDN'T</strong> type (excludes blur tracking):</h4>
+
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter"><![CDATA[
+                    <div class="form-group">
+                        <label for="email" class="col-sm-2 control-label">
+                            Email *
+                        </label>
+                        <div class="col-sm-3">
+                            <input type="email" required class="form-control" ng-model="person.email" name="email" id="email">
+                            <div class="validation-error" ng-show="(exampleForm.email.$dirty || invalidSubmitAttempt)&& exampleForm.email.$error.required">
+                                Email is required.
+                            </div>
+                            <div class="validation-error" ng-show="(exampleForm.email.$dirty || invalidSubmitAttempt) && exampleForm.email.$error.email">
+                                Email must be a valid email address.
                             </div>
                         </div>
-                        ]]></script>
-            </div>
-            <div class="validations">
-                <i class="fa fa-check-square"></i>
-                Must be an email address
-            </div>
-            <div class="helpers">
-                <div>
-                    <i class="fa fa-cogs"></i>
-                    Woah! It generated almost everything for you with only one directive!
-                </div>
-                <ul>
-                    <li>aa-auto-field="person.Email" generates:</li>
-                    <ul>
-                        <li>An automatic name="..." for the field (for use with ng-form) based on the ng-model binding</li>
-                        <li>An overridable "aa-label" directive that follows a camel cased spacing pattern based on the ng-model binding (also 508 compliant)</li>
-                        <li>Label generated/positioned using a configurable labelStrategy that also produced the required star *</li>
-                        <li>A 'aa-val-msg' directive for auto generation of validation messages</li>
-                    </ul>
-                </ul>
-            </div>
-        </div>
+                    </div>
+                ]]>
+        </script>
+    </div>
 
-        <!-- FIRST NAME -->
-        <div class="form-group">
-            <label for="firstName" class="col-sm-2 control-label">First Name *</label>
-            <div class="col-sm-3">
-                <input type="text" class="form-control" id="firstName" name="firstName"
-                	required="" ng-minlength="2" ng-maxlength="30"
-                	ng-model="person.firstName"
-                    aa-val-msg="" aa-valid-icon="" />
-            </div>
-        </div>
-        <div ng-hide="hideExamples" class="alert alert-info example">
-            <div syntax-toggler-for="HTML">
-                <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
+</div>
+
+<!-- FIRST NAME -->
+<div class="form-group">
+    <div class="col-sm-3">
+        <input type="text" class="form-control"
+               required ng-minlength="2" ng-maxlength="30"
+               aa-field="person.firstName"/>
+    </div>
+</div>
+<!--/ FIRST NAME -->
+
+<div ng-hide="hideExamples" class="alert alert-info example">
+    <h4>What you typed:</h4>
+
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter"><![CDATA[
                     <div class="form-group">
-                        <label for="firstName" class="col-sm-2 control-label">First Name *</label>
                         <div class="col-sm-3">
-                            <input type="text" class="form-control" id="firstName" name="firstName"
-                            	required="" ng-minlength="2" ng-maxlength="30"
-                            	ng-model="person.firstName"
-                                aa-val-msg="" aa-valid-icon="" />
+                            <input type="text" class="form-control" aa-field="person.firstName" required ng-minlength="2" ng-maxlength="30"/>
                         </div>
                     </div>
-                    ]]></script>
-            </div>
-            <div class="validations">
-                <i class="fa fa-check-square"></i>
-                Required field, min 2, max 30
-            </div>
-            <div class="helpers">
-                <div>
-                    <i class="fa fa-cogs"></i>
-                    It's generating validation messages but not much else. That's handy.
-                </div>
-                <ul>
-                    <li>Label is created manually in HTML with a 'for' corresponding to a manual 'id' on the input for 508 compliance.</li>
-                    <li>Auto validation message using label name with 'aa-val-msg' directive</li>
-                    <li>Valid icon with 'aa-valid-icon' directive</li>
-                </ul>
-            </div>
+                    ]]>
+        </script>
+    </div>
+    <div class="validations">
+        <i class="fa fa-check-square"></i>
+        Required field, min 2, max 30
+    </div>
+    <div class="helpers">
+        <div>
+            <i class="fa fa-cogs"></i>
+            So you want a little more flexibility? It's generating everything except the bootstrap wrapper!
         </div>
+        <ul>
+            <li>Generates ng-model="person.Email" on the element</li>
+            <li>An overridable "aa-label" directive that follows a camel cased spacing pattern based on the ng-model
+                binding (also 508 compliant)
+            </li>
+            <li>The label generated/positioned using a default but configurable labelStrategy
+                (label-strategy="someCustomStrategy") that also produced the required star *
+            </li>
+            <li>An automatic name for the field (for use with ng-form) based on the ng-model binding</li>
+            <li>A 'aa-val-msg' directive for auto generation of validation messages</li>
+        </ul>
+    </div>
+
+    <h4>What you <strong>DIDN'T</strong> type (excludes blur tracking):</h4>
+
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter"><![CDATA[
+                    <div class="form-group">
+                        <label for="firstName" class="col-sm-2 control-label">
+                            First Name *
+                        </label>
+                        <div class="col-sm-3">
+                            <input type="text" required class="form-control" ng-model="person.firstName" name="firstName" id="firstName">
+
+                            <div class="validation-error" ng-show="(exampleForm.firstName.$dirty || invalidSubmitAttempt) && exampleForm.firstName.$error.required">
+                                First Name is required.
+                            </div>
+                            <div class="validation-error" ng-show="(exampleForm.firstName.$dirty || invalidSubmitAttempt) && exampleForm.firstName.$error.maxlength">
+                                First name must be less than 30 characters.
+                            </div>
+                            <div class="validation-error" ng-show="(exampleForm.firstName.$dirty || invalidSubmitAttempt) && exampleForm.firstName.$error.minlength">
+                                First Name must be greater than 2 characters.
+                            </div>
+                        </div>
+                    </div>
+                ]]>
+        </script>
+    </div>
+</div>
 
 
+<!-- LAST NAME -->
+<div class="form-group">
+    <div class="col-sm-3">
+        <input type="text" class="form-control" name="lastName"
+               ng-model="person.lastName" required ng-minlength="2" ng-maxlength="30"
+               aa-label="Last Name Custom" aa-val-msg aa-valid-icon/>
+    </div>
+</div>
+<!--/ LAST NAME -->
 
-        <!-- LAST NAME -->
-        <div class="form-group">
-            <div class="col-sm-3">
-                <input type="text" class="form-control" name="lastName"
-                       ng-model="person.lastName" required=""
-                       aa-label="Last Name" aa-val-msg="" aa-valid-icon="" />
-            </div>
-        </div>
-        <div ng-hide="hideExamples" class="alert alert-info example">
-            <div syntax-toggler-for="HTML">
-                <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
+<div ng-hide="hideExamples" class="alert alert-info example">
+    <h4>What you typed:</h4>
+
+    <div syntax-highligher-for="HTML">
+        <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
                     <div class="form-group">
                         <div class="col-sm-3">
                             <input type="text" class="form-control" name="lastName"
-                                   ng-model="person.lastName" required=""
-                                   aa-label="Last Name" aa-val-msg="" aa-valid-icon="" />
+                                   ng-model="person.lastName" required ng-minlength="2" ng-maxlength="30"
+                                   aa-label="Last Name Custom" aa-val-msg aa-valid-icon />
                         </div>
                     </div>
-                    ]]></script>
-            </div>
-            <div class="validations">
-                <i class="fa fa-check-square"></i>
-                Required field
-            </div>
-            <div class="helpers">
-                <div>
-                    <i class="fa fa-cogs"></i>
-                    It can generate labels in a configurable manner too!
-                </div>
-                <ul>
-                    <li>Label is automatically generated with 'aa-label' directive specifying 'Last Name' as the label name.</li>
-                    <li>Label generated/positioned using a configurable labelStrategy that also produced the required star *</li>
-                    <li>Label for / element ID are generated automatically for 508 compliance</li>
-                    <li>Auto validation message using label name with 'aa-val-msg' directive</li>
-                    <li>Valid icon with 'aa-valid-icon' directive</li>
-                </ul>
-            </div>
+                    ]]>
+        </script>
+    </div>
+    <div class="validations">
+        <i class="fa fa-check-square"></i>
+        Required field
+    </div>
+    <div class="helpers">
+        <div>
+            <i class="fa fa-cogs"></i>
+            It can generate labels in a configurable manner too!
         </div>
+        <ul>
+            <li>Label is automatically generated with 'aa-label' directive specifying 'Last Name Custom' as the label
+                name.
+            </li>
+            <li>Label generated/positioned using a configurable labelStrategy that also produced the required star *
+            </li>
+            <li>Label for / element ID are generated automatically for 508 compliance</li>
+            <li>Auto validation messages using label name with 'aa-val-msg' directive</li>
+            <li>Valid icon with 'aa-valid-icon' directive</li>
+        </ul>
+    </div>
+    <h4>What you <strong>DIDN'T</strong> type (excludes blur tracking):</h4>
 
-
-        <!-- GENDER -->
-        <div class="form-group">
-            <label class="col-sm-2 control-label">Gender *</label>
-            <div class="col-sm-1">
-                <label class="radio-inline">
-                    <input type="radio" name="gender" required="" aa-val-msg="" ng-model="person.gender" value="male"> Male
-                </label>
-                <label class="radio-inline">
-                    <input type="radio" name="gender" required="" ng-model="person.gender" value="female"> Female
-                </label>
-            </div>
-        </div>
-        <div ng-hide="hideExamples" class="alert alert-info example">
-            <div syntax-toggler-for="HTML">
-                <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter"><![CDATA[
                     <div class="form-group">
-                        <label class="col-sm-2 control-label">Gender *</label>
-                        <div class="col-sm-1">
-                            <label class="radio-inline">
-                                <input type="radio" name="gender" required="" aa-val-msg="" ng-model="person.gender" value="male"> Male
-                            </label>
-                            <label class="radio-inline">
-                                <input type="radio" name="gender" required="" ng-model="person.gender" value="female"> Female
-                            </label>
+                        <label for="lastName" class="col-sm-2 control-label">
+                            Last Name Custom *
+                        </label>
+                        <div class="col-sm-3">
+                            <input type="text" required class="form-control" ng-model="person.lastName" name="lastName" id="lastName">
+
+                            <i ng-show="exampleForm.lastName.$invalid" class="fa fa-exclamation-circle fa-lg"></i>
+
+                            <div class="validation-error" ng-show="(exampleForm.lastName.$dirty || invalidSubmitAttempt) && exampleForm.lastName.$error.required">
+                                Last Name is required.
+                            </div>
+                            <div class="validation-error" ng-show="(exampleForm.lastName.$dirty || invalidSubmitAttempt) && exampleForm.lastName.$error.maxlength">
+                                Last Name must be less than 30 characters.
+                            </div>
+                            <div class="validation-error" ng-show="(exampleForm.lastName.$dirty || invalidSubmitAttempt) && exampleForm.lastName.$error.minlength">
+                                Last Name must be greater than 2 characters.
+                            </div>
                         </div>
                     </div>
-                    ]]></script>
-            </div>
-            <div class="validations">
-                <i class="fa fa-check-square"></i>
-                Required field
-            </div>
-            <div class="helpers">
-                <div>
-                    <i class="fa fa-cogs"></i>
-                    aa-val-msg directive on <strong>one</strong> button produces a validation message.
-                </div>
-            </div>
+                ]]>
+        </script>
+    </div>
+</div>
+
+
+<!-- FAVORITE NUMBER -->
+<input type="number" aa-field-group="person.favoriteNumber">
+<!--/ FAVORITE NUMBER -->
+
+<div ng-hide="hideExamples" class="alert alert-info example">
+    <h4>What you typed:</h4>
+
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
+                <input type="number" aa-field-group="person.favoriteNumber">
+                ]]>
+        </script>
+    </div>
+    <div class="validations">
+        <i class="fa fa-check-square"></i>
+        Required field, must be a NUMBER and NOT a letter. <strong>Not required.</strong>
+    </div>
+    <div class="helpers">
+        <div>
+            <i class="fa fa-cogs"></i>
+            aa-field works on input type="number" generating the correct message as well
+            <ul>
+                <li>Note: since this field isn't required there is no 'required *'</li>
+            </ul>
         </div>
+    </div>
+    <h4>What you <strong>DIDN'T</strong> type (excludes blur tracking):</h4>
 
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter"><![CDATA[
+                    <div class="form-group">
+                        <label for="favoriteNumber" class="col-sm-2 control-label">
+                            Favorite Number
+                        </label>
+                        <div class="col-sm-3">
+                            <input type="number" required class="form-control" ng-model="person.favoriteNumber" name="favoriteNumber" id="favoriteNumber">
 
-
-        <!-- FAVORITE NUMBER -->
-        <div class="form-group">
-            <div class="col-sm-1">
-                <input type="number" class="form-control" aa-auto-field="person.favoriteNumber">
-            </div>
-        </div>
-        <div ng-hide="hideExamples" class="alert alert-info example">
-            <div syntax-toggler-for="HTML">
-                <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
-                <div class="form-group">
-                    <div class="col-sm-1">
-                        <input type="number" class="form-control" aa-auto-field="person.favoriteNumber" required="">
+                            <div class="validation-error" ng-show="(exampleForm.favoriteNumber.$dirty || invalidSubmitAttempt) && exampleForm.favoriteNumber.$error.number">
+                                Favorite Number must be a number
+                            </div>
+                        </div>
                     </div>
-                </div>
-                ]]></script>
-            </div>
-            <div class="validations">
-                <i class="fa fa-check-square"></i>
-                Required field, must be a NUMBER and NOT a letter. <strong>Not required.</strong>
-            </div>
-            <div class="helpers">
-                <div>
-                    <i class="fa fa-cogs"></i>
-                    aa-auto-field works on input type="number" generating the correct message as well
-                    <ul>
-                        <li>Note: since this field isn't required there is no 'required *'</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+                ]]>
+        </script>
+    </div>
+</div>
 
 
-        <!-- AGE -->
-        <div class="form-group">
-            <div class="col-sm-1">
-                <input type="number" class="form-control" aa-auto-field="person.age" min="0" max="140" required="">
-            </div>
-        </div>
-        <div ng-hide="hideExamples" class="alert alert-info example">
-            <div syntax-toggler-for="HTML">
-                <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
-                <div class="col-sm-1">
-                    <input type="number" class="form-control" aa-auto-field="person.age" min="0" max="140" required="">
-                </div>
-                ]]></script>
-            </div>
-            <div class="validations">
-                <i class="fa fa-check-square"></i>
-                Required field, must be >= 0 and <= 140 (maybe need to update sometime...ha)
-            </div>
-            <div class="helpers">
-                <div>
-                    <i class="fa fa-cogs"></i>
-                    aa-auto-field works on input type="number" generating the correct message for the range values as well
-                </div>
-            </div>
-        </div>
+<!-- AGE -->
+<input type="number" aa-field-group="person.age" min="0" max="140" required>
+<!--/ AGE -->
 
+<div ng-hide="hideExamples" class="alert alert-info example">
+    <h4>What you typed:</h4>
 
-        <!-- FAVORITE LETTER -->
-        <div class="form-group">
-            <div class="col-sm-1">
-                <input type="text" class="form-control" aa-auto-field="person.favoriteLetter" required=""
-                       maxlength="1" ng-pattern="/^[A-Za-z]$/">
-            </div>
+    <div syntax-highligher-for="HTML">
+        <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
+                <input type="number" aa-field-group="person.age" min="0" max="140" required>
+                ]]>
+        </script>
+    </div>
+    <div class="validations">
+        <i class="fa fa-check-square"></i>
+        Required field, must be >= 0 and <= 140 (maybe need to update sometime...ha)
+    </div>
+    <div class="helpers">
+        <div>
+            <i class="fa fa-cogs"></i>
+            aa-field works on input type="number" generating the correct message for the range values as well
         </div>
-        <div ng-hide="hideExamples" class="alert alert-info example">
-            <div syntax-toggler-for="HTML">
-                <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
-                <div class="form-group">
-                    <div class="col-sm-1">
-                        <input type="text" class="form-control" aa-auto-field="person.favoriteLetter" required=""
-                               maxlength="1" ng-pattern="/^[A-Za-z]$/">
+    </div>
+    <h4>What you <strong>DIDN'T</strong> type (excludes blur tracking):</h4>
+
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter"><![CDATA[
+                    <div class="form-group">
+                        <label for="age" class="col-sm-2 control-label">
+                            Age *
+                        </label>
+                        <div class="col-sm-3">
+                            <input type="number" required class="form-control" ng-model="person.age" name="age" id="age">
+
+                            <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.number">
+                                Age must be a number
+                            </div>
+                            <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.min">
+                                Age must be at least 0.
+                            </div>
+                            <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.max">
+                                Age must be at most 140.
+                            </div>
+                            <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.required">
+                                Age is required.
+                            </div>
+                        </div>
                     </div>
-                </div>
-                ]]></script>
-            </div>
-            <div class="validations">
-                <i class="fa fa-check-square"></i>
-                Required field. Must be a LETTER (using ng-pattern regex)
-            </div>
-            <div class="helpers">
-                <div>
-                    <i class="fa fa-cogs"></i>
-                    FormExtensions doesn't speak regex but if it knows something is wrong and it's not sure what it will display a generic validation message.
-                    Feel free to write your own using normal Angular validation if this doesn't work!
-                </div>
-            </div>
+                ]]>
+        </script>
+    </div>
+</div>
+
+
+<!-- FAVORITE LETTER -->
+<input type="text" class="form-control" aa-field-group="person.favoriteLetter"
+       maxlength="1" ng-pattern="/^[A-Za-z]$/" required>
+<!--/ FAVORITE LETTER -->
+
+<div ng-hide="hideExamples" class="alert alert-info example">
+    <h4>What you typed:</h4>
+
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
+                    <input type="text" class="form-control" aa-field-group="person.favoriteLetter"
+                           maxlength="1" ng-pattern="/^[A-Za-z]$/" required>
+                ]]>
+        </script>
+    </div>
+    <div class="validations">
+        <i class="fa fa-check-square"></i>
+        Required field. Must be a LETTER (using ng-pattern regex)
+    </div>
+    <div class="helpers">
+        <div>
+            <i class="fa fa-cogs"></i>
+            FormExtensions doesn't speak regex but if it knows something is wrong and it's not sure what it will display
+            a generic validation message.
+            Feel free to write your own using normal Angular validation if this doesn't work!
         </div>
+    </div>
+    <h4>What you <strong>DIDN'T</strong> type (excludes blur tracking):</h4>
 
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter"><![CDATA[
+                    <div class="form-group">
+                        <label for="favoriteLetter" class="col-sm-2 control-label">
+                            Favorite Letter *
+                        </label>
+                        <div class="col-sm-3">
+                            <input type="text" required class="form-control" ng-model="person.favoriteLetter" name="favoriteLetter" id="favoriteLetter">
 
+                            <div class="validation-error" ng-show="(exampleForm.favoriteLetter.$dirty || invalidSubmitAttempt) && exampleForm.favoriteLetter.$error.required">
+                                Favorite Letter is required.
+                            </div>
 
-        <!-- FAVORITE WEBSITE -->
-        <div class="form-group">
-            <div class="col-sm-3">
-                <input type="url" class="form-control" aa-auto-field="person.favoriteWebsite" required="">
-            </div>
-        </div>
-        <div ng-hide="hideExamples" class="alert alert-info example">
-            <div syntax-toggler-for="HTML">
-                <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
-                <div class="form-group">
-                    <div class="col-sm-3">
-                        <input type="url" class="form-control" aa-auto-field="person.favoriteWebsite" required="">
+                            <div class="validation-error" ng-show="(exampleForm.favoriteLetter.$dirty || invalidSubmitAttempt) && exampleForm.favoriteLetter.$error.pattern">
+                                Favorite Letter is invalid.
+                            </div>
+                        </div>
                     </div>
-                </div>
-                ]]></script>
-            </div>
-            <div class="validations">
-                <i class="fa fa-check-square"></i>
-                Required field. Must be a URL.
-            </div>
-            <div class="helpers">
-                <div>
-                    <i class="fa fa-cogs"></i>
-                    URL validation messages are no match for FormExtensions! (Yeah it generates them...)
-                </div>
-            </div>
+                ]]>
+        </script>
+    </div>
+</div>
+
+
+<!-- FAVORITE WEBSITE -->
+<input type="url" aa-field-group="person.favoriteWebsite" required>
+<!--/ FAVORITE WEBSITE -->
+
+<div ng-hide="hideExamples" class="alert alert-info example">
+    <h4>What you typed:</h4>
+
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
+                <input type="url" aa-field-group="person.favoriteWebsite" required>
+                ]]>
+        </script>
+    </div>
+    <div class="validations">
+        <i class="fa fa-check-square"></i>
+        Required field. Must be a URL.
+    </div>
+    <div class="helpers">
+        <div>
+            <i class="fa fa-cogs"></i>
+            URL validation messages are no match for FormExtensions! (Yeah it generates them...)
         </div>
+    </div>
+    <h4>What you <strong>DIDN'T</strong> type (excludes blur tracking):</h4>
+
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter"><![CDATA[
+                    <div class="form-group">
+                        <label for="favoriteWebsite" class="col-sm-2 control-label">
+                            Favorite Website *
+                        </label>
+                        <div class="col-sm-3">
+                            <input type="text" required class="form-control" ng-model="person.favoriteWebsite" name="favoriteWebsite" id="favoriteWebsite">
+
+                            <div class="validation-error" ng-show="(exampleForm.favoriteWebsite.$dirty || invalidSubmitAttempt) && exampleForm.favoriteWebsite.$error.required">
+                                Favorite Website is required.
+                            </div>
+
+                            <div class="validation-error" ng-show="(exampleForm.favoriteWebsite.$dirty || invalidSubmitAttempt) && exampleForm.favoriteWebsite.$error.url">
+                                Favorite Website must be a valid url.
+                            </div>
+                        </div>
+                    </div>
+                ]]>
+        </script>
+    </div>
+</div>
 
 
-        <!-- FAVORITE FOOD -->
-        <div class="form-group">
-            <div class="col-sm-3">
-                <select class="form-control" aa-auto-field="person.favoriteColor" ng-options="c.name for c in colors" required="">
+<!-- FAVORITE COLOR -->
+<select aa-field-group="person.favoriteColor" ng-options="c.name for c in colors" required>
+    <option value="">Select...</option>
+</select>
+<!--/ FAVORITE COLOR -->
+
+<div ng-hide="hideExamples" class="alert alert-info example">
+    <h4>What you typed:</h4>
+
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
+                <select aa-field-group="person.favoriteColor" ng-options="c.name for c in colors" required>
                     <option value="">Select...</option>
                 </select>
-            </div>
+                ]]>
+        </script>
+    </div>
+    <div class="validations">
+        <i class="fa fa-check-square"></i>
+        Required field.
+    </div>
+    <div class="helpers">
+        <div>
+            <i class="fa fa-cogs"></i>
+            The aa-field directive and its many sub-components have no problem with select lists either
         </div>
-        <div ng-hide="hideExamples" class="alert alert-info example">
-            <div syntax-toggler-for="HTML">
-                <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
-                <div class="col-sm-3">
-                    <select class="form-control" aa-auto-field="person.favoriteColor" ng-options="c.name for c in colors" required="">
-                        <option value="">Select...</option>
-                    </select>
-                </div>
-                ]]></script>
-            </div>
-            <div class="validations">
-                <i class="fa fa-check-square"></i>
-                Required field.
-            </div>
-            <div class="helpers">
-                <div>
-                    <i class="fa fa-cogs"></i>
-                    The aa-auto-field directive and its many sub-components have no problem with select lists either
-                </div>
-            </div>
-        </div>
+    </div>
+    <h4>What you <strong>DIDN'T</strong> type (excludes blur tracking):</h4>
+
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter"><![CDATA[
+                    <div class="form-group">
+                        <label for="favoriteWebsite" class="col-sm-2 control-label">
+                            Favorite Website *
+                        </label>
+                        <div class="col-sm-3">
+                            <select ng-model="person.favoriteColor" ng-options="c.name for c in colors" required>
+                                <option value="">Select...</option>
+                            </select>
+
+                            <div class="validation-error" ng-show="(exampleForm.favoriteColor.$dirty || invalidSubmitAttempt) && exampleForm.favoriteColor.$error.required">
+                                Favorite Website is required.
+                            </div>
+                        </div>
+                    </div>
+                ]]>
+        </script>
+    </div>
+</div>
 
 
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-3">
-                <button aa-submit-form="save()" class="btn btn-default">Save</button>
-            </div>
+<!-- GENDER -->
+<div class="form-group">
+    <label class="col-sm-2 control-label">Gender *</label>
+
+    <div class="col-sm-1">
+        <label class="radio-inline">
+            <input type="radio" name="gender" required aa-val-msg ng-model="person.gender" value="male"> Male
+        </label>
+        <label class="radio-inline">
+            <input type="radio" name="gender" required ng-model="person.gender" value="female"> Female
+        </label>
+    </div>
+</div>
+<!--/ GENDER -->
+
+<div ng-hide="hideExamples" class="alert alert-info example">
+    <h4>What you typed:</h4>
+
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Gender *</label>
+                    <div class="col-sm-1">
+                        <label class="radio-inline">
+                            <input type="radio" name="gender" required aa-val-msg ng-model="person.gender" value="male"> Male
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="gender" required ng-model="person.gender" value="female"> Female
+                        </label>
+                    </div>
+                </div>
+                ]]>
+        </script>
+    </div>
+    <div>
+        <i class="fa fa-cogs"></i>
+        You aren't forced to use anything. Mix and match! Here just auto-generate the required message.
+    </div>
+    <div class="validations">
+        <i class="fa fa-check-square"></i>
+        Required field
+    </div>
+    <div class="helpers">
+        <div>
+            <i class="fa fa-cogs"></i>
+            aa-val-msg directive on <strong>one</strong> button produces a validation message.
         </div>
-        <div ng-hide="hideExamples" class="alert alert-info example">
-            <div syntax-toggler-for="HTML">
-                <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
+    </div>
+    <h4>What you <strong>DIDN'T</strong> type (excludes blur tracking):</h4>
+
+    <div syntax-highligher-for="xml">
+        <script type="syntaxhighlighter"><![CDATA[
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Gender *</label>
+                    <div class="col-sm-1">
+                        <label class="radio-inline">
+                            <input type="radio" name="gender" required ng-model="person.gender" value="male"> Male
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="gender" required ng-model="person.gender" value="female"> Female
+                        </label>
+                        <div class="validation-error" ng-show="(exampleForm.gender.$dirty || invalidSubmitAttempt) && exampleForm.gender.$error.required">
+                            Gender is required.
+                        </div>
+                    </div>
+                </div>
+            ]]>
+        </script>
+    </div>
+</div>
+
+
+<div class="form-group">
+    <div class="col-sm-offset-2 col-sm-3">
+        <button aa-submit-form="save()" class="btn btn-default">Save</button>
+    </div>
+</div>
+<div ng-hide="hideExamples" class="alert alert-info example">
+    <div syntax-highligher-for="HTML">
+        <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-3">
                         <button aa-submit-form="save()" class="btn btn-default">Save</button>
                     </div>
                 </div>
-                ]]></script>
-            </div>
-            <div class="helpers">
-                <div>
-                    <i class="fa fa-cogs"></i>
-                    This is using the "aa-submit-form" directive which is essentially a "gated" ng-click:
-                    <ul>
-                        <li>It calls the underlying scope function (just like a ng-click) ONLY if the parent form is valid</li>
-                        <li>If clicked when the form is invalid it triggers all validation messages to appear in the form</li>
-                    </ul>
-                </div>
-            </div>
+                ]]>
+        </script>
+    </div>
+    <div class="helpers">
+        <div>
+            <i class="fa fa-cogs"></i>
+            This is using the "aa-submit-form" directive which is essentially a "gated" ng-click:
+            <ul>
+                <li>It calls the underlying scope function (just like a ng-click) ONLY if the parent form is valid</li>
+                <li>If clicked when the form is invalid it triggers all validation messages to appear in the form</li>
+            </ul>
         </div>
     </div>
+</div>
+</div>
 </div>

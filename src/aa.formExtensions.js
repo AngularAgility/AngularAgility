@@ -263,7 +263,14 @@
             };
         }])
 
-        .directive('aaAutoField', ['$compile', function ($compile) {
+        .directive('aaAutoField', function() {
+            return {
+                link: function() {
+                    throw "aaAutoField has been deprecated in favor aaField";
+                }
+            };
+        })
+        .directive('aaField', ['$compile', function ($compile) {
             return {
                 restrict: 'A',
                 scope: false,
@@ -273,9 +280,9 @@
                 compile: function(element, attrs) {
 
                     //use the passed value for ng-model
-                    element.attr("ng-model", attrs.aaAutoField);
+                    element.attr("ng-model", attrs.aaField);
 
-                    var lastPartOfName = attrs.aaAutoField.substring(attrs.aaAutoField.lastIndexOf('.') + 1);
+                    var lastPartOfName = attrs.aaField.substring(attrs.aaField.lastIndexOf('.') + 1);
 
                     //if no name set calc one
                     if (!attrs.name) {
@@ -299,7 +306,7 @@
 
                     element.attr("aa-val-msg", "");
 
-                    element.removeAttr('aa-auto-field');
+                    element.removeAttr('aa-field');
 
                     element.replaceWith(outerHTML(element[0]));
 
@@ -310,7 +317,14 @@
             };
         }])
 
-        .directive('aaAutoFieldGroup', ['$compile', 'aaFormExtensions', function ($compile, aaFormExtensions) {
+        .directive('aaAutoFieldGroup', function() {
+            return {
+                link: function() {
+                    throw "aaAutoField has been deprecated in favor aaFieldGroup";
+                }
+            };
+        })
+        .directive('aaFieldGroup', ['$compile', 'aaFormExtensions', function ($compile, aaFormExtensions) {
             return {
                 restrict: 'A',
                 scope: false,
@@ -319,8 +333,8 @@
                 terminal: true,
                 compile: function(element, attrs) {
 
-                    element.removeAttr('aa-auto-field-group');
-                    element.attr("aa-auto-field", attrs.aaAutoFieldGroup);
+                    element.removeAttr('aa-field-group');
+                    element.attr("aa-field", attrs.aaFieldGroup);
 
                     var strat = aaFormExtensions.autoFieldGroupStrategies[attrs.autoFieldGroupStrategy || aaFormExtensions.defaultAutoFieldGroupStrategy];
                     strat(element);

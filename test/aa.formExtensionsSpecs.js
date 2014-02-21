@@ -1,14 +1,14 @@
 describe('aa.formExtensinos.js >', function () {
     beforeEach(module('aa.formExtensions'));
 
-    describe('aaAutoField >', function () {
+    describe('aaField >', function () {
         var scope, form, element;
 
         beforeEach(inject(function($compile, $rootScope) {
             scope = $rootScope.$new();
 
             form = angular.element('<div ng-form="exampleForm"></div>');
-            element = angular.element('<input type="email" aa-auto-field="testEmail">');
+            element = angular.element('<input type="email" aa-field="testEmail">');
             form.append(element);
 
             $compile(form)(scope);
