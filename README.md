@@ -12,7 +12,7 @@ Note all JavaScript/CSS that you might want to use is located in /src/*.*
 ##Form Extensions
 [Blog Posts](http://johnculviner.com/category/form-extensions/) |
 [Source](https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.formExtensions.js) |
-[API Docs](https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.formExtensions.js)
+[API Docs](https://github.com/AngularAgility/AngularAgility/wiki/Form-Extensions-API-Docs)
 
 Angular.js form validation is likely one of the best takes on form validation out there. Unfortunately it can often be a little TOO flexible for many applications where you want basic error message display and generation
 witout having to dive into the form object model and manually construct basic messages for each field.
