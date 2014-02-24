@@ -541,7 +541,7 @@
                     valMsgForTemplate: self.valMsgForTemplate,
                     valMsgPlacementStrategies: self.valMsgPlacementStrategies,
                     defaultValMsgPlacementStrategy: self.defaultValMsgPlacementStrategy,
-                    defaultOnInvalidAttempt: self.defaultOnInvalidAttempt,
+                    defaultOnInvalidAttempt: self.defaultOnInvalidAttempt
                 };
             };
         });
