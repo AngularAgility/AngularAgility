@@ -9,12 +9,10 @@ angular
         $scope.selectedStateAbbreviation = "MN";
 
         $scope.select2Config = {
-            $settings: {
-                mode: 'id',
-                id: 'abbreviation',
-                text: 'name',
-                options: select2States
-            }
+            mode: 'id',
+            id: 'abbreviation',
+            text: 'name',
+            options: select2States
         };
     })
 
@@ -23,12 +21,10 @@ angular
         $scope.selectedStateObject = { name: "Minnesota", abbreviation: "MN" };
 
         $scope.select2Config = {
-            $settings: {
-                mode: 'object',
-                id: 'abbreviation',
-                text: 'name',
-                options: select2States
-            }
+            mode: 'object',
+            id: 'abbreviation',
+            text: 'name',
+            options: select2States
         };
     })
 
@@ -37,21 +33,21 @@ angular
         $scope.selectedStateAbbreviation = "MN";
 
         $scope.select2Config = {
-            $settings: {
-                mode: 'id',
-                id: 'abbreviation',
-                text: 'name',
-                textLookup: function(id) {
-                    //find the text for the selected id
-                    //looks at 'text' field above (name)
-                    return $http.get('/states/' + id);
-                },
-                options: function(searchText) {
-                    //search for options with AJAX
-                    return $http.get('/searchStates/' + searchText);
-                }
+            mode: 'id',
+            id: 'abbreviation',
+            text: 'name',
+            textLookup: function(id) {
+                //find the text for the selected id
+                //looks at 'text' field above (name)
+                return $http.get('/states/' + id);
             },
-            minimumInputLength: 2
+            options: function(searchText) {
+                //search for options with AJAX
+                return $http.get('/searchStates/' + searchText);
+            },
+            select2: {
+                minimumInputLength: 2
+            }
         };
     })
 
@@ -60,16 +56,16 @@ angular
         $scope.selectedStateName = "Minnesota";
 
         $scope.select2Config = {
-            $settings: {
-                mode: 'id',
-                id: '@this',
-                text: '@this',
-                options: function(searchText) {
-                    //search for options with AJAX
-                    return $http.get('/searchStatesJustName/' + searchText);
-                }
+            mode: 'id',
+            id: '@this',
+            text: '@this',
+            options: function(searchText) {
+                //search for options with AJAX
+                return $http.get('/searchStatesJustName/' + searchText);
             },
-            minimumInputLength: 2
+            select2: {
+                minimumInputLength: 2
+            }
         };
     })
 
@@ -78,15 +74,15 @@ angular
         $scope.selectedStateObject = { name: "Minnesota", abbreviation: "MN" };
 
         $scope.select2Config = {
-            $settings: {
-                mode: 'object',
-                id: 'abbreviation',
-                text: 'name',
-                options: function(searchText) {
-                    return $http.get('/searchStates/' + searchText);
-                }
+            mode: 'object',
+            id: 'abbreviation',
+            text: 'name',
+            options: function(searchText) {
+                return $http.get('/searchStates/' + searchText);
             },
-            minimumInputLength: 2
+            select2: {
+                minimumInputLength: 2
+            }
         };
     })
 
@@ -95,9 +91,7 @@ angular
         $scope.favoriteFoods = ['Lasagna', 'Chicken Curry', 'Pizza'];
 
         $scope.select2Config = {
-            $settings: {
-                mode: 'tags-id'
-            }
+            mode: 'tags-id'
         };
     })
 
@@ -106,12 +100,10 @@ angular
         $scope.favoriteStates = ["MN", "WI"];
 
         $scope.select2Config = {
-            $settings: {
-                mode: 'tags-id',
-                id: 'abbreviation',
-                text: 'name',
-                options: select2States
-            }
+            mode: 'tags-id',
+            id: 'abbreviation',
+            text: 'name',
+            options: select2States
         };
     })
 
@@ -123,12 +115,10 @@ angular
         ];
 
         $scope.select2Config = {
-            $settings: {
-                mode: 'tags-object',
-                id: 'abbreviation',
-                text: 'name',
-                options: select2States
-            }
+            mode: 'tags-object',
+            id: 'abbreviation',
+            text: 'name',
+            options: select2States
         };
     })
 
@@ -137,21 +127,21 @@ angular
         $scope.favoriteStates = [ "MN", "WI" ];
 
         $scope.select2Config = {
-            $settings: {
-                mode: 'tags-id',
-                id: 'abbreviation',
-                text: 'name',
-                textLookup: function(id) {
-                    //find the text for the selected id
-                    //looks at 'text' field above (name)
-                    return $http.get('/states/' + id);
-                },
-                options: function(searchText) {
-                    //search for options with AJAX
-                    return $http.get('/searchStates/' + searchText);
-                }
+            mode: 'tags-id',
+            id: 'abbreviation',
+            text: 'name',
+            textLookup: function(id) {
+                //find the text for the selected id
+                //looks at 'text' field above (name)
+                return $http.get('/states/' + id);
             },
-            minimumInputLength: 2
+            options: function(searchText) {
+                //search for options with AJAX
+                return $http.get('/searchStates/' + searchText);
+            },
+            select2: {
+                minimumInputLength: 2
+            }
         };
     })
 
@@ -163,14 +153,14 @@ angular
         ];
 
         $scope.select2Config = {
-            $settings: {
-                mode: 'tags-object',
-                id: 'abbreviation',
-                text: 'name',
-                options: function(searchText) {
-                    return $http.get('/searchStates/' + searchText);
-                }
+            mode: 'tags-object',
+            id: 'abbreviation',
+            text: 'name',
+            options: function(searchText) {
+                return $http.get('/searchStates/' + searchText);
             },
-            minimumInputLength: 2
+            select2: {
+                minimumInputLength: 2
+            }
         };
     });

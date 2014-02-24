@@ -13,9 +13,9 @@
     </div>
 </div>
 
-<div class="container">
+<div class="container form-horizontal">
 <div class="well">
-    <p class="lead">Some background:</p>
+    <p class="lead">Some background</p>
     <p>
         First off, there are a few other Select2 directives out there. This one is different in that it is specifically designed to
         <strong>easily</strong>
@@ -33,6 +33,26 @@
 
     Take a look at the examples below to see what this one does readily and feel free to copy paste!
 </div>
+
+<div class="well">
+    <p class="lead">The data</p>
+    The data used for this demo is a simple list of US states and their abbreviation. The data is either retrieved
+    with AJAX for some examples or exists solely in the client for others. Here are the first couple states:
+    <pre>
+        var states = [
+            {
+                "name": "Alabama",
+                "abbreviation": "AL"
+            },
+            {
+                "name": "Alaska",
+                "abbreviation": "AK"
+            }
+            //...
+        ]
+    </pre>
+</div>
+
     <div ng-controller="select2basicId">
         <h1>Basic Id Example</h1>
         <div class="form-group select2">
@@ -43,12 +63,35 @@
         </div>
         <br/>
         <div class="alert alert-info">
-            <pre>$scope.selectedStateAbbreviation = {{ selectedStateAbbreviation | json }}</pre>
-
             <p>
                 Very basic. The bound ng-model value selectedStateAbbreviation is just the "abbreviation" for the state.
                 Ex "MN". This is called 'id' mode by the directive since we are just storing the id.
             </p>
+            <h3>Current state of bound scope</h3>
+            <pre>$scope.selectedStateAbbreviation = {{ selectedStateAbbreviation | json }}</pre>
+            <h3>JavaScript</h3>
+            <div syntax-highligher-for="javascript">
+            <script type="syntaxhighlighter"><![CDATA[
+            app.controller('select2basicId', function($scope, select2States) {
+
+                $scope.selectedStateAbbreviation = "MN";
+
+                $scope.select2Config = {
+                    mode: 'id',
+                    id: 'abbreviation',
+                    text: 'name',
+                    options: select2States
+                };
+            })
+            ]]></script>
+            </div>
+
+            <h3>HTML</h3>
+            <div syntax-highligher-for="html">
+                <script type="syntaxhighlighter"><![CDATA[
+                <div aa-select2="select2Config" ng-model="selectedStateAbbreviation"></div>
+            ]]></script>
+            </div>
         </div>
     </div>
 
@@ -63,12 +106,37 @@
         </div>
         <br/>
         <div class="alert alert-info">
-            <pre>$scope.selectedStateObject = {{ selectedStateObject | json }}</pre>
-
             <p>
                 A little more complicated. ng-model is bound to "selectedStateObject" which is an object representing
                 the currently selected state. This is called 'object' mode by the directive since we are binding full objects.
             </p>
+
+            <h3>Current state of bound scope</h3>
+            <pre>$scope.selectedStateObject = {{ selectedStateObject | json }}</pre>
+
+            <h3>JavaScript</h3>
+            <div syntax-highligher-for="javascript">
+                <script type="syntaxhighlighter"><![CDATA[
+            app.controller('select2basicObject', function($scope, select2States) {
+
+                $scope.selectedStateObject = { name: "Minnesota", abbreviation: "MN" };
+
+                $scope.select2Config = {
+                    mode: 'object',
+                    id: 'abbreviation',
+                    text: 'name',
+                    options: select2States
+                };
+            })
+            ]]></script>
+            </div>
+
+            <h3>HTML</h3>
+            <div syntax-highligher-for="html">
+                <script type="syntaxhighlighter"><![CDATA[
+                <div aa-select2="select2Config" ng-model="selectedStateObject"></div>
+            ]]></script>
+            </div>
         </div>
     </div>
 
@@ -82,12 +150,49 @@
         </div>
         <br/>
         <div class="alert alert-info">
-            <pre>$scope.selectedStateAbbreviation = {{ selectedStateAbbreviation | json }}</pre>
-
             <p>
                 Using AJAX search for a state as it is typed. The bound ng-model value selectedStateAbbreviation is just the "abbreviation" for the state.
                 Ex "MN". This is called 'id' mode by the directive since we are just storing the id.
             </p>
+
+            <h3>Current state of bound scope</h3>
+            <pre>$scope.selectedStateAbbreviation = {{ selectedStateAbbreviation | json }}</pre>
+
+
+            <h3>JavaScript</h3>
+            <div syntax-highligher-for="javascript">
+                <script type="syntaxhighlighter"><![CDATA[
+                    app.controller('select2ajaxId', function($scope, $http) {
+
+                        $scope.selectedStateAbbreviation = "MN";
+
+                        $scope.select2Config = {
+                            mode: 'id',
+                            id: 'abbreviation',
+                            text: 'name',
+                            textLookup: function(id) {
+                                //find the text for the selected id
+                                //looks at 'text' field above (name)
+                                return $http.get('/states/' + id);
+                            },
+                            options: function(searchText) {
+                                //search for options with AJAX
+                                return $http.get('/searchStates/' + searchText);
+                            },
+                            select2: {
+                                minimumInputLength: 2
+                            }
+                        };
+                    })
+            ]]></script>
+            </div>
+
+            <h3>HTML</h3>
+            <div syntax-highligher-for="html">
+                <script type="syntaxhighlighter"><![CDATA[
+                <div aa-select2="select2Config" ng-model="selectedStateAbbreviation"></div>
+            ]]></script>
+            </div>
         </div>
     </div>
 
@@ -96,17 +201,48 @@
         <div class="form-group select2">
             <label class="col-sm-2 control-label">State: </label>
             <div class="col-sm-3">
-                <div aa-select2="select2Config" ng-model="selectedStateName" style="width: 220px;"></div>
+                <div aa-select2="select2Config" ng-model="selectedStateName"></div>
             </div>
         </div>
         <br/>
         <div class="alert alert-info">
-            <pre>$scope.selectedStateName = {{ selectedStateName | json }}</pre>
-
             <p>
                 Using AJAX search for a state as it is typed. The bound ng-model value is the full name of the state and
                 <strong>so is the display text.</strong>
             </p>
+
+            <h3>Current state of bound scope</h3>
+            <pre>$scope.selectedStateName = {{ selectedStateName | json }}</pre>
+
+            <h3>JavaScript</h3>
+            <div syntax-highligher-for="javascript">
+                <script type="syntaxhighlighter"><![CDATA[
+            app.controller('select2ajaxNameAndIdSame', function($scope, $http) {
+
+                $scope.selectedStateName = "Minnesota";
+
+                $scope.select2Config = {
+                    mode: 'id',
+                    id: '@this',
+                    text: '@this',
+                    options: function(searchText) {
+                        //search for options with AJAX
+                        return $http.get('/searchStatesJustName/' + searchText);
+                    },
+                    select2: {
+                        minimumInputLength: 2
+                    }
+                };
+            })
+            ]]></script>
+            </div>
+
+            <h3>HTML</h3>
+            <div syntax-highligher-for="html">
+                <script type="syntaxhighlighter"><![CDATA[
+                <div aa-select2="select2Config" ng-model="selectedStateName"></div>
+            ]]></script>
+            </div>
         </div>
     </div>
 
@@ -120,11 +256,42 @@
         </div>
         <br/>
         <div class="alert alert-info">
-            <pre>$scope.selectedStateObject = {{ selectedStateObject | json }}</pre>
             <p>
                 Using AJAX search for a state as it is typed. ng-model is bound to "selectedStateObject" which is an object representing
                 the currently selected state. This is called 'object' mode by the directive since we are binding full objects.
             </p>
+
+            <h3>Current state of bound scope</h3>
+            <pre>$scope.selectedStateObject = {{ selectedStateObject | json }}</pre>
+
+            <h3>JavaScript</h3>
+            <div syntax-highligher-for="javascript">
+                <script type="syntaxhighlighter"><![CDATA[
+                app.controller('select2ajaxObject', function($scope, select2States, $http) {
+
+                    $scope.selectedStateObject = { name: "Minnesota", abbreviation: "MN" };
+
+                    $scope.select2Config = {
+                        mode: 'object',
+                        id: 'abbreviation',
+                        text: 'name',
+                        options: function(searchText) {
+                            return $http.get('/searchStates/' + searchText);
+                        },
+                        select2: {
+                            minimumInputLength: 2
+                        }
+                    };
+                })
+            ]]></script>
+            </div>
+
+            <h3>HTML</h3>
+            <div syntax-highligher-for="html">
+                <script type="syntaxhighlighter"><![CDATA[
+                <div aa-select2="select2Config" ng-model="selectedStateObject"></div>
+            ]]></script>
+            </div>
         </div>
     </div>
 
@@ -138,10 +305,33 @@
         </div>
         <br/>
         <div class="alert alert-info">
-            <pre>$scope.favoriteFoods = {{ favoriteFoods | json }}</pre>
             <p>
                 Some pre-selected tags in the ng-model bound favoriteFoods are set. You can type in your own (whatever you want) and it will update favoriteFoods.
             </p>
+
+            <h3>Current state of bound scope</h3>
+            <pre>$scope.favoriteFoods = {{ favoriteFoods | json }}</pre>
+
+            <h3>JavaScript</h3>
+            <div syntax-highligher-for="javascript">
+                <script type="syntaxhighlighter"><![CDATA[
+                app.controller('select2tagsBasic', function($scope) {
+
+                    $scope.favoriteFoods = ['Lasagna', 'Chicken Curry', 'Pizza'];
+
+                    $scope.select2Config = {
+                        mode: 'tags-id'
+                    };
+                })
+            ]]></script>
+            </div>
+
+            <h3>HTML</h3>
+            <div syntax-highligher-for="html">
+                <script type="syntaxhighlighter"><![CDATA[
+                <div aa-select2="select2Config" ng-model="favoriteFoods" style="width: 300px;"></div>
+            ]]></script>
+            </div>
         </div>
     </div>
 
@@ -155,10 +345,36 @@
         </div>
         <br/>
         <div class="alert alert-info">
-            <pre>$scope.favoriteStates = {{ favoriteStates | json }}</pre>
             <p>
                 Some pre-selected tags in the ng-model bound favoriteStates are set. You can add more from a constrained list.
             </p>
+
+            <h3>Current state of bound scope</h3>
+            <pre>$scope.favoriteStates = {{ favoriteStates | json }}</pre>
+
+            <h3>JavaScript</h3>
+            <div syntax-highligher-for="javascript">
+                <script type="syntaxhighlighter"><![CDATA[
+                app.controller('select2tagsIdConstrained', function($scope, select2States) {
+
+                    $scope.favoriteStates = ["MN", "WI"];
+
+                    $scope.select2Config = {
+                        mode: 'tags-id',
+                        id: 'abbreviation',
+                        text: 'name',
+                        options: select2States
+                    };
+                })
+            ]]></script>
+            </div>
+
+            <h3>HTML</h3>
+            <div syntax-highligher-for="html">
+                <script type="syntaxhighlighter"><![CDATA[
+                <div aa-select2="select2Config" ng-model="favoriteStates" style="width: 300px;"></div>
+            ]]></script>
+            </div>
         </div>
     </div>
 
@@ -185,10 +401,39 @@
         </div>
         <br/>
         <div class="alert alert-info">
-            <pre>$scope.favoriteStates = {{ favoriteStates | json }}</pre>
             <p>
                 Some pre-selected tags in the ng-model bound favoriteStates are set. You can add more from a constrained client-side list.
             </p>
+
+            <h3>Current state of bound scope</h3>
+            <pre>$scope.favoriteStates = {{ favoriteStates | json }}</pre>
+
+            <h3>JavaScript</h3>
+            <div syntax-highligher-for="javascript">
+                <script type="syntaxhighlighter"><![CDATA[
+                app.controller('select2tagObjectsConstrained', function($scope, select2States) {
+
+                    $scope.favoriteStates = [
+                        { name: "Minnesota", abbreviation: "MN" },
+                        { name: "Wisconsin", abbreviation: "WI" }
+                    ];
+
+                    $scope.select2Config = {
+                        mode: 'tags-object',
+                        id: 'abbreviation',
+                        text: 'name',
+                        options: select2States
+                    };
+                })
+            ]]></script>
+            </div>
+
+            <h3>HTML</h3>
+            <div syntax-highligher-for="html">
+                <script type="syntaxhighlighter"><![CDATA[
+                <div aa-select2="select2Config" ng-model="favoriteStates" style="width: 300px;"></div>
+            ]]></script>
+            </div>
         </div>
     </div>
 
@@ -202,10 +447,47 @@
         </div>
         <br/>
         <div class="alert alert-info">
-            <pre>$scope.favoriteStates = {{ favoriteStates | json }}</pre>
             <p>
                 Some pre-selected tags in the ng-model bound favoriteStates are set. You can add more from a constrained AJAX list.
             </p>
+
+            <h3>Current state of bound scope</h3>
+            <pre>$scope.favoriteStates = {{ favoriteStates | json }}</pre>
+
+            <h3>JavaScript</h3>
+            <div syntax-highligher-for="javascript">
+                <script type="syntaxhighlighter"><![CDATA[
+                app.controller('select2tagIdAjaxConstrained', function($scope, $http) {
+
+                    $scope.favoriteStates = [ "MN", "WI" ];
+
+                    $scope.select2Config = {
+                        mode: 'tags-id',
+                        id: 'abbreviation',
+                        text: 'name',
+                        textLookup: function(id) {
+                            //find the text for the selected id
+                            //looks at 'text' field above (name)
+                            return $http.get('/states/' + id);
+                        },
+                        options: function(searchText) {
+                            //search for options with AJAX
+                            return $http.get('/searchStates/' + searchText);
+                        },
+                        select2: {
+                            minimumInputLength: 2
+                        }
+                    };
+                })
+            ]]></script>
+            </div>
+
+            <h3>HTML</h3>
+            <div syntax-highligher-for="html">
+                <script type="syntaxhighlighter"><![CDATA[
+                <div aa-select2="select2Config" ng-model="favoriteStates" style="width: 300px;"></div>
+            ]]></script>
+            </div>
         </div>
     </div>
 
@@ -219,13 +501,44 @@
         </div>
         <br/>
         <div class="alert alert-info">
-            <pre>$scope.favoriteStates = {{ favoriteStates | json }}</pre>
             <p>
                 Some pre-selected tags in the ng-model bound favoriteStates are set. You can add more from a constrained AJAX list.
             </p>
+
+            <h3>Current state of bound scope</h3>
+            <pre>$scope.favoriteStates = {{ favoriteStates | json }}</pre>
+
+            <h3>JavaScript</h3>
+            <div syntax-highligher-for="javascript">
+                <script type="syntaxhighlighter"><![CDATA[
+                .controller('select2tagObjectsAjaxConstrained', function($scope, $http) {
+
+                    $scope.favoriteStates = [
+                        { name: "Minnesota", abbreviation: "MN" },
+                        { name: "Wisconsin", abbreviation: "WI" }
+                    ];
+
+                    $scope.select2Config = {
+                        mode: 'tags-object',
+                        id: 'abbreviation',
+                        text: 'name',
+                        options: function(searchText) {
+                            return $http.get('/searchStates/' + searchText);
+                        },
+                        select2: {
+                            minimumInputLength: 2
+                        }
+                    };
+                })
+            ]]></script>
+            </div>
+
+            <h3>HTML</h3>
+            <div syntax-highligher-for="html">
+                <script type="syntaxhighlighter"><![CDATA[
+                <div aa-select2="select2Config" ng-model="favoriteStates" style="width: 300px;"></div>
+            ]]></script>
+            </div>
         </div>
     </div>
-
-
-
 </div>

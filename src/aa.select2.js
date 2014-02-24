@@ -24,9 +24,9 @@ angular
 
                 //native select2 options directly from the user. always takes prescedence
                 //copy the object before we muck with it incase multiple select2s are sharing settings
-                var userOpts = scope.$eval(attrs.aaSelect2);
+                var settings = scope.$eval(attrs.aaSelect2);
 
-                if(!angular.isObject(userOpts) || isEmptyObject(userOpts)) {
+                if(!angular.isObject(settings) || isEmptyObject(settings)) {
                     throw 'aa-select2 options must be specified. Ex: <div aa-select2="*options here*"...\r\n';
                 }
 
@@ -34,7 +34,6 @@ angular
                 var derivedOpts = {},
 
                 //directive settings (aka nice wrapper for select2)
-                    settings = userOpts.$settings,
                     inAjaxMode = settings ? angular.isFunction(settings.options) : false,
                     inLocalArrayMode = settings ? angular.isArray(settings.options) : false,
                     inIdMode = settings && settings.mode ? settings.mode.indexOf('id') !== -1 : false,
@@ -44,8 +43,8 @@ angular
 
                 //need a placeholder for allow clear to work
                 //fix bug?/weird api odditiy
-                if(userOpts.allowClear && !userOpts.placeholder) {
-                    userOpts.placeholder = "Select...";
+                if(settings.allowClear && !settings.placeholder) {
+                    settings.placeholder = "Select...";
                 }
 
                 var modelValue = scope.$eval(attrs.ngModel);
@@ -155,11 +154,11 @@ angular
                     width: 'resolve'
                 };
 
-                //order of prescedence
+                //order of prescedence for passing into select2 native api:
                 //static opts loses first
-                //then derivedOpts (the facade for select2 API, aka what makes this plugin easy)
-                //finally any explicit user opts will always win
-                var opts = angular.extend(staticOpts, derivedOpts, userOpts);
+                //then derivedOpts (the facade for select2 API that was created above aka what makes this plugin easy)
+                //finally any explicit user opts passed into settings as 'select2' will always win
+                var opts = angular.extend(staticOpts, derivedOpts, settings.select2);
 
                 //setup select2 with options
                 element.select2(opts);
