@@ -47,8 +47,6 @@ angular
                     settings.placeholder = "Select...";
                 }
 
-                var modelValue = scope.$eval(attrs.ngModel);
-
                 //configure select2's options per passed $settings
                 if(settings) {
 
@@ -102,17 +100,17 @@ angular
                         if(inIdMode) {
                             derivedOpts.initSelection = function(e, callback) {
 
-                                if(!scope.$eval(attrs.ngModel)) {
+                                if(!ngModel.$modelValue) {
                                     return;
                                 }
 
                                 if(inThisMode) {
-                                    callback({id: modelValue, text: modelValue});
+                                    callback({id: ngModel.$modelValue, text: ngModel.$modelValue});
                                     return;
                                 }
 
                                 //resolves promises and resolved values alike
-                                $q.when(settings.textLookup(modelValue))
+                                $q.when(settings.textLookup(ngModel.$modelValue))
                                     .then(function(data) {
 
                                         var result;
@@ -125,7 +123,7 @@ angular
                                         if(!angular.isObject(result)) {
                                             //passed back just the text. resolve:
                                             var newResult = {};
-                                            newResult[settings.id] = modelValue;
+                                            newResult[settings.id] = ngModel.$modelValue;
                                             newResult[settings.text] = result;
                                             result = newResult;
                                         }
@@ -149,7 +147,7 @@ angular
                     }
 
                     if(inTagsMode) {
-                        derivedOpts.tags = modelValue || [];
+                        derivedOpts.tags = ngModel.$modelValue || [];
                     }
 
                 }
@@ -176,13 +174,9 @@ angular
                     }
 
                     if(inIdMode) {
-
                         element.select2('val', ngModel.$modelValue);
-
                     } else if(inObjectMode) {
-
                         element.select2('data', ngModel.$modelValue);
-
                     }
                 };
 
