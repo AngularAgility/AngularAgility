@@ -320,7 +320,7 @@
         .directive('aaAutoFieldGroup', function() {
             return {
                 link: function() {
-                    throw "aaAutoField has been deprecated in favor aaFieldGroup";
+                    throw "aaAutoFieldGroup has been deprecated in favor aaFieldGroup";
                 }
             };
         })
@@ -336,7 +336,7 @@
                     element.removeAttr('aa-field-group');
                     element.attr("aa-field", attrs.aaFieldGroup);
 
-                    var strat = aaFormExtensions.autoFieldGroupStrategies[attrs.autoFieldGroupStrategy || aaFormExtensions.defaultAutoFieldGroupStrategy];
+                    var strat = aaFormExtensions.fieldGroupStrategies[attrs.fieldGroupStrategy || aaFormExtensions.defaultFieldGroupStrategy];
                     strat(element);
 
                     return function(scope, element) {
@@ -429,11 +429,11 @@
 
 
             //AUTO FIELD GROUP STRATEGIES
-            this.defaultAutoFieldGroupStrategy = "bootstrap3InlineForm";
-            this.setDefaultAutoFieldGroupStrategy = function(strategyName) {
-                this.defaultAutoFieldGroupStrategy = strategyName;
+            this.defaultFieldGroupStrategy = "bootstrap3InlineForm";
+            this.setDefaultFieldGroupStrategy = function(strategyName) {
+                this.defaultFieldGroupStrategy = strategyName;
             };
-            this.autoFieldGroupStrategies = {
+            this.fieldGroupStrategies = {
                 bootstrap3InlineForm: function (element) {
 
                     //add form-control if it is missing
@@ -444,8 +444,8 @@
                     element.wrap('<div class="form-group"><div class="col-sm-3"></div></div>');
                 }
             };
-            this.registerAutoFieldGroupStrategy = function (name, strategy) {
-                this.autoFieldGroupStrategies[name] = strategy;
+            this.registerFieldGroupStrategy = function (name, strategy) {
+                this.fieldGroupStrategies[name] = strategy;
             };
 
 
@@ -531,8 +531,8 @@
                     defaultLabelStrategy: self.defaultLabelStrategy,
                     labelStrategies: self.labelStrategies,
 
-                    defaultAutoFieldGroupStrategy: self.defaultAutoFieldGroupStrategy,
-                    autoFieldGroupStrategies: self.autoFieldGroupStrategies,
+                    defaultFieldGroupStrategy: self.defaultFieldGroupStrategy,
+                    fieldGroupStrategies: self.fieldGroupStrategies,
 
 
                     validIconStrategy: self.validIconStrategy,
