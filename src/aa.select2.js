@@ -18,7 +18,7 @@ angular
 
         return {
             require: 'ngModel',
-            template: '<input type="hidden" />',
+            template: '<input type="text" />',
             replace: true,
             link: function (scope, element, attrs, ngModel) {
 
@@ -99,8 +99,12 @@ angular
                                 });
                         };
 
-                        if(modelValue && inIdMode) {
+                        if(inIdMode) {
                             derivedOpts.initSelection = function(e, callback) {
+
+                                if(!scope.$eval(attrs.ngModel)) {
+                                    return;
+                                }
 
                                 if(inThisMode) {
                                     callback({id: modelValue, text: modelValue});
@@ -220,8 +224,9 @@ angular
                 //util
                 //assumes object is defined
                 function isEmptyObject(obj) {
-                    if(!Object.keys) //<=IE 8
+                    if(!Object.keys) {  //<=IE 8
                         return JSON.stringify(obj) === "{}";
+                    }
 
                     return Object.keys(obj).length === 0;
                 }
