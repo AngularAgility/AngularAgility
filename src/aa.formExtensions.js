@@ -176,6 +176,11 @@
                     var ngModel = ctrls[0];
                     var form = ctrls[1];
 
+                    //TODO: auto generation of name would be better than an error IMO
+                    if(!attrs.name) {
+                        throw "In order to use aaValMsg a name MUST be specified on the element: " +  element[0];
+                    }
+
                     var msgElement = aaFormExtensions.valMsgPlacementStrategies[attrs.aaValMsg ||  aaFormExtensions.defaultValMsgPlacementStrategy](
                         element, form.$name, attrs.name
                     );
@@ -199,6 +204,7 @@
                         fieldInForm = $scope.$eval(fullFieldPath),
                         formObj = $scope.$eval(fullFieldPath.substring(0, fullFieldPath.indexOf('.')));
 
+                    //TODO: if this is inside an isolate scope and the form is outside the isolate scope this doesn't work
                     //could nest multiple forms so can't trust directive require and have to eval to handle edge cases...
                     ensureaaFormExtensionsFieldExists(formObj, fieldInForm.$name);
                     var fieldInFormExtensions = $scope.$eval(fullFieldPath.replace('.', '.$aaFormExtensions.'));
