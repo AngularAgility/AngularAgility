@@ -18,8 +18,8 @@ Angular.js form validation is likely one of the best takes on form validation ou
 witout having to dive into the form object model and manually construct basic messages for each field.
 
 This is where Form Extensions comes in. It will:
-* Drastically reduce the amount of boilerplate, repetitive, error-prone HTML required to produce forms and validation messages.
-* Automatically generate Angular.js fields for use in form validation AND their error messages
+* Drastically reduce the amount of boilerplate, repetitive, error-prone HTML required to produce forms, labels and validation messages.
+* Automatically generate Angular.js fields for use in form validation, their error messages AND labels.
 * Form extensions programatically extends forms at myForm.$aaFormExtensions = {...}
 * Code is cleaner and easier to read. Form Extensions is DSL that distills your HTML down to only what is required.
 * Feel free to use full blown markup whenever you want complete control.
