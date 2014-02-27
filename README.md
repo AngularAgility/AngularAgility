@@ -36,30 +36,34 @@ This is where Form Extensions comes in. It will:
 ####With Form Extensions:
 
 ```html
-<input type="number" aa-field-group="person.age" min="0" max="140" required>
+<div ng-form="exampleForm" class="form-horizontal">
+    <input type="number" aa-field-group="person.age" min="0" max="140" required>
+</div>
 ```
 
 ####Without Form Extensions:
 
 ```html
-<div class="form-group">
-    <label for="age" class="col-sm-2 control-label">
-        Age *
-    </label>
-    <div class="col-sm-3">
-        <input type="number" required class="form-control" ng-model="person.age" name="age" id="age" />
-
-        <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.number">
-            Age must be a number
-        </div>
-        <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.min">
-            Age must be at least 0.
-        </div>
-        <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.max">
-            Age must be at most 140.
-        </div>
-        <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.required">
-            Age is required.
+<div ng-form="exampleForm" class="form-horizontal">
+    <div class="form-group">
+        <label for="age" class="col-sm-2 control-label">
+            Age *
+        </label>
+        <div class="col-sm-3">
+            <input type="number" required class="form-control" ng-model="person.age" name="age" id="age" />
+    
+            <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.number">
+                Age must be a number
+            </div>
+            <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.min">
+                Age must be at least 0.
+            </div>
+            <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.max">
+                Age must be at most 140.
+            </div>
+            <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.required">
+                Age is required.
+            </div>
         </div>
     </div>
 </div>
