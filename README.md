@@ -20,6 +20,7 @@ witout having to dive into the form object model and manually construct basic me
 This is where Form Extensions comes in. It will:
 * Drastically reduce the amount of boilerplate, repetitive, error-prone HTML required to produce forms, labels and validation messages.
 * Automatically generate Angular.js fields for use in form validation, their error messages AND labels.
+* On blur and on invalid submit attempt showing of validation messages.
 * Form extensions programatically extends forms at myForm.$aaFormExtensions = {...}
 * Code is cleaner and easier to read. Form Extensions is DSL that distills your HTML down to only what is required.
 * Feel free to use full blown markup whenever you want complete control.
