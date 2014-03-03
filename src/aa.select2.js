@@ -30,7 +30,7 @@ angular
                     throw 'aa-select2 options must be specified. Ex: <div aa-select2="*options here*"...\r\n';
                 }
 
-                //possible select2 options derived from user selections on $settings
+                //possible select2 options derived from user selections on settings
                 var derivedOpts = {},
 
                 //directive settings (aka nice wrapper for select2)
@@ -43,23 +43,25 @@ angular
 
                 //need a placeholder for allow clear to work
                 //fix bug?/weird api odditiy
-                if(settings.allowClear && !settings.placeholder) {
-                    settings.placeholder = "Select...";
+                if(settings.select2 && settings.select2.allowClear) {
+                    derivedOpts.placeholder = "Select...";
                 }
 
-                //configure select2's options per passed $settings
+                if(attrs.placeholder) {
+                    derivedOpts.placeholder = attrs.placeholder;
+                }
+
+                //configure select2's options per passed settings
                 if(settings) {
 
-                    settings.id = settings.id || 'id';
-                    settings.text = settings.text || 'text';
 
                     if(inThisMode) {
                         settings.id = 'id';
                         settings.text = 'text';
+                    } else {
+                        settings.id = settings.id || 'id';
+                        settings.text = settings.text || 'text';
                     }
-
-                    //allow for flexibility of mapping ajax object back to the bound ng-model
-                    settings.ajaxMap = derivedOpts.ajaxMap || function(ajaxResultObject) { return ajaxResultObject;};
 
                     //have 'options' client side in an array
                     if(inLocalArrayMode) {
@@ -133,18 +135,14 @@ angular
                         }
                     }
 
-                    if(settings.id) {
-                        derivedOpts.id = settings.id;
-                    }
+                    derivedOpts.id = settings.id;
 
-                    if(settings.text) {
-                        derivedOpts.formatSelection = function(obj) {
-                            return obj[settings.text];
-                        };
-                        derivedOpts.formatResult = function(obj) {
-                            return obj[settings.text];
-                        };
-                    }
+                    derivedOpts.formatSelection = function(obj) {
+                        return obj[settings.text];
+                    };
+                    derivedOpts.formatResult = function(obj) {
+                        return obj[settings.text];
+                    };
 
                     if(inTagsMode) {
                         derivedOpts.tags = ngModel.$modelValue || [];
