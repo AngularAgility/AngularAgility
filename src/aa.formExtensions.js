@@ -248,30 +248,54 @@
         //generate a label for an input generating an ID for it if it doesn't already exist
         .directive('aaLabel', ['aaFormExtensions', function (aaFormExtensions) {
             return {
-                link: function (scope, element, attrs) {
-                    var strategy = aaFormExtensions.labelStrategies[attrs.aaLabelStrategy];
+                compile: function(element, attrs) {
 
-                    //this could be a one off strategy on scope. lets try...
-                    if(!strategy) {
-                        var maybe = scope.$eval(attrs.aaLabelStrategy);
-                        if(angular.isFunction(maybe)){
-                            strategy = maybe;
+                    //add default option if specified
+                    //if this is a select with a default-option attribute add a default option (per ng spec)
+                    if(element.prop('tagName').toUpperCase() === 'SELECT' && attrs.defaultOption !== undefined) {
+
+                        var msg = attrs.defaultOption;
+
+                        if(msg === null || msg === "") {
+
+                            //gen one
+                            msg = 'Select';
+
+                            if(attrs.aaLabel) {
+                                msg += ' a ' + attrs.aaLabel;
+                            }
+
+                            msg += '...';
                         }
+
+                        element.append(angular.element('<option value=""></option>').html(msg));
                     }
 
-                    //use default
-                    if(!strategy) {
-                        strategy = aaFormExtensions.labelStrategies[aaFormExtensions.defaultLabelStrategy];
-                    }
+                    return function (scope, element, attrs) {
+                        var strategy = aaFormExtensions.labelStrategies[attrs.aaLabelStrategy];
 
-                    var isRequiredField = (attrs.required !== undefined);
+                        //this could be a one off strategy on scope. lets try...
+                        if(!strategy) {
+                            var maybe = scope.$eval(attrs.aaLabelStrategy);
+                            if(angular.isFunction(maybe)){
+                                strategy = maybe;
+                            }
+                        }
 
-                    //auto generate an ID for compliant label names
-                    if (!element[0].id) {
-                        element[0].id = guid();
-                    }
+                        //use default
+                        if(!strategy) {
+                            strategy = aaFormExtensions.labelStrategies[aaFormExtensions.defaultLabelStrategy];
+                        }
 
-                    strategy(element, attrs.aaLabel, isRequiredField);
+                        var isRequiredField = (attrs.required !== undefined);
+
+                        //auto generate an ID for compliant label names
+                        if (!element[0].id) {
+                            element[0].id = guid();
+                        }
+
+                        strategy(element, attrs.aaLabel, isRequiredField);
+                    };
                 }
             };
         }])
