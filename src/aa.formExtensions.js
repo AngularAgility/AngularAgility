@@ -130,32 +130,39 @@
                         for (var key in ngModel.$error) {
                             if(ngModel.$error[key]) {
 
+                                //for each possible validation message check if there is a custom
+                                //validation message template on the element otherwise use
+                                //the globally registered one
                                 if(key === 'minlength') {
                                     errorMessages.push(
-                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.ngMinlength)
+                                        stringFormat(attrs.ngMinlengthMsg || aaFormExtensions.validationMessages.minlength, fieldName, attrs.ngMinlength)
                                     );
                                 } else if (key === 'maxlength') {
                                     errorMessages.push(
-                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.ngMaxlength)
+                                        stringFormat(attrs.ngMaxlengthMsg || aaFormExtensions.validationMessages.maxlength, fieldName, attrs.ngMaxlength)
                                     );
                                 } else if (key === 'min') {
                                     errorMessages.push(
-                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.min)
+                                        stringFormat(attrs.minMsg || aaFormExtensions.validationMessages.min, fieldName, attrs.min)
                                     );
                                 } else if (key === 'max') {
                                     errorMessages.push(
-                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.max)
+                                        stringFormat(attrs.maxMsg || aaFormExtensions.validationMessages.max, fieldName, attrs.max)
+                                    );
+                                } else if (key === 'pattern') {
+                                    errorMessages.push(
+                                        stringFormat(attrs.ngPatternMsg || aaFormExtensions.validationMessages.pattern, fieldName)
                                     );
                                 } else if (key === 'required' && element[0].type === 'number') {
                                     //angular doesn't correctly flag numbers as invalid rather as required when something wrong is filled in
                                     //hack around it
                                     errorMessages.push(
                                         /*jshint -W069 */
-                                        stringFormat(aaFormExtensions.validationMessages['number'], fieldName)
+                                        stringFormat(attrs.numberMsg || aaFormExtensions.validationMessages.number, fieldName)
                                     );
                                 } else if (aaFormExtensions.validationMessages[key]) {
                                     errorMessages.push(
-                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName)
+                                        stringFormat(attrs[key + 'Msg'] || aaFormExtensions.validationMessages[key], fieldName)
                                     );
                                 }
                             }
