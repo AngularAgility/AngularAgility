@@ -158,9 +158,6 @@
                                     //angular doesn't correctly flag numbers as invalid rather as required when something wrong is filled in
                                     //hack around it
                                     errorMessages.push(
-<<<<<<< HEAD
-                                        stringFormat(aaFormExtensions.validationMessages.number, fieldName)
-=======
                                         /*jshint -W069 */
                                         stringFormat(attrs.numberMsg || aaFormExtensions.validationMessages.number, fieldName)
                                     );
