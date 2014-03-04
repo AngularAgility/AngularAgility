@@ -163,7 +163,6 @@
 =======
                                         /*jshint -W069 */
                                         stringFormat(attrs.numberMsg || aaFormExtensions.validationMessages.number, fieldName)
->>>>>>> FETCH_HEAD
                                     );
                                 } else if (aaFormExtensions.validationMessages[key]) {
                                     errorMessages.push(
