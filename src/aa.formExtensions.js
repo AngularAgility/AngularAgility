@@ -9,8 +9,9 @@
  *   http://www.opensource.org/licenses/mit-license.php
  */
 
-;(function () {
-    var formExtensions = angular.module('aa.formExtensions', [])
+(function () {
+    'use strict';
+    angular.module('aa.formExtensions', [])
         .directive('aaSaveForm', function() {
             return {
                 link: function() {
@@ -101,7 +102,7 @@
                     element.on('blur', function() {
                         ngForm.$aaFormExtensions[ngModel.$name].$hadFocus = true;
                         element.addClass('aa-had-focus');
-                        
+
                         if(!scope.$$phase) {
                             //sometimes a blur can happen during a digest or apply...
                             scope.$apply();
@@ -130,32 +131,43 @@
                         for (var key in ngModel.$error) {
                             if(ngModel.$error[key]) {
 
+                                //for each possible validation message check if there is a custom
+                                //validation message template on the element otherwise use
+                                //the globally registered one
                                 if(key === 'minlength') {
                                     errorMessages.push(
-                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.ngMinlength)
+                                        stringFormat(attrs.ngMinlengthMsg || aaFormExtensions.validationMessages.minlength, fieldName, attrs.ngMinlength)
                                     );
                                 } else if (key === 'maxlength') {
                                     errorMessages.push(
-                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.ngMaxlength)
+                                        stringFormat(attrs.ngMaxlengthMsg || aaFormExtensions.validationMessages.maxlength, fieldName, attrs.ngMaxlength)
                                     );
                                 } else if (key === 'min') {
                                     errorMessages.push(
-                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.min)
+                                        stringFormat(attrs.minMsg || aaFormExtensions.validationMessages.min, fieldName, attrs.min)
                                     );
                                 } else if (key === 'max') {
                                     errorMessages.push(
-                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName, attrs.max)
+                                        stringFormat(attrs.maxMsg || aaFormExtensions.validationMessages.max, fieldName, attrs.max)
+                                    );
+                                } else if (key === 'pattern') {
+                                    errorMessages.push(
+                                        stringFormat(attrs.ngPatternMsg || aaFormExtensions.validationMessages.pattern, fieldName)
                                     );
                                 } else if (key === 'required' && element[0].type === 'number') {
                                     //angular doesn't correctly flag numbers as invalid rather as required when something wrong is filled in
                                     //hack around it
                                     errorMessages.push(
+<<<<<<< HEAD
+                                        stringFormat(aaFormExtensions.validationMessages.number, fieldName)
+=======
                                         /*jshint -W069 */
-                                        stringFormat(aaFormExtensions.validationMessages['number'], fieldName)
+                                        stringFormat(attrs.numberMsg || aaFormExtensions.validationMessages.number, fieldName)
+>>>>>>> FETCH_HEAD
                                     );
                                 } else if (aaFormExtensions.validationMessages[key]) {
                                     errorMessages.push(
-                                        stringFormat(aaFormExtensions.validationMessages[key], fieldName)
+                                        stringFormat(attrs[key + 'Msg'] || aaFormExtensions.validationMessages[key], fieldName)
                                     );
                                 }
                             }
@@ -241,30 +253,54 @@
         //generate a label for an input generating an ID for it if it doesn't already exist
         .directive('aaLabel', ['aaFormExtensions', function (aaFormExtensions) {
             return {
-                link: function (scope, element, attrs) {
-                    var strategy = aaFormExtensions.labelStrategies[attrs.aaLabelStrategy];
+                compile: function(element, attrs) {
 
-                    //this could be a one off strategy on scope. lets try...
-                    if(!strategy) {
-                        var maybe = scope.$eval(attrs.aaLabelStrategy);
-                        if(angular.isFunction(maybe)){
-                            strategy = maybe;
+                    //add default option if specified
+                    //if this is a select with a default-option attribute add a default option (per ng spec)
+                    if(element.prop('tagName').toUpperCase() === 'SELECT' && attrs.defaultOption !== undefined) {
+
+                        var msg = attrs.defaultOption;
+
+                        if(msg === null || msg === "") {
+
+                            //gen one
+                            msg = 'Select';
+
+                            if(attrs.aaLabel) {
+                                msg += ' a ' + attrs.aaLabel;
+                            }
+
+                            msg += '...';
                         }
+
+                        element.append(angular.element('<option value=""></option>').html(msg));
                     }
 
-                    //use default
-                    if(!strategy) {
-                        strategy = aaFormExtensions.labelStrategies[aaFormExtensions.defaultLabelStrategy];
-                    }
+                    return function (scope, element, attrs) {
+                        var strategy = aaFormExtensions.labelStrategies[attrs.aaLabelStrategy];
 
-                    var isRequiredField = (attrs.required !== undefined);
+                        //this could be a one off strategy on scope. lets try...
+                        if(!strategy) {
+                            var maybe = scope.$eval(attrs.aaLabelStrategy);
+                            if(angular.isFunction(maybe)){
+                                strategy = maybe;
+                            }
+                        }
 
-                    //auto generate an ID for compliant label names
-                    if (!element[0].id) {
-                        element[0].id = guid();
-                    }
+                        //use default
+                        if(!strategy) {
+                            strategy = aaFormExtensions.labelStrategies[aaFormExtensions.defaultLabelStrategy];
+                        }
 
-                    strategy(element, attrs.aaLabel, isRequiredField);
+                        var isRequiredField = (attrs.required !== undefined);
+
+                        //auto generate an ID for compliant label names
+                        if (!element[0].id) {
+                            element[0].id = guid();
+                        }
+
+                        strategy(element, attrs.aaLabel, isRequiredField);
+                    };
                 }
             };
         }])
@@ -553,8 +589,12 @@
         });
 
     //utility
-    function guid(a) {
-        return a ? (a ^ Math.random() * 16 >> a / 4).toString(16) : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, guid);
+    function guid() {
+        /*jshint bitwise: false*/
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random()*16|0, v = c === 'x' ? r : (r&0x3|0x8);
+            return v.toString(16);
+        });
     }
 
     function toTitleCase(str) {
