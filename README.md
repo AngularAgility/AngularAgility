@@ -51,7 +51,8 @@ This is where Form Extensions comes in. It **works with built in Angular.js vali
             Age *
         </label>
         <div class="col-sm-3">
-            <input type="number" required class="form-control" ng-model="person.age" name="age" id="age" min="0" max="140" required />
+            <input type="number" class="form-control" ng-model="person.age" 
+            name="age" id="age" min="0" max="140" required />
     
             <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.number">
                 Age must be a number
