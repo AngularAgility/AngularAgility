@@ -17,7 +17,7 @@ Note all JavaScript/CSS that you might want to use is located in /src/*.*
 Angular.js form validation is likely one of the best takes on form validation out there. Unfortunately it can often be a little TOO flexible for many applications where you want basic error message display and generation
 witout having to dive into the form object model and manually construct basic messages for each field.
 
-This is where Form Extensions comes in. It will:
+This is where Form Extensions comes in. It *works with built in Angular.js validation* to:
 * Drastically reduce the amount of boilerplate, repetitive, error-prone HTML required to produce forms, labels and validation messages.
 * Automatically generate Angular.js fields for use in form validation, their error messages AND labels.
 * On blur and on invalid submit attempt showing of validation messages.
@@ -51,7 +51,7 @@ This is where Form Extensions comes in. It will:
             Age *
         </label>
         <div class="col-sm-3">
-            <input type="number" required class="form-control" ng-model="person.age" name="age" id="age" />
+            <input type="number" required class="form-control" ng-model="person.age" name="age" id="age" min="0" max="140" required />
     
             <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.number">
                 Age must be a number

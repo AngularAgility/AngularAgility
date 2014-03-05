@@ -182,7 +182,7 @@
                             First Name *
                         </label>
                         <div class="col-sm-3">
-                            <input type="text" required class="form-control" ng-model="person.firstName" name="firstName" id="firstName">
+                            <input type="text" class="form-control" ng-model="person.firstName" name="firstName" id="firstName" required ng-minlength="2" ng-maxlength="30">
 
                             <div class="validation-error" ng-show="(exampleForm.firstName.$dirty || invalidSubmitAttempt) && exampleForm.firstName.$error.required">
                                 First Name is required.
@@ -255,7 +255,7 @@
                             Last Name Custom *
                         </label>
                         <div class="col-sm-3">
-                            <input type="text" required class="form-control" ng-model="person.lastName" name="lastName" id="lastName">
+                            <input type="text" required class="form-control" ng-model="person.lastName" name="lastName" id="lastName" ng-minlength="2" ng-maxlength="30">
 
                             <i ng-show="exampleForm.lastName.$invalid" class="fa fa-exclamation-circle fa-lg"></i>
 
@@ -311,7 +311,7 @@
                             Favorite Number
                         </label>
                         <div class="col-sm-3">
-                            <input type="number" required class="form-control" ng-model="person.favoriteNumber" name="favoriteNumber" id="favoriteNumber">
+                            <input type="number" class="form-control" ng-model="person.favoriteNumber" name="favoriteNumber" id="favoriteNumber">
 
                             <div class="validation-error" ng-show="(exampleForm.favoriteNumber.$dirty || invalidSubmitAttempt) && exampleForm.favoriteNumber.$error.number">
                                 Favorite Number must be a number
@@ -356,7 +356,7 @@
                             Age *
                         </label>
                         <div class="col-sm-3">
-                            <input type="number" required class="form-control" ng-model="person.age" name="age" id="age">
+                            <input type="number" class="form-control" ng-model="person.age" name="age" id="age" min="0" max="140" required>
 
                             <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.number">
                                 Age must be a number
@@ -380,7 +380,7 @@
 
 <!-- FAVORITE LETTER -->
 <input type="text" class="form-control" aa-field-group="person.favoriteLetter"
-       maxlength="1" ng-pattern="/^[A-Za-z]$/" required>
+       maxlength="1" ng-pattern="/^[A-Za-z]$/" ng-pattern-msg="{0} must be a letter." required>
 <!--/ FAVORITE LETTER -->
 
 <div ng-hide="hideExamples" class="alert alert-info example">
@@ -389,7 +389,7 @@
     <div syntax-highligher-for="xml">
         <script type="syntaxhighlighter" class="brush: xml"><![CDATA[
                     <input type="text" class="form-control" aa-field-group="person.favoriteLetter"
-                           maxlength="1" ng-pattern="/^[A-Za-z]$/" required>
+                           maxlength="1" ng-pattern="/^[A-Za-z]$/"  ng-pattern-msg="{0} must be a letter." required>
                 ]]>
         </script>
     </div>
@@ -401,8 +401,8 @@
         <div>
             <i class="fa fa-cogs"></i>
             FormExtensions doesn't speak regex but if it knows something is wrong and it's not sure what it will display
-            a generic validation message.
-            Feel free to write your own using normal Angular validation if this doesn't work!
+            a generic validation message. You can make your own message on <strong>any</strong> built in validation directive by using
+            <i>directive-name</i>-msg="my message".
         </div>
     </div>
     <h4>What you <strong>DIDN'T</strong> type (excludes blur tracking):</h4>
@@ -414,14 +414,14 @@
                             Favorite Letter *
                         </label>
                         <div class="col-sm-3">
-                            <input type="text" required class="form-control" ng-model="person.favoriteLetter" name="favoriteLetter" id="favoriteLetter">
+                            <input type="text" required class="form-control" ng-model="person.favoriteLetter" name="favoriteLetter" id="favoriteLetter" maxlength="1" ng-pattern="/^[A-Za-z]$/">
 
                             <div class="validation-error" ng-show="(exampleForm.favoriteLetter.$dirty || invalidSubmitAttempt) && exampleForm.favoriteLetter.$error.required">
                                 Favorite Letter is required.
                             </div>
 
                             <div class="validation-error" ng-show="(exampleForm.favoriteLetter.$dirty || invalidSubmitAttempt) && exampleForm.favoriteLetter.$error.pattern">
-                                Favorite Letter is invalid.
+                                Favorite Letter must be a letter.
                             </div>
                         </div>
                     </div>
