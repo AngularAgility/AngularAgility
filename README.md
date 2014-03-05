@@ -7,7 +7,8 @@ A set of useful Angular extensions to improve productivity
 
 Note all JavaScript/CSS that you might want to use is located in /src/*.*
 
-##[Live demo of this exact source here](http://angularagility.herokuapp.com/)
+###[Live demo of this exact source here](http://angularagility.herokuapp.com/)
+###[API Docs](https://github.com/AngularAgility/AngularAgility/wiki/)
 
 ##Form Extensions
 [Blog Posts](http://johnculviner.com/category/form-extensions/) |
