@@ -28,13 +28,10 @@
                 restrict: 'A',
                 require: '^form',
                 link: function(scope, element, attrs, ngForm) {
-
-                    ensureaaFormExtensions(ngForm);
-
                     element.on('click', function() {
                         scope.$apply(function() {
 
-                            ngForm.$aaFormExtensions.$submitAttempt();
+                            ngForm.$aaFormExtensions.$onSubmitAttempt();
 
                             if (ngForm.$valid) {
 
@@ -92,7 +89,8 @@
                 link: function(scope, element, attrs, controllers) {
                     var ngModel = controllers[0],
                         ngForm = controllers[1],
-                        fieldName = "This field";
+                        fieldName = "This field",
+                        field = ngForm.$aaFormExtensions[ngModel.$name];
 
                     if (!ngForm)
                         return; //only for validation with forms
@@ -111,9 +109,14 @@
                     }
 
                     ensureaaFormExtensionsFieldExists(ngForm, ngModel.$name);
-                    ngForm.$aaFormExtensions[ngModel.$name].$element = element;
+                    field.$getElement = function() {
+                        return element;
+                    };
+                    field.ngModel = ngModel;
+                    field.form = ngForm;
+
                     element.on('blur', function() {
-                        ngForm.$aaFormExtensions[ngModel.$name].$hadFocus = true;
+                        field.$hadFocus = true;
                         element.addClass('aa-had-focus');
 
                         if (!scope.$$phase) {
@@ -138,8 +141,21 @@
                     ngModel.$parsers.push(calcErrorMessages);
 
                     function calcErrorMessages(val) {
-                        var errorMessages = ngForm.$aaFormExtensions[ngModel.$name].$errorMessages;
-                        errorMessages.length = 0;
+                        var fieldErrorMessages = field.$errorMessages,
+                            msg,
+                            fieldForms = [];
+
+                        //clear out the validation messages that exist on *just the field*
+                        fieldErrorMessages.length = 0;
+
+                        //find all forms recursively that this field is a child of
+                        collectForms(ngForm);
+                        function collectForms(form) {
+                            fieldForms.push(form);
+                            if (form.$aaFormExtensions.$parentForm) {
+                                collectForms(form.$aaFormExtensions.$parentForm);
+                            }
+                        }
 
                         for (var key in ngModel.$error) {
                             if (ngModel.$error[key]) {
@@ -148,39 +164,51 @@
                                 //validation message template on the element otherwise use
                                 //the globally registered one
                                 if (key === 'minlength') {
-                                    errorMessages.push(
-                                        stringFormat(attrs.ngMinlengthMsg || aaFormExtensions.validationMessages.minlength, fieldName, attrs.ngMinlength)
-                                    );
+                                    msg = stringFormat(attrs.ngMinlengthMsg || aaFormExtensions.validationMessages.minlength, fieldName, attrs.ngMinlength);
+                                    fieldErrorMessages.push(msg);
                                 } else if (key === 'maxlength') {
-                                    errorMessages.push(
-                                        stringFormat(attrs.ngMaxlengthMsg || aaFormExtensions.validationMessages.maxlength, fieldName, attrs.ngMaxlength)
-                                    );
+                                    msg = stringFormat(attrs.ngMaxlengthMsg || aaFormExtensions.validationMessages.maxlength, fieldName, attrs.ngMaxlength);
+                                    fieldErrorMessages.push(msg);
                                 } else if (key === 'min') {
-                                    errorMessages.push(
-                                        stringFormat(attrs.minMsg || aaFormExtensions.validationMessages.min, fieldName, attrs.min)
-                                    );
+                                    msg = stringFormat(attrs.minMsg || aaFormExtensions.validationMessages.min, fieldName, attrs.min);
+                                    fieldErrorMessages.push(msg);
                                 } else if (key === 'max') {
-                                    errorMessages.push(
-                                        stringFormat(attrs.maxMsg || aaFormExtensions.validationMessages.max, fieldName, attrs.max)
-                                    );
+                                    msg = stringFormat(attrs.maxMsg || aaFormExtensions.validationMessages.max, fieldName, attrs.max);
+                                    fieldErrorMessages.push(msg);
                                 } else if (key === 'pattern') {
-                                    errorMessages.push(
-                                        stringFormat(attrs.ngPatternMsg || aaFormExtensions.validationMessages.pattern, fieldName)
-                                    );
+                                    msg = stringFormat(attrs.ngPatternMsg || aaFormExtensions.validationMessages.pattern, fieldName);
+                                    fieldErrorMessages.push(msg);
                                 } else if (key === 'required' && element[0].type === 'number') {
                                     //angular doesn't correctly flag numbers as invalid rather as required when something wrong is filled in
                                     //hack around it
-                                    errorMessages.push(
-                                        /*jshint -W069 */
-                                        stringFormat(attrs.numberMsg || aaFormExtensions.validationMessages.number, fieldName)
-                                    );
+                                    msg = stringFormat(attrs.numberMsg || aaFormExtensions.validationMessages.number, fieldName);
+                                    fieldErrorMessages.push(msg);
                                 } else if (aaFormExtensions.validationMessages[key]) {
-                                    errorMessages.push(
-                                        stringFormat(attrs[key + 'Msg'] || aaFormExtensions.validationMessages[key], fieldName)
-                                    );
+                                    msg = stringFormat(attrs[key + 'Msg'] || aaFormExtensions.validationMessages[key], fieldName);
+                                    fieldErrorMessages.push(msg);
                                 }
                             }
                         }
+
+                        angular.forEach(fieldForms, function(form) {
+
+                            //clear out any validation messages that exist for this field
+                            for (var i = form.$aaFormExtensions.$allValidationErrors.length - 1; i >= 0; i--) {
+                                if (form.$aaFormExtensions.$allValidationErrors[i].field === field) {
+                                    form.$aaFormExtensions.$allValidationErrors.splice(i, 1);
+                                }
+                            }
+
+                            //push any new ones on
+                            angular.forEach(fieldErrorMessages, function(msg) {
+                                form.$aaFormExtensions.$allValidationErrors.push({
+                                    field: field,
+                                    message: msg
+                                });
+                            });
+                        });
+
+                        //$parsers work in a chain, don't remove this!
                         return val;
                     }
                 }
@@ -464,6 +492,14 @@
             };
         }])
 
+        //extend Angular form to have $aaFormExtensions and also keep track of the parent form
+        .directive('ngForm', function() {
+            return formFactory(true);
+        })
+        .directive('form', function() {
+            return formFactory(false);
+        })
+
         .provider('aaFormExtensions', function() {
 
             var self = this;
@@ -584,7 +620,7 @@
             this.spinnerClickStrategies = {
                 fontAwesomeInsideButton: function(buttonElement) {
 
-                    var loading = angular.element('<i class="fa fa-spinner fa-spin"></i>');
+                    var loading = angular.element('<i style="margin-left: 5px;" class="fa fa-spinner fa-spin"></i>');
 
                     return {
                         before: function() {
@@ -696,34 +732,68 @@
         });
     }
 
-    function ensureaaFormExtensions(form) {
-        if (!form.$aaFormExtensions) {
-            form.$aaFormExtensions = {
-                '$submitAttempt': function() {
-                    setAttemptRecursively(form, form.$invalid);
-                }
-            };
-        }
-
-        function setAttemptRecursively(form, isInvalid) {
-            form.$aaFormExtensions.$invalidAttempt = isInvalid;
-            angular.forEach(form, function(fieldVal, fieldName) {
-                if (fieldName.indexOf('$') !== 0 && form.constructor === fieldVal.constructor) {
-                    setAttemptRecursively(fieldVal, isInvalid);
-                }
-            });
-        }
-    }
-
     function ensureaaFormExtensionsFieldExists(form, fieldName) {
-        ensureaaFormExtensions(form);
-
         if (!form.$aaFormExtensions[fieldName]) {
             form.$aaFormExtensions[fieldName] = {
                 $hadFocus: false,
                 $errorMessages: [],
-                $element: null
+                $getElement: null
             };
         }
+    }
+
+    function formFactory(isNgForm) {
+        return {
+            restrict: isNgForm ? 'EAC' : 'E',
+            require: 'form',
+            compile: function() {
+                return {
+                    pre: function(scope, element, attrs, thisForm) {
+
+                        //have to manually find parent forms '?^form' doesn't appear to work in this case (as it is very funky)
+                        var elm = element,
+                            data,
+                            parentForm = null;
+
+                        do {
+                            elm = elm.parent();
+                            data = elm.data();
+
+                            if(data === undefined) {
+                                break;
+                            }
+
+                            if(data.$formController) {
+                                parentForm = data.$formController;
+                                break;
+                            }
+
+                        } while (true);
+
+                        thisForm.$aaFormExtensions = {
+                            $onSubmitAttempt: function() {
+                                setAttemptRecursively(thisForm, thisForm.$invalid);
+                            },
+                            $parentForm: parentForm,
+                            $allValidationErrors: []
+                        };
+
+                        function setAttemptRecursively(form, isInvalid) {
+                            form.$aaFormExtensions.$invalidAttempt = isInvalid;
+                            angular.forEach(form, function(fieldVal, fieldName) {
+                                if (fieldName.indexOf('$') !== 0 && form.constructor === fieldVal.constructor) {
+                                    setAttemptRecursively(fieldVal, isInvalid);
+                                }
+                            });
+                        }
+
+                        //TODO:
+                        //when this form's scope is disposed clean up any $allValidationErrors references on parent forms
+                        //to prevent memory leaks in the case of a ng-if switching out child forms etc.
+
+                    }
+                };
+            }
+        };
     }
 })();

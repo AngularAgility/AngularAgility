@@ -52,16 +52,18 @@
         <li>Change a field that was once valid to be invalid.</li>
         <li>Attempt to submit the form without all the fields being valid.</li>
         <li>Submit the form when all the fields are valid.</li>
-        <li ng-hide="hideExamples"><a href="" ng-click="hideExamples = true">Hide all blue notes</a></li>
-        <li ng-show="hideExamples"><a href="" ng-click="hideExamples = false">Show all blue notes</a></li>
-
     </ul>
 </div>
 
-
+<h2 ng-hide="hideExamples"><a href="" ng-click="hideExamples = true">Hide all blue notes</a></h2>
+<h2 ng-show="hideExamples"><a href="" ng-click="hideExamples = false">Show all blue notes</a></h2>
 
 
 <div ng-form="exampleForm" class="form-horizontal">
+
+<!--<div ng-form="nestedForm">-->
+    <!--<input aa-field-group="nestedField" required>-->
+<!--</div>-->
 
 <!-- EMAIL -->
 <input type="email" aa-field-group="person.email" required/>
@@ -631,4 +633,17 @@
     </div>
 </div>
 </div>
+
+<!-- todo make this into a dialog/directive and improve it's display "aa-validation-summary"-->
+<!-- todo use a 'showValidationError' strategy to determine validation errors that should be displayed rather than hax below -->
+<div class="alert alert-danger" style="position: fixed; bottom: 5px; right: 10px;" ng-if="exampleForm.$aaFormExtensions.$allValidationErrors.length > 0">
+    Validation error summary: (work in progress)
+    <ul>
+        <li ng-repeat="error in exampleForm.$aaFormExtensions.$allValidationErrors"
+            ng-show="error.field.$hadFocus || error.field.form.$aaFormExtensions.$invalidAttempt">
+            {{ error.message }}
+        </li>
+    </ul>
+</div>
+
 </div>
