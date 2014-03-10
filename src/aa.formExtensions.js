@@ -89,11 +89,13 @@
                 link: function(scope, element, attrs, controllers) {
                     var ngModel = controllers[0],
                         ngForm = controllers[1],
-                        fieldName = "This field",
-                        field = ngForm.$aaFormExtensions[ngModel.$name];
-
+                        fieldName = "This field";
+                        
                     if (!ngForm)
                         return; //only for validation with forms
+                        
+                    ensureaaFormExtensionsFieldExists(ngForm, ngModel.$name);
+                    var field = ngForm.$aaFormExtensions[ngModel.$name];
 
                     if (attrs.aaLabel) {
                         //use default label
@@ -107,8 +109,7 @@
                             }
                         });
                     }
-
-                    ensureaaFormExtensionsFieldExists(ngForm, ngModel.$name);
+                    
                     field.$getElement = function() {
                         return element;
                     };
@@ -759,11 +760,9 @@
                             elm = elm.parent();
                             data = elm.data();
 
-                            if(data === undefined) {
+                            if(!data) {
                                 break;
-                            }
-
-                            if(data.$formController) {
+                            } else if(data.$formController) {
                                 parentForm = data.$formController;
                                 break;
                             }
