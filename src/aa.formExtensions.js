@@ -11,7 +11,7 @@
 
 (function() {
     'use strict';
-    angular.module('aa.formExtensions', [])
+    angular.module('aa.formExtensions', ['aa.notify'])
         .directive('aaSaveForm', function() {
             return {
                 link: function() {
