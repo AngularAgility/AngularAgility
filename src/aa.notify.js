@@ -17,7 +17,7 @@
         // aaNotify.info(
         // aaNotify.warning(
         // aaNotify.danger/.error( (same thing)
-        .factory('aaNotify', function(aaNotifyConfig, $rootScope) {
+        .factory('aaNotify', ['aaNotifyConfig', '$rootScope', function(aaNotifyConfig, $rootScope) {
 
             return {
                 //simple api uses aaNotifyConfigProvider.defaultNotifyConfig
@@ -72,10 +72,10 @@
                     $rootScope.$broadcast('aaNotifyContainer-' + targetContainerName + '-remove', messageHandle);
                 }
             };
-        })
+        }])
 
         //place the directive wherever you'd like with whatever classes you'd like to position it
-        .directive('aaNotify', function($timeout) {
+        .directive('aaNotify', ['$timeout', function($timeout) {
             return {
                 template:
                     '<div>' +
@@ -118,7 +118,7 @@
                     };
                 }
             };
-        })
+        }])
 
         .provider('aaNotifyConfig', function() {
 
@@ -206,12 +206,12 @@
                 };
             };
         })
-        .run(function(aaNotifyConfig, $templateCache) {
+        .run(['aaNotifyConfig', '$templateCache', function(aaNotifyConfig, $templateCache) {
             //add templates to the template cache if specified
             angular.forEach(aaNotifyConfig.notifyConfigs, function(config) {
                 if (config.templateName) {
                     $templateCache.put(config.templateName, config.template);
                 }
             });
-        });
+        }]);
 })();
