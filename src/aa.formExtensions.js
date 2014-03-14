@@ -20,7 +20,7 @@
             aaNotifyConfigProvider.addOrUpdateNotifyConfig('aaFormExtensionsValidationErrors', {
                 template:
                     '<div class="alert alert-danger aa-form-extensions-validation-errors">' +
-                        'The following fields have validation errors: ' +
+                        '<strong>The following fields have validation errors: </strong>' +
                         '<ul>' +
                             '<li ng-repeat="error in notification.validationErrorsToDisplay()">' +
                             '{{ error.message }}&nbsp;' +
@@ -864,12 +864,12 @@
                         //create/destroy notifications as necessary to display form validity
                         //only top level forms will display a validation message UNLESS there is a notification
                         //target specified on the form
+                        var notifyHandle = null;
                         var customNotifyTarget = scope.$eval(attrs.notifyTarget);
                         var notifyTarget = customNotifyTarget || aaFormExtensions.defaultNotifyTarget;
 
                         if(notifyTarget && (form.$aaFormExtensions.$parentForm === null || customNotifyTarget)) {
 
-                            var notifyHandle = null;
                             scope.$watch(function() {
                                 return angular.toJson([ //possible perf issue but what is the alternative?
                                     form.$aaFormExtensions.$allValidationErrors,
@@ -921,6 +921,13 @@
                                 return toDisplay;
                             }
                         }
+
+                        scope.$on('$destroy', function() {
+                            if(notifyHandle) {
+                                //form is going away, remove associated notifications!
+                                aaNotify.remove(notifyHandle, notifyTarget);
+                            }
+                        });
                     }
                 };
             }
