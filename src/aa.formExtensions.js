@@ -19,7 +19,7 @@
             //**if this doesn't work for you by all means register a new one with the same key!**
             aaNotifyConfigProvider.addOrUpdateNotifyConfig('aaFormExtensionsValidationErrors', {
                 template:
-                    '<div class="alert alert-danger">' +
+                    '<div class="alert alert-danger aa-form-extensions-validation-errors">' +
                         'The following fields have validation errors: ' +
                         '<ul>' +
                             '<li ng-repeat="error in notification.validationErrorsToDisplay()">' +
