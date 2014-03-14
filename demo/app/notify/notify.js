@@ -29,7 +29,7 @@ angular.module('angularAgilityDemo')
                     //and *do whatever you want* for a notification!
                     //if you like the sound of this keep scrolling...
                     showClose: true,
-                    iconClass: 'fa fa-exclamation-triangle fa-2x',
+                    iconClass: 'fa fa-exclamation-triangle',
                     ttl: 0 //forever
                 });
         };
