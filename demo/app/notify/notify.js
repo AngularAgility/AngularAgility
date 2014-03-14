@@ -24,9 +24,12 @@ angular.module('angularAgilityDemo')
         $scope.tryDanger = function() {
             aaNotify.danger('Example danger message!',
                 {
-                    //any args here end up on the template's scope... AKA very extensible!
+                    //any args here end up on the notification template's scope...
+                    //In other words you can register a different template
+                    //and *do whatever you want* for a notification!
                     //if you like the sound of this keep scrolling...
                     showClose: true,
+                    iconClass: 'fa fa-exclamation-triangle fa-2x',
                     ttl: 0 //forever
                 });
         };

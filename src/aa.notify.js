@@ -160,8 +160,9 @@
                 {
                     //this is the 'per notification' template that is ng-repeated
                     template:
-                        '<div class="alert" ng-class="notification.cssClasses">' +
-                            '{{notification.message}}' +
+                        '<div class="alert aa-notify-notification" ng-class="notification.cssClasses">' +
+                            '<i ng-if="notification.iconClass" ng-class="notification.iconClass"></i>&nbsp;' +
+                            '<span class="message">{{notification.message}}</span>' +
                             '<span ng-if="notification.showClose" ng-click="close(notification)">' +
                                 '&nbsp;<i class="fa fa-times"></i>' +
                             '</span>' +
