@@ -1,5 +1,5 @@
 angular
-    .module('angularAgilityDemo', ['ui.router', 'aa.formExtensions', 'aa.select2'])
+    .module('angularAgilityDemo', ['ui.router', 'aa.formExtensions', 'aa.select2', 'aa.notify'])
     .config(['$urlRouterProvider', '$stateProvider', 'aaFormExtensionsProvider',
         function($urlRouterProvider, $stateProvider, aaFormExtensionsProvider) {
 
@@ -17,6 +17,11 @@ angular
                 .state('select2', {
                     url: '/select2',
                     templateUrl: 'app/select2/select2.html'
+                })
+                .state('notify', {
+                    url: '/notify',
+                    templateUrl: 'app/notify/notify.html',
+                    controller: 'notify'
                 });
 
             //a built in label strategy that works with bootstrap

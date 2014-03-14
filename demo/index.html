@@ -40,6 +40,9 @@
                     <li ng-class="{ active: $state.includes('formExtensions') }">
                         <a ui-sref="formExtensions">Form Extensions</a>
                     </li>
+                    <li ng-class="{ active: $state.includes('notify') }">
+                        <a ui-sref="notify">Notify</a>
+                    </li>
                     <li ng-class="{ active: $state.includes('select2') }">
                         <a ui-sref="select2">Select2</a>
                     </li>
@@ -74,13 +77,16 @@
     <!-- Angular Agility code -->
     <script src="/src/aa.formExtensions.js"></script>
     <script src="/src/aa.select2.js"></script>
+    <script src="/src/aa.notify.js"></script>
 
     <!-- demo code -->
     <script src="lib/angular-ui-router.js"></script>
     <script src="app/app.js"></script>
     <script src="app/formExtensions/formExtensions.js"></script>
     <script src="app/select2/select2.js"></script>
-    
+    <script src="app/notify/notify.js"></script>
+
+    <!-- does anyone look at this demo?-->
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
