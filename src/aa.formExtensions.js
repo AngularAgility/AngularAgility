@@ -222,6 +222,7 @@
                         angular.forEach(fieldForms, function(form) {
 
                             //clear out any validation messages that exist for this field
+                            //since we are going to add new ones below based on what was calculated for the field changing
                             for(var i = form.$aaFormExtensions.$allValidationErrors.length - 1; i >= 0; i--) {
                                 if(form.$aaFormExtensions.$allValidationErrors[i].field === field) {
                                     form.$aaFormExtensions.$allValidationErrors.splice(i, 1);
@@ -826,37 +827,45 @@
 
                         //when this form's scope is disposed clean up any $allValidationErrors references on parent forms
                         //to prevent memory leaks in the case of a ng-if switching out child forms etc.
-                        scope.$on('$destroy', function() {
+                        if(thisForm.$parentForm) {
 
-                            //collected native form fields
-                            var ngModelsToRemove = [];
-                            angular.forEach(thisForm, function(fieldVal, fieldName) {
-                                if(fieldName.indexOf('$') !== 0) {
-                                    ngModelsToRemove.push(fieldVal);
-                                }
-                            });
+                            scope.$on('$destroy', function () {
 
-                            //remove fields from parent forms recursively
-                            recurseForms(thisForm);
-
-                            function recurseForms(form) {
-                                angular.forEach(ngModelsToRemove, function(fieldToRemove) {
-
-                                    var valErrorField;
-
-                                    for(var i = form.$aaFormExtensions.$allValidationErrors.length - 1; i >= 0, i--;) {
-                                        valErrorField = form.$aaFormExtensions.$allValidationErrors[i];
-                                        if(valErrorField.$.ngModel === fieldToRemove) {
-                                            form.$aaFormExtensions.$allValidationErrors.splice(i, 1);
-                                        }
+                                //collected native form fields
+                                var ngModelsToRemove = [];
+                                angular.forEach(thisForm, function (fieldVal, fieldName) {
+                                    if (fieldName.indexOf('$') !== 0) {
+                                        ngModelsToRemove.push(fieldVal);
                                     }
                                 });
 
-                                if(form.$aaFormExtensions.$parentForm) {
-                                    recurseForms(form.$aaFormExtensions.$parentForm);
+                                //remove fields from parent forms recursively
+                                recurseForms(thisForm.$parentForm);
+
+                                function recurseForms(form) {
+
+                                    if(!form.$aaFormExtensions.$allValidationErrors.length) {
+                                        return;
+                                    }
+
+                                    angular.forEach(ngModelsToRemove, function (fieldToRemove) {
+
+                                        var valErrorField;
+
+                                        for (var i = form.$aaFormExtensions.$allValidationErrors.length; i >= 0, i--;) {
+                                            valErrorField = form.$aaFormExtensions.$allValidationErrors[i];
+                                            if (valErrorField.field.ngModel === fieldToRemove) {
+                                                form.$aaFormExtensions.$allValidationErrors.splice(i, 1);
+                                            }
+                                        }
+                                    });
+
+                                    if (form.$aaFormExtensions.$parentForm) {
+                                        recurseForms(form.$aaFormExtensions.$parentForm);
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     },
                     post: function(scope, element, attrs, form) {
 
