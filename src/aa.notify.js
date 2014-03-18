@@ -17,7 +17,7 @@
         // aaNotify.info(
         // aaNotify.warning(
         // aaNotify.danger/.error( (same thing)
-        .factory('aaNotify', ['aaNotifyConfig', '$rootScope', function(aaNotifyConfig, $rootScope) {
+        .factory('aaNotify', ['aaNotifyConfig', '$rootScope', '$sce', function(aaNotifyConfig, $rootScope, $sce) {
 
             return {
                 //simple api uses aaNotifyConfigProvider.defaultNotifyConfig
@@ -57,7 +57,7 @@
                     options.messageHandle = {};
 
                     if(notifyConfig.optionsTransformer) {
-                        notifyConfig.optionsTransformer(options);
+                        notifyConfig.optionsTransformer(options, $sce);
                     }
 
                     options.template = notifyConfig.templateUrl || notifyConfig.templateName;
@@ -161,19 +161,21 @@
                     //this is the 'per notification' template that is ng-repeated
                     template:
                         '<div class="alert aa-notify-notification" ng-class="notification.cssClasses">' +
-                            '<i ng-if="notification.iconClass" ng-class="notification.iconClass"></i>&nbsp;' +
-                            '<span class="message">{{notification.message}}</span>' +
-                            '<span ng-if="notification.showClose" ng-click="close(notification)">' +
+                            '<div class="pull-right aa-notify-close" ng-if="notification.showClose" ng-click="close(notification)">' +
                                 '&nbsp;<i class="fa fa-times"></i>' +
-                            '</span>' +
+                            '</div>' +
+                            '<i class="aa-notify-icon" ng-if="notification.iconClass" ng-class="notification.iconClass"></i>&nbsp;' +
+                            '<span ng-if="!notification.allowHtml" class="aa-notify-message">{{notification.message}}</span>' +
+                            '<span ng-if="notification.allowHtml" class="aa-notify-message" ng-bind-html="notification.message"></span>' +
                         '</div>',
                     options: {
                         ttl: 4000 //overridable on a per-call basis
                     },
                     defaultTargetContainerName: 'default',
-                    optionsTransformer: function(options) {
+                    optionsTransformer: function(options, $sce) {
                         //transform the options of each message however you want right before it shows up
                         //in this case options is being customized for twitter bootstrap 2/3 based on the notification type
+                        //this exists to allow partial template overrides (change logic but keep template)
 
                         if(!options.cssClasses) {
                             options.cssClasses = '';
@@ -190,6 +192,10 @@
 
                         } else if (options.messageType === 'danger' || options.messageType === 'error') {
                             options.cssClasses += 'alert-danger alert-error'; //support old/new bootstrap
+                        }
+
+                        if(options.allowHtml) {
+                            options.message = $sce.trustAsHtml(options.message);
                         }
                     }
                 }

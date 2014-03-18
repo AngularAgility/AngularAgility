@@ -57,18 +57,22 @@
                     };
 
                     $scope.tryDanger = function() {
-                        aaNotify.danger('Example danger message!',
+                        aaNotify.danger('Example danger message!<br/><br/><br/>This text after some &lt;br/&gt;s',
                             {
-                                //any args here end up on the notification template's scope...
                                 //You can register many different templates and
                                 //*do whatever you want* for a notification, wherever/however you want!
                                 //(you aren't bound by this dev's idea of what a notification should look like)
                                 //if you like the sound of this keep scrolling to Advanced Mode below...
-                                showClose: true,
-                                iconClass: 'fa fa-exclamation-triangle',
-                                ttl: 0 //forever
+
+                                //the default template has these options
+                                //*if you don't like them *easily* make your own template!*
+                                showClose: true,                            //close button
+                                iconClass: 'fa fa-exclamation-triangle',    //iconClass for a <i></i> style icon to use
+                                allowHtml: true,                            //allows HTML in the message to render as HTML
+
+                                //common to the framework as a whole
+                                ttl: 0  //time to live in ms
                             });
-                    };
                 })
         ]]>
             </script>
