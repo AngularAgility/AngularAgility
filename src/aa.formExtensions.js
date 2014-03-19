@@ -117,8 +117,9 @@
                         ngForm = controllers[1],
                         fieldName = "This field";
 
-                    if(!ngForm)
+                    if(!ngForm) {
                         return; //only for validation with forms
+                    }
 
                     ensureaaFormExtensionsFieldExists(ngForm, ngModel.$name);
                     var field = ngForm.$aaFormExtensions[ngModel.$name];
@@ -151,7 +152,6 @@
                         }
                     });
 
-
                     scope.$watch(function() {
                         return ngForm.$aaFormExtensions.$invalidAttempt;
                     }, function(val) {
@@ -160,13 +160,17 @@
                         }
                     });
 
-                    //need this to run AFTER Angular's 'ngModel' runs... another way?
-                    $timeout(calcErrorMessages, 0);
+                    //recalculate field errors every time they change
+                    scope.$watch(function() {
+                        return ngModel.$error;
+                    },
+                    function(val) {
+                        if(val) {
+                            calcErrorMessages();
+                        }
+                    }, true);
 
-                    //subsequent runs after value changes in GUI...
-                    ngModel.$parsers.push(calcErrorMessages);
-
-                    function calcErrorMessages(val) {
+                    function calcErrorMessages() {
                         var fieldErrorMessages = field.$errorMessages,
                             msg,
                             fieldForms = [];
@@ -237,9 +241,6 @@
                                 });
                             });
                         });
-
-                        //$parsers work in a chain, don't remove this!
-                        return val;
                     }
                 }
             };
