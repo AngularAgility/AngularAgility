@@ -12,7 +12,7 @@
 (function() {
     'use strict';
     angular.module('aa.formExtensions', ['aa.notify'])
-        .config(['aaNotifyConfigProvider', function(aaNotifyConfigProvider) {
+        .config(['aaNotifyConfigProvider', '$httpProvider', '$provide', function(aaNotifyConfigProvider, $httpProvider, $provide) {
 
             //register a notifyConfig to be used by default for displaying validation errors in forms
             //there are a few config options available at
@@ -35,6 +35,60 @@
                     }
                 }
             });
+
+
+            //setup ajax watcher that tracks loading, this is useful by its self
+            //and is required for dirty tracking
+            //NOTE: if you do non Angular AJAX you will need to call increment/decrement yourself
+            $provide.factory('aaAjaxWatcher', ['$rootScope', function($rootScope) {
+
+                function applyIfNeeded() {
+                    if(!$rootScope.$$phase) {
+                        $rootScope.$apply();
+                    }
+                }
+
+                var pendingRequests = 0;
+
+                var watcher = {
+                    isLoading: false,
+                    increment: function() {
+                        pendingRequests++;
+                        applyIfNeeded();
+                    },
+                    decrement: function() {
+                        pendingRequests--;
+                        applyIfNeeded();
+                    }
+                };
+
+                $rootScope.$watch(function() {
+                    return pendingRequests;
+                }, function(val) {
+                    $rootScope.aaIsLoading = watcher.isLoading = val > 0;
+                });
+
+                return watcher;
+            }]);
+
+            //tracks JUST ANGULAR http requests.
+            $provide.factory('aaAjaxInterceptor', ['aaAjaxWatcher', '$q', function(aaAjaxWatcher, $q) {
+                return {
+                    request: function(request) {
+                        aaAjaxWatcher.increment();
+                        return request;
+                    },
+                    response: function(response) {
+                        aaAjaxWatcher.decrement();
+                        return response;
+                    },
+                    responseError: function(response) {
+                        aaAjaxWatcher.decrement();
+                        return $q.reject(response);
+                    }
+                };
+            }]);
+            $httpProvider.interceptors.push('aaAjaxInterceptor');
 
         }])
         .directive('aaSaveForm', function() {
@@ -108,7 +162,7 @@
         //constructs myForm.$aaFormExtensions.myFieldName object
         //including validation messages for all ngModels at form.$aaFormExtensions.
         //messages can be used there manually or emitted automatically with aaValMsg
-        .directive('ngModel', ['aaFormExtensions', '$document', '$timeout', function(aaFormExtensions, $document, $timeout) {
+        .directive('ngModel', ['aaFormExtensions', '$document', function(aaFormExtensions, $document) {
             return {
                 require: ['ngModel', '?^form'],
                 priority: 1,
@@ -169,6 +223,18 @@
                             calcErrorMessages();
                         }
                     }, true);
+
+
+//                    //ngModel is going to change per view
+//                    ngModel.$viewChangeListeners.push(function() {
+//                        console.log(ngModel.$modelValue);
+//                    });
+//
+//                    //view is going to change per ngModel
+//                    ngModel.$formatters.push(function(val) {
+//                        console.log(val);
+//                        return val;
+//                    });
 
                     function calcErrorMessages() {
                         var fieldErrorMessages = field.$errorMessages,
@@ -253,7 +319,6 @@
                 require: ['ngModel', '^form'],
                 link: function(scope, element, attrs, ctrls) {
 
-                    var ngModel = ctrls[0];
                     var form = ctrls[1];
 
                     //TODO: auto generation of name would be better than an error IMO
