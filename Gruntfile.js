@@ -43,7 +43,17 @@ module.exports = function (grunt) {
         watch: {
             files: ['<%= jshint.files %>'],
             tasks: ['jshint']
-        }
+        },
+		ngdocs: {
+			options:{
+				dest:'docs',
+				html5Mode:true,
+				scripts: ['src/aa.formExtensions.js'],
+				title: 'Angular Agility - Form Extensions',
+				startPage: ''
+			},
+			all:['src/aa.formExtensions.js']
+		}
     });
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -51,10 +61,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-karma');
-
+	grunt.loadNpmTasks('grunt-ngdocs');
+	
     grunt.registerTask('test', ['jshint', 'karma:continuous']);
     grunt.registerTask('build', ['test', 'concat', 'uglify']);
 
-    grunt.registerTask('default', ['build']);
+    grunt.registerTask('default', ['build', 'ngdocs']);
 
 };
