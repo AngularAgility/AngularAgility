@@ -1,10 +1,10 @@
-<div class="form-horizontal">
+<div ng-form="exampleForm" class="form-horizontal">
     <div class="form-group">
         <label for="email" class="col-sm-2 control-label">
             Email *
         </label>
         <div class="col-sm-3">
-            <input type="email" required class="form-control" ng-model="person.email" name="email" id="email">
+            <input type="email" class="form-control" ng-model="person.email" name="email" id="email" required>
             <div class="validation-error" ng-show="(exampleForm.email.$dirty || invalidSubmitAttempt)&& exampleForm.email.$error.required">
                 Email is required.
             </div>
@@ -18,7 +18,7 @@
             First Name *
         </label>
         <div class="col-sm-3">
-            <input type="text" required class="form-control" ng-model="person.firstName" name="firstName" id="firstName">
+            <input type="text" class="form-control" ng-model="person.firstName" name="firstName" id="firstName" required ng-minlength="2" ng-maxlength="30">
 
             <div class="validation-error" ng-show="(exampleForm.firstName.$dirty || invalidSubmitAttempt) && exampleForm.firstName.$error.required">
                 First Name is required.
@@ -36,7 +36,7 @@
             Last Name Custom *
         </label>
         <div class="col-sm-3">
-            <input type="text" required class="form-control" ng-model="person.lastName" name="lastName" id="lastName">
+            <input type="text" class="form-control" ng-model="person.lastName" name="lastName" id="lastName" required ng-minlength="2" ng-maxlength="30">
 
             <i ng-show="exampleForm.lastName.$invalid" class="fa fa-exclamation-circle fa-lg"></i>
 
@@ -68,7 +68,7 @@
             Age *
         </label>
         <div class="col-sm-3">
-            <input type="number" required class="form-control" ng-model="person.age" name="age" id="age">
+            <input type="number" class="form-control" ng-model="person.age" name="age" id="age" min="0" max="140" required>
 
             <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.number">
                 Age must be a number
@@ -89,7 +89,8 @@
             Favorite Letter *
         </label>
         <div class="col-sm-3">
-            <input type="text" required class="form-control" ng-model="person.favoriteLetter" name="favoriteLetter" id="favoriteLetter">
+            <input type="text" class="form-control" ng-model="person.favoriteLetter" name="favoriteLetter" id="favoriteLetter"
+                maxlength="1" ng-pattern="/^[A-Za-z]$/" required>
 
             <div class="validation-error" ng-show="(exampleForm.favoriteLetter.$dirty || invalidSubmitAttempt) && exampleForm.favoriteLetter.$error.required">
                 Favorite Letter is required.
@@ -105,7 +106,7 @@
             Favorite Website *
         </label>
         <div class="col-sm-3">
-            <input type="text" required class="form-control" ng-model="person.favoriteWebsite" name="favoriteWebsite" id="favoriteWebsite">
+            <input type="text" class="form-control" ng-model="person.favoriteWebsite" name="favoriteWebsite" id="favoriteWebsite" required>
 
             <div class="validation-error" ng-show="(exampleForm.favoriteWebsite.$dirty || invalidSubmitAttempt) && exampleForm.favoriteWebsite.$error.required">
                 Favorite Website is required.
