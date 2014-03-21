@@ -18,8 +18,93 @@
 	* @requires aa.notify
 	*
 	* @description
-	* This module contains the form extension directives that are used to generate 
-	* angular form elements easily.
+	* This module contains the form extension directives that are used to easily generate 
+	* angular form elements.
+	*
+	* Form extensions is a set of directives that can be used to generate common form
+	* elements that typically go together, while still using the power of Angular JS.
+	* By specifying a form extensions directive, you can write fewer lines
+	* of code and still create fully functional, Angular compatible forms. Because form
+	* extensions is powered by Angular, you can also combine Angular ng attributes to override
+	* the behaviour of form extensions. 
+	*
+	* Form extensions also supports automatic generation of toaster alerts. Out of the box, form 
+	* extension directives will tie themselves to $error. When an error does occur (such as a required 
+	* field not being filled in ), form extensions will automatically pop-up a toast notification alerting
+	* the user what field is missing. This, by default, appears in the lower right corner of the view port.
+	* The toast also has support for click-able error direction, meaning that the user can click the error
+	* message that appears in the toast notification, and the cursor will put itself in the input element 
+	* with the offending error, even if it is located off screen.
+	* 
+	* Without Form Extensions:
+	*
+	<pre>
+		<div ng-form="exampleForm" class="form-horizontal">
+			<div class="form-group">
+				<label for="email" class="col-sm-2 control-label">
+					Email *
+				</label>
+				<div class="col-sm-3">
+					<input type="email" class="form-control" ng-model="person.email" name="email" id="email" required>
+					<div class="validation-error" ng-show="(exampleForm.email.$dirty || invalidSubmitAttempt)&& exampleForm.email.$error.required">
+						Email is required.
+					</div>
+					<div class="validation-error" ng-show="(exampleForm.email.$dirty || invalidSubmitAttempt) && exampleForm.email.$error.email">
+						Email must be a valid email address.
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="firstName" class="col-sm-2 control-label">
+					First Name *
+				</label>
+				<div class="col-sm-3">
+					<input type="text" class="form-control" ng-model="person.firstName" name="firstName" id="firstName" required ng-minlength="2" ng-maxlength="30">
+
+					<div class="validation-error" ng-show="(exampleForm.firstName.$dirty || invalidSubmitAttempt) && exampleForm.firstName.$error.required">
+						First Name is required.
+					</div>
+					<div class="validation-error" ng-show="(exampleForm.firstName.$dirty || invalidSubmitAttempt) && exampleForm.firstName.$error.maxlength">
+						First name must be less than 30 characters.
+					</div>
+					<div class="validation-error" ng-show="(exampleForm.firstName.$dirty || invalidSubmitAttempt) && exampleForm.firstName.$error.minlength">
+						First Name must be greater than 2 characters.
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="lastName" class="col-sm-2 control-label">
+					Last Name Custom *
+				</label>
+				<div class="col-sm-3">
+					<input type="text" class="form-control" ng-model="person.lastName" name="lastName" id="lastName" required ng-minlength="2" ng-maxlength="30">
+
+					<i ng-show="exampleForm.lastName.$invalid" class="fa fa-exclamation-circle fa-lg"></i>
+
+					<div class="validation-error" ng-show="(exampleForm.lastName.$dirty || invalidSubmitAttempt) && exampleForm.lastName.$error.required">
+						Last Name is required.
+					</div>
+					<div class="validation-error" ng-show="(exampleForm.lastName.$dirty || invalidSubmitAttempt) && exampleForm.lastName.$error.maxlength">
+						Last Name must be less than 30 characters.
+					</div>
+					<div class="validation-error" ng-show="(exampleForm.lastName.$dirty || invalidSubmitAttempt) && exampleForm.lastName.$error.minlength">
+						Last Name must be greater than 2 characters.
+					</div>
+				</div>
+			</div>
+		</div>
+	</pre>
+	*
+	* With Form Extensions: 
+	*
+	<pre>
+		<div ng-form="exampleForm" class="form-horizontal">
+			<input type="email" aa-field-group="person.email" required/>
+			<input aa-field-group="person.firstName" required ng-minlength="2" ng-maxlength="30"/>
+			<input aa-field-group="person.lastName" aa-label="Last Name Custom" required ng-minlength="2" ng-maxlength="30"/>
+		</div>
+	</pre>
+	*
 	*/
     angular.module('aa.formExtensions', ['aa.notify'])
         .config(['aaNotifyConfigProvider', '$httpProvider', '$provide', function(aaNotifyConfigProvider, $httpProvider, $provide) {

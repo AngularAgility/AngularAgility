@@ -50,9 +50,18 @@ module.exports = function (grunt) {
 				html5Mode:true,
 				scripts: [ 'docs/js/angular.min.js','src/aa.formExtensions.js','src/aa.notify.js','src/aa.select2.js'],
 				title: 'Angular Agility - Form Extensions',
-				startPage: '/api'
+				startPage: '/api/aa.formExtensions'
 			},
 			all:['src/aa.formExtensions.js']
+		},
+		copy: {
+			main:{
+				files:[{
+					expand:true,
+					src:['docs/**'],
+					dest:'demo/'
+				}]
+			}
 		}
     });
 
@@ -60,6 +69,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-concat');
+	grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-karma');
 	grunt.loadNpmTasks('grunt-ngdocs');
 	
