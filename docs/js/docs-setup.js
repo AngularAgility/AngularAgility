@@ -11,6 +11,15 @@ NG_DOCS={
       "moduleName": "aa.formExtensions",
       "shortDescription": "This module contains the form extension directives that are used to generate ",
       "keywords": "aa angular api directives easily elements extension form formextensions generate module notify overview"
+    },
+    {
+      "section": "api",
+      "id": "aaSaveForm",
+      "shortName": "aaSaveForm",
+      "type": "directive",
+      "moduleName": "aaSaveForm",
+      "shortDescription": "The directive &quot;aaSaveForm&quot; has been deprecated in favour of a more &quot;sensically&quot; named aaSubmitForm.",
+      "keywords": "aasaveform aasubmitform api deprecated directive favour form named sensically"
     }
   ],
   "apis": {
