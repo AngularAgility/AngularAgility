@@ -11,6 +11,16 @@
 
 (function() {
     'use strict';
+	
+	/**
+	* @ngdoc overview
+	* @name aa.formExtensions
+	* @requires aa.notify
+	*
+	* @description
+	* This module contains the form extension directives that are used to generate 
+	* angular form elements easily.
+	*/
     angular.module('aa.formExtensions', ['aa.notify'])
         .config(['aaNotifyConfigProvider', '$httpProvider', '$provide', function(aaNotifyConfigProvider, $httpProvider, $provide) {
 
@@ -91,10 +101,20 @@
             $httpProvider.interceptors.push('aaAjaxInterceptor');
 
         }])
+		
+		/*
+		* @ngdoc directive
+		* @name aaSaveForm
+		* @element form
+		* @deprecated
+		*
+		* @description
+		*  The directive "aaSaveForm" has been deprecated in favour of a more "sensically" named aaSubmitForm.
+		*/
         .directive('aaSaveForm', function() {
             return {
                 link: function() {
-                    throw "aaSaveForm has been deprecated in favor of a more sensically named aaSubmitForm";
+                    throw "aaSaveForm has been deprecated in favour of a more sensically named aaSubmitForm";
                 }
             };
         })
