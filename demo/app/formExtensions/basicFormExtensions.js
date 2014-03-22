@@ -1,6 +1,9 @@
 angular
     .module('angularAgilityDemo')
-    .controller('formExtensions', ['$scope', '$http', function ($scope, $http) {
+    .controller('basicFormExtensions', ['$scope', '$http', function ($scope, $http) {
+
+        $scope.settings.title = "Basic Form Extensions Demo";
+        $scope.settings.subtitle = "Generate Angular.js form fields, labels and rich validation messages with error notifications in one line of HTML";
 
         $scope.save = function () {
             return $http.get('/twosecondwait')

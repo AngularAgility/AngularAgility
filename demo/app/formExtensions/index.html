@@ -1,0 +1,33 @@
+<div class="navbar" role="navigation" style="margin-bottom: 0">
+    <div class="container">
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li ng-class="{ active: $state.includes('formExtensions.basic') }">
+                    <a ui-sref="formExtensions.basic">Basic</a>
+                </li>
+                <li ng-class="{ active: $state.includes('formExtensions.advanced') }">
+                    <a ui-sref="formExtensions.advanced">Advanced</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div ng-init="settings = {}" class="jumbotron">
+    <div class="container">
+        <h1>{{ settings.title }}</h1>
+
+        <p class="lead">{{ settings.subtitle }}</p>
+        <p class="lead">
+            <a href="https://github.com/AngularAgility/AngularAgility/wiki/Form-Extensions-API-Docs">API Docs</a>
+            |
+            <a href="https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.formExtensions.js">Source</a>
+            |
+            <a href="http://johnculviner.com/category/form-extensions/">Blog Posts</a>
+        </p>
+    </div>
+</div>
+
+<div>
+    <div ui-view="" />
+</div>

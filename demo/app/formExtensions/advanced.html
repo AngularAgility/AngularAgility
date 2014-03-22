@@ -1,0 +1,132 @@
+<div class="container">
+
+    <div class="well">
+        <p class="lead">Some things to note:</p>
+        <ul>
+            <li>
+                <i ng-show="aaIsLoading" class="fa fa-spinner fa-spin fa-5x"></i>
+                aaIsLoading available on rootScope or from aaLoadingWatcher factory
+            </li>
+            <li>
+                ngForm boundaries are indicated like <span class="highlight-form">this</span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="well">
+        <p class="lead">'Form changed' tracking</p>
+
+        <p>
+            'Form changed' tracking means deviation from the initial state of the form AFTER AJAX&dagger; indicates that a form
+            changed. You can change a field and set it back to it's initial state and aaFormExtensions considers
+            the field AND the form no longer changed (all values are equal to their init state&dagger;).
+            <br />
+        </p>
+
+        <p>
+            Angular considers the field/form dirty still since it was touched (yet changed back to initial state).
+        </p>
+
+        <p>
+            &dagger;All native Angular AJAX requests are counted by aaLoadingWatcher. If you have
+            non Angular AJAX loading to account for simply use aaLoadingWatcher's API to count them.
+        </p>
+    </div>
+
+    <div class="form-horizontal">
+
+        <div ng-form="personForm" class="highlight-form">
+            <h2>Person</h2>
+
+            <pre>
+                //current variable status
+                personForm.$valid = {{ personForm.$valid }}
+                personForm.$aaFormExtensions.$changed = {{ personForm.$aaFormExtensions.$changed}}
+                personForm.$aaFormExtensions.$childForms.length = {{ personForm.$aaFormExtensions.$childForms.length }}
+                personForm.$aaFormExtensions.$invalidAttempt = {{ personForm.$aaFormExtensions.$invalidAttempt}}
+            </pre>
+
+            <input aa-field-group="person.firstName" required>
+
+            <input aa-field-group="person.lastName" required>
+
+            <input type="number" aa-field-group="person.age" required>
+
+            <div ng-form="addressForm" class="highlight-form">
+                <h2>Address</h2>
+                <pre>
+                    //current variable status
+                    addressForm.$valid = {{ addressForm.$valid }}
+                    addressForm.$aaFormExtensions.$changed = {{ addressForm.$aaFormExtensions.$changed }}
+                    addressForm.$aaFormExtensions.$childForms.length = {{ addressForm.$aaFormExtensions.$childForms.length }}
+                    addressForm.$aaFormExtensions.$invalidAttempt = {{ addressForm.$aaFormExtensions.$invalidAttempt }}
+                </pre>
+
+                <input aa-field-group="person.address.addressLine1" required>
+
+                <input aa-field-group="person.address.addressLine2">
+
+                <input aa-field-group="person.address.city" required>
+
+                <select aa-field-group="person.address.state" required>
+                    <option value="">Select...</option>
+                    <option value="Minnesota">Minnesota</option>
+                    <option value="Wisconsin">Wisconsin</option>
+                </select>
+
+                <input type="number" aa-field-group="person.address.zip" min="00001" max="99999" required>
+            </div>
+
+            <h2>Friends</h2>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="friend in person.friends" ng-form="friendForm" class="highlight-form">
+                    <!--edit mode-->
+                    <td ng-if="friend.$editMode" class="col-sm-2">
+                        <input type="text" class="form-control" ng-model="friend.firstName" name="firstName"
+                               aa-field-name="First Name"
+                               aa-val-msg required/>
+                    </td>
+                    <td ng-if="friend.$editMode" class="col-sm-2">
+                        <input type="text" class="form-control" ng-model="friend.lastName" name="lastName"
+                               aa-field-name="Last Name"
+                               aa-val-msg required/>
+                    </td>
+                    <!-- view mode-->
+                    <td ng-if="!friend.$editMode">{{ friend.firstName }}</td>
+                    <td ng-if="!friend.$editMode">{{ friend.lastName }}</td>
+                    <!-- buttons -->
+                    <td>
+                        <button ng-if="!friend.$editMode" class="btn btn-primary" ng-click="friend.$editMode = true">
+                            <i class="fa fa-pencil-square-o"></i>
+                        </button>
+                        <button ng-if="friend.$editMode" class="btn btn-success" aa-submit-form="friend.$editMode = false">
+                            <i class="fa fa-check"></i>
+                        </button>
+                        <button class="btn btn-danger" ng-click="person.friends.splice(person.friends.indexOf(friend), 1)">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <button class="btn btn-success" ng-click="person.friends.push({$editMode: true})">Add Friend</button>
+            <br/>
+
+            <div class="clearfix">
+                <div class="pull-right">
+                    <button class="btn btn-primary" aa-submit-form="submit()">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div aa-notify style="position: fixed; top: 60px; right: 25px;"></div>
+</div>

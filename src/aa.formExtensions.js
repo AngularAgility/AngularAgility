@@ -110,7 +110,6 @@
         .config(['aaNotifyConfigProvider', '$httpProvider', '$provide', function(aaNotifyConfigProvider, $httpProvider, $provide) {
 
             //register a notifyConfig to be used by default for displaying validation errors in forms
-            //there are a few config options available at
             //**if this doesn't work for you by all means register a new one with the same key!**
             aaNotifyConfigProvider.addOrUpdateNotifyConfig('aaFormExtensionsValidationErrors', {
                 template:
@@ -133,9 +132,9 @@
 
 
             //setup ajax watcher that tracks loading, this is useful by its self
-            //and is required for dirty tracking
+            //and is required for changed tracking
             //NOTE: if you do non Angular AJAX you will need to call increment/decrement yourself
-            $provide.factory('aaAjaxWatcher', ['$rootScope', function($rootScope) {
+            $provide.factory('aaLoadingWatcher', ['$rootScope', function($rootScope) {
 
                 function applyIfNeeded() {
                     if(!$rootScope.$$phase) {
@@ -154,31 +153,38 @@
                     decrement: function() {
                         pendingRequests--;
                         applyIfNeeded();
-                    }
+                    },
+                    runWhenDoneLoading: [] //functions...
                 };
 
                 $rootScope.$watch(function() {
                     return pendingRequests;
                 }, function(val) {
                     $rootScope.aaIsLoading = watcher.isLoading = val > 0;
+
+                    if(!watcher.isLoading) {
+                        angular.forEach(watcher.runWhenDoneLoading, function(func) {
+                            func();
+                        });
+                    }
                 });
 
                 return watcher;
             }]);
 
             //tracks JUST ANGULAR http requests.
-            $provide.factory('aaAjaxInterceptor', ['aaAjaxWatcher', '$q', function(aaAjaxWatcher, $q) {
+            $provide.factory('aaAjaxInterceptor', ['aaLoadingWatcher', '$q', function(aaLoadingWatcher, $q) {
                 return {
                     request: function(request) {
-                        aaAjaxWatcher.increment();
+                        aaLoadingWatcher.increment();
                         return request;
                     },
                     response: function(response) {
-                        aaAjaxWatcher.decrement();
+                        aaLoadingWatcher.decrement();
                         return response;
                     },
                     responseError: function(response) {
-                        aaAjaxWatcher.decrement();
+                        aaLoadingWatcher.decrement();
                         return $q.reject(response);
                     }
                 };
@@ -207,7 +213,6 @@
         .directive('aaSubmitForm', ['aaFormExtensions', '$q', function(aaFormExtensions, $q) {
             return {
                 scope: {
-                    onInvalidAttempt: '&',
                     aaSubmitForm: '&'
                 },
                 restrict: 'A',
@@ -230,32 +235,6 @@
                                         eleSpinnerClickStrategy.after();
                                         return result;
                                     });
-
-                            } else {
-                                var hasScopeFunction = typeof scope.onInvalidAttempt() === 'function';
-                                var hasGlobalFunction = typeof aaFormExtensions.defaultOnInvalidAttempt === 'function';
-
-                                if(hasScopeFunction || hasGlobalFunction) {
-                                    //calc error messages
-
-                                    var errorMessages = [];
-
-                                    angular.forEach(ngForm.$aaFormExtensions, function(fieldObj, fieldName) {
-
-                                        if(fieldName.indexOf('$') === 0) {
-                                            return;
-                                        }
-
-                                        errorMessages = errorMessages.concat(fieldObj.$errorMessages);
-                                    });
-
-                                    if(hasScopeFunction) {
-                                        scope.onInvalidAttempt(errorMessages, ngForm);
-                                        return;
-                                    }
-
-                                    aaFormExtensions.defaultOnInvalidAttempt(errorMessages, ngForm);
-                                }
                             }
                         });
                     });
@@ -267,14 +246,15 @@
         //constructs myForm.$aaFormExtensions.myFieldName object
         //including validation messages for all ngModels at form.$aaFormExtensions.
         //messages can be used there manually or emitted automatically with aaValMsg
-        .directive('ngModel', ['aaFormExtensions', '$document', function(aaFormExtensions, $document) {
+        .directive('ngModel', ['aaFormExtensions', '$document', 'aaLoadingWatcher', function(aaFormExtensions, $document, aaLoadingWatcher) {
             return {
                 require: ['ngModel', '?^form'],
                 priority: 1,
                 link: function(scope, element, attrs, controllers) {
                     var ngModel = controllers[0],
                         ngForm = controllers[1],
-                        fieldName = "This field";
+                        fieldName = "This field",
+                        initialValue;
 
                     if(!ngForm) {
                         return; //only for validation with forms
@@ -283,9 +263,9 @@
                     ensureaaFormExtensionsFieldExists(ngForm, ngModel.$name);
                     var field = ngForm.$aaFormExtensions[ngModel.$name];
 
-                    if(attrs.aaLabel) {
+                    if(attrs.aaLabel || attrs.aaFieldName) {
                         //use default label
-                        fieldName = attrs.aaLabel;
+                        fieldName = attrs.aaLabel || attrs.aaFieldName;
 
                     } else if(element[0].id) {
                         //is there a label for this field?
@@ -296,7 +276,6 @@
                         });
                     }
 
-                    //$ allows for deep watch without perf hit
                     field.$element = element;
                     field.$ngModel = ngModel;
                     field.$form = ngForm;
@@ -330,16 +309,54 @@
                     }, true);
 
 
-//                    //ngModel is going to change per view
-//                    ngModel.$viewChangeListeners.push(function() {
-//                        console.log(ngModel.$modelValue);
-//                    });
-//
-//                    //view is going to change per ngModel
-//                    ngModel.$formatters.push(function(val) {
-//                        console.log(val);
-//                        return val;
-//                    });
+                    var loadingWatchDeReg, //for 'perf'
+                        changedDependency = {
+                            field: field,
+                            isChanged: false
+                        };
+                    recursivePushChangedDependency(ngForm, changedDependency);
+
+                    if(aaLoadingWatcher.isLoading) {
+                        //delay changed checking until AFTER the form is completely loaded
+                        loadingWatchDeReg = scope.$watch(function() {
+                            return aaLoadingWatcher.isLoading;
+                        }, function(isLoading) {
+                            if(!isLoading) {
+                                loadingWatchDeReg();
+                                setupChanged();
+                            }
+                        });
+                    } else {
+                        setupChanged();
+                    }
+
+
+                    //start watching for changed efficiently!
+                    function setupChanged() {
+
+                        if(ngModel.$modelValue !== ngModel.$modelValue) {
+                            //inited to NaN (which isn't equal to its self...)
+                            changedDependency.initialValue = undefined;
+                        } else {
+                            changedDependency.initialValue = ngModel.$modelValue;
+                        }
+
+
+                        //we can avoid using more expensive watches because angular exposes the built in methods:
+                        //ngModel.$modelValue is changing per view change
+                        ngModel.$viewChangeListeners.push(changed);
+
+                        //view is going to change per ngModel change
+                        ngModel.$formatters.push(function(val) {
+                            changed();
+                            return val;
+                        });
+
+                        function changed() {
+                            changedDependency.isChanged = changedDependency.initialValue !== ngModel.$modelValue;
+                            recursiveCheckAndSetFormChanged(ngForm);
+                        }
+                    }
 
                     function calcErrorMessages() {
                         var fieldErrorMessages = field.$errorMessages,
@@ -694,12 +711,14 @@
         }])
 
         //extend Angular form to have $aaFormExtensions and also keep track of the parent form
-        .directive('ngForm', ['aaFormExtensions', 'aaNotify', function(aaFormExtensions, aaNotify) {
-            return formFactory(true, aaFormExtensions, aaNotify);
-        }])
-        .directive('form', ['aaFormExtensions', 'aaNotify', function(aaFormExtensions, aaNotify) {
-            return formFactory(false, aaFormExtensions, aaNotify);
-        }])
+        .directive('ngForm', ['aaFormExtensions', 'aaNotify', 'aaLoadingWatcher', '$parse',
+            function(aaFormExtensions, aaNotify, aaLoadingWatcher, $parse) {
+                return aaFormFactory(true, aaFormExtensions, aaNotify, aaLoadingWatcher, $parse);
+            }])
+        .directive('form', ['aaFormExtensions', 'aaNotify', 'aaLoadingWatcher', '$parse',
+            function(aaFormExtensions, aaNotify, aaLoadingWatcher, $parse) {
+                return aaFormFactory(false, aaFormExtensions, aaNotify, aaLoadingWatcher, $parse);
+            }])
 
         .provider('aaFormExtensions', function() {
 
@@ -871,12 +890,6 @@
                 this.valMsgForTemplate = valMsgForTemplate;
             };
 
-            this.defaultOnInvalidAttempt = function() {
-                //todo integrate with 'growl like' notifications
-            };
-            this.setDefaultOnInvalidAttempt = function(func) {
-                this.defaultOnInvalidAttempt = func;
-            };
 
             this.$get = function() {
                 return {
@@ -894,8 +907,6 @@
                     valMsgPlacementStrategies: self.valMsgPlacementStrategies,
 
                     defaultValMsgPlacementStrategy: self.defaultValMsgPlacementStrategy,
-
-                    defaultOnInvalidAttempt: self.defaultOnInvalidAttempt,
 
                     defaultSpinnerClickStrategy: self.defaultSpinnerClickStrategy,
                     spinnerClickStrategies: self.spinnerClickStrategies,
@@ -952,7 +963,48 @@
         }
     }
 
-    function formFactory(isNgForm, aaFormExtensions, aaNotify) {
+    function arrayRemove(array, item) {
+        if(!array || !item ) {
+            return;
+        }
+
+        var idx = array.indexOf(item);
+
+        if(idx !== -1) {
+            array.splice(idx, 1);
+        }
+    }
+
+    //all parent forms need to know about a changed dependency, crawl up the graph to distribute to all of them
+    function recursivePushChangedDependency(form, dep) {
+        form.$aaFormExtensions.$changedDependencies.push(dep);
+
+        if(form.$aaFormExtensions.$parentForm) {
+            recursivePushChangedDependency(form.$aaFormExtensions.$parentForm, dep);
+        }
+    }
+
+    //call after changed has changed
+    //recursively check this and each parent form for changed fields. set the form (and parent forms)
+    //changed indicator accordingly
+    function recursiveCheckAndSetFormChanged(form) {
+
+        var hasAnyChangedField = false;
+
+        angular.forEach(form.$aaFormExtensions.$changedDependencies, function(dep) {
+            if(dep.isChanged) {
+                hasAnyChangedField = true;
+            }
+        });
+
+        form.$aaFormExtensions.$changed = hasAnyChangedField;
+
+        if(form.$aaFormExtensions.$parentForm) {
+            recursiveCheckAndSetFormChanged(form.$aaFormExtensions.$parentForm);
+        }
+    }
+
+    function aaFormFactory(isNgForm, aaFormExtensions, aaNotify, aaLoadingWatcher, $parse) {
         return {
             restrict: isNgForm ? 'EAC' : 'E',
             require: 'form',
@@ -961,48 +1013,46 @@
                     pre: function(scope, element, attrs, thisForm) {
 
                         //have to manually find parent forms '?^form' doesn't appear to work in this case (as it is very funky)
-                        var elm = element,
-                            data,
-                            parentForm = null;
-
-                        do {
-                            elm = elm.parent();
-                            data = elm.data();
-
-                            if(!data) {
-                                break;
-                            } else if(data.$formController) {
-                                parentForm = data.$formController;
-                                break;
-                            }
-
-                        } while(true);
-
+                        var parentForm = element.parent().controller('form');
 
                         thisForm.$aaFormExtensions = {
                             $onSubmitAttempt: function() {
                                 setAttemptRecursively(thisForm, thisForm.$invalid);
                             },
                             $parentForm: parentForm,
-                            $allValidationErrors: []
+                            $childForms: [],
+                            $allValidationErrors: [],
+                            $changedDependencies: [],
+                            $changed: false,
+                            $invalidAttempt: false,
+                            $addChangedDependency: function(watchExpr, deepWatch){
+                                genericAddChangedDependency('', watchExpr, deepWatch );
+                            },
+                            $addCollectionChangedDependency: function(watchExpr){
+                                genericAddChangedDependency('Collection', watchExpr);
+                            }
                         };
+
+                        if(parentForm) {
+                            parentForm.$aaFormExtensions.$childForms.push(thisForm);
+                        }
+
 
                         function setAttemptRecursively(form, isInvalid) {
                             form.$aaFormExtensions.$invalidAttempt = isInvalid;
-                            angular.forEach(form, function(fieldVal, fieldName) {
-                                if(fieldName.indexOf('$') !== 0 && form.constructor === fieldVal.constructor) {
-                                    setAttemptRecursively(fieldVal, isInvalid);
-                                }
+
+                            angular.forEach(form.$aaFormExtensions.$childForms, function(childForm) {
+                                setAttemptRecursively(childForm, isInvalid);
                             });
                         }
 
-                        //when this form's scope is disposed clean up any $allValidationErrors references on parent forms
+                        //when this form's scope is disposed clean up any references THIS form on parent forms
                         //to prevent memory leaks in the case of a ng-if switching out child forms etc.
-                        if(thisForm.$parentForm) {
+                        if(thisForm.$aaFormExtensions.$parentForm) {
 
                             scope.$on('$destroy', function () {
 
-                                //collected native form fields
+                                //collected native form fields (for $allValidationErrors)
                                 var ngModelsToRemove = [];
                                 angular.forEach(thisForm, function (fieldVal, fieldName) {
                                     if (fieldName.indexOf('$') !== 0) {
@@ -1010,8 +1060,8 @@
                                     }
                                 });
 
-                                //remove fields from parent forms recursively
-                                recurseForms(thisForm.$parentForm);
+                                //remove from parent forms recursively
+                                recurseForms(thisForm.$aaFormExtensions.$parentForm);
 
                                 function recurseForms(form) {
 
@@ -1019,22 +1069,69 @@
                                         return;
                                     }
 
+                                    //REMOVE this forms fields from $allValidationErrors
                                     angular.forEach(ngModelsToRemove, function (fieldToRemove) {
 
                                         var valErrorField;
 
                                         for (var i = form.$aaFormExtensions.$allValidationErrors.length; i >= 0, i--;) {
                                             valErrorField = form.$aaFormExtensions.$allValidationErrors[i];
-                                            if (valErrorField.field.ngModel === fieldToRemove) {
+                                            if (valErrorField.field.$ngModel === fieldToRemove) {
                                                 form.$aaFormExtensions.$allValidationErrors.splice(i, 1);
                                             }
                                         }
                                     });
 
+                                    //REMOVE this forms reference as being a child form
+                                    arrayRemove(form.$aaFormExtensions.$childForms, thisForm);
+
                                     if (form.$aaFormExtensions.$parentForm) {
                                         recurseForms(form.$aaFormExtensions.$parentForm);
                                     }
+
+                                    //REMOVE this forms changed dependencies
+                                    angular.forEach(thisForm.$aaFormExtensions.$changedDependencies, function(dep) {
+                                        arrayRemove(form.$aaFormExtensions.$changedDependencies, dep);
+
+                                        var hasAnyChangedField = false;
+
+                                        angular.forEach(form.$aaFormExtensions.$changedDependencies, function(dep) {
+                                            if(dep.isChanged) {
+                                                hasAnyChangedField = true;
+                                            }
+                                        });
+
+                                        form.$aaFormExtensions.$changed = hasAnyChangedField;
+                                    });
                                 }
+                            });
+                        }
+
+                        //supports both type of changed deps generically
+                        function genericAddChangedDependency(watchNamePart, watchExpr, deepWatch) {
+
+                            if(!angular.$isString(watchExpr)) {
+                                throw "$add" + watchNamePart + "ChangedDependency only supports string watchExprs to allow for form reset support";
+                            }
+
+                            aaLoadingWatcher.runWhenDoneLoading(function() {
+
+                                var changedDep = {
+                                    isChanged: false,
+                                    initialValue: angular.copy(scope.$eval(watchExpr))
+                                };
+
+                                recursivePushChangedDependency(changedDep);
+
+                                scope['$watch' + watchNamePart](watchExpr, function(val, oldVal) {
+                                    if(val === oldVal){
+                                        return; //first run
+                                    }
+                                    changedDep.isChanged = !angular.equals(changedDep.initialValue, val);
+
+                                    recursiveCheckAndSetFormChanged(thisForm);
+
+                                }, deepWatch);
                             });
                         }
                     },

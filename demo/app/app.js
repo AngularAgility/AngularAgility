@@ -9,11 +9,23 @@ angular
                     url: '/home',
                     templateUrl: 'app/home/home.html'
                 })
+
                 .state('formExtensions', {
+                    abstract: true,
                     url: '/formExtensions',
-                    templateUrl: 'app/formExtensions/formExtensions.html',
-                    controller: 'formExtensions'
+                    templateUrl: 'app/formExtensions/index.html'
                 })
+                .state('formExtensions.basic', {
+                    url: '/formExtensions/basic',
+                    templateUrl: 'app/formExtensions/basic.html',
+                    controller: 'basicFormExtensions'
+                })
+                .state('formExtensions.advanced', {
+                    url: '/formExtensions/advanced',
+                    templateUrl: 'app/formExtensions/advanced.html',
+                    controller: 'advancedFormExtensions'
+                })
+
                 .state('select2', {
                     url: '/select2',
                     templateUrl: 'app/select2/select2.html'

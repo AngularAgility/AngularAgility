@@ -2,6 +2,14 @@
 body {
     padding-top: 50px;
 }
+
+pre {
+    padding: 15px 0 0 0;
+    margin: 0;
+    color: #A9B7C6;
+    background-color: #2B2B2B;
+}
+
 .starter-template {
     padding: 40px 15px;
     text-align: center;
@@ -19,4 +27,14 @@ body {
 
 .syntaxhighlighter {
     padding-top: 2px;
+}
+
+.nav.navbar-nav li.active {
+    font-weight: bold;
+}
+
+.highlight-form {
+    border: 2px dotted red;
+    margin: 5px;
+    padding: 5px;
 }
