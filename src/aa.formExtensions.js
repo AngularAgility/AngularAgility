@@ -253,8 +253,7 @@
                 link: function(scope, element, attrs, controllers) {
                     var ngModel = controllers[0],
                         ngForm = controllers[1],
-                        fieldName = "This field",
-                        initialValue;
+                        fieldName = "This field";
 
                     if(!ngForm) {
                         return; //only for validation with forms
@@ -1145,7 +1144,7 @@
                         var customNotifyTarget = scope.$eval(attrs.notifyTarget);
                         var notifyTarget = customNotifyTarget || aaFormExtensions.defaultNotifyTarget;
 
-                        if(notifyTarget && (form.$aaFormExtensions.$parentForm === null || customNotifyTarget)) {
+                        if(notifyTarget && (!form.$aaFormExtensions.$parentForm || customNotifyTarget)) {
 
                             scope.$watch(function() {
                                 return angular.toJson([ //possible perf issue but what is the alternative?
