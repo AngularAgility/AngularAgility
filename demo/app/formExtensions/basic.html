@@ -37,6 +37,15 @@
         <li>Change a field that was once valid to be invalid.</li>
         <li>Attempt to submit the form without all the fields being valid.</li>
         <li>Submit the form when all the fields are valid.</li>
+        <li>The validation messages notification uses <a ui-sref="notify()">Notify</a> and is completely
+        <strong>optional</strong>. Is simply added by putting this anywhere in your DOM:
+            <div syntax-highligher-for="xml">
+                <script type="syntaxhighlighter"><![CDATA[
+                    <div aa-notify style="position: fixed; bottom: 25px; left: 25px;"></div>
+                ]]>
+                </script>
+            </div>
+        </li>
     </ul>
 </div>
 
@@ -45,10 +54,6 @@
 
 
 <div ng-form="exampleForm" class="form-horizontal">
-
-<!--<div ng-form="nestedForm">-->
-    <!--<input aa-field-group="nestedField" required>-->
-<!--</div>-->
 
 <!-- EMAIL -->
 <input type="email" aa-field-group="person.email" required/>

@@ -79,7 +79,7 @@
             return {
                 template:
                     '<div>' +
-                        '<div ng-repeat="notification in notifications">' +
+                        '<div ng-repeat="notification in notifications" class="aa-notification">' +
                             '<div ng-include="notification.template"></div>' +
                         '</div>' +
                     '</div>',
@@ -162,7 +162,10 @@
                     template:
                         '<div class="alert aa-notify-notification" ng-class="notification.cssClasses">' +
                             '<div class="pull-right aa-notify-close" ng-if="notification.showClose" ng-click="close(notification)">' +
-                                '&nbsp;<i class="fa fa-times"></i>' +
+                                '<span class="fa-stack fa-lg">' +
+                                    '<i class="fa fa-circle fa-stack-2x"></i>' +
+                                    '<i class="fa fa-times fa-stack-1x fa-inverse"></i>' +
+                                '</span>' +
                             '</div>' +
                             '<i class="aa-notify-icon" ng-if="notification.iconClass" ng-class="notification.iconClass"></i>&nbsp;' +
                             '<span ng-if="!notification.allowHtml" class="aa-notify-message">{{notification.message}}</span>' +

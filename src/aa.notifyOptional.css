@@ -1,0 +1,16 @@
+.aa-notification {
+    z-index: 10000;
+    position: relative;
+}
+
+.aa-notify-close {
+    color: black;
+    font-size: 70%;
+    position: absolute;
+    right: -13px;
+    top: -12px;
+}
+
+.aa-notify-close:hover {
+    cursor: pointer;
+}

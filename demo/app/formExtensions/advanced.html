@@ -5,7 +5,10 @@
         <ul>
             <li>
                 <i ng-show="aaIsLoading" class="fa fa-spinner fa-spin fa-5x"></i>
-                aaIsLoading available on rootScope or from aaLoadingWatcher factory
+                isLoading boolean is available from aaLoadingWatcher.isLoading factory or:
+<pre>
+$rootScope.aaIsLoading = {{ aaIsLoading }}
+</pre>
             </li>
             <li>
                 ngForm boundaries are indicated like <span class="highlight-form">this</span>
@@ -14,10 +17,10 @@
     </div>
 
     <div class="well">
-        <p class="lead">'Form changed' tracking</p>
+        <p class="lead">Form changed tracking</p>
 
         <p>
-            'Form changed' tracking means deviation from the initial state of the form AFTER AJAX&dagger; indicates that a form
+            Form changed tracking means deviation from the initial state of the form AFTER AJAX&dagger; indicates that a form
             changed. You can change a field and set it back to it's initial state and aaFormExtensions considers
             the field AND the form no longer changed (all values are equal to their init state&dagger;).
             <br />
@@ -27,9 +30,9 @@
             Angular considers the field/form dirty still since it was touched (yet changed back to initial state).
         </p>
 
-        <p>
+        <p style="font-size: 80%">
             &dagger;All native Angular AJAX requests are counted by aaLoadingWatcher. If you have
-            non Angular AJAX loading to account for simply use aaLoadingWatcher's API to count them.
+            non Angular AJAX loading to account for simply use aaLoadingWatcher.increment()/.decrement() API to count them.
         </p>
     </div>
 
@@ -38,13 +41,13 @@
         <div ng-form="personForm" class="highlight-form">
             <h2>Person</h2>
 
-            <pre>
-                //current variable status
-                personForm.$valid = {{ personForm.$valid }}
-                personForm.$aaFormExtensions.$changed = {{ personForm.$aaFormExtensions.$changed}}
-                personForm.$aaFormExtensions.$childForms.length = {{ personForm.$aaFormExtensions.$childForms.length }}
-                personForm.$aaFormExtensions.$invalidAttempt = {{ personForm.$aaFormExtensions.$invalidAttempt}}
-            </pre>
+<pre>
+//current variable status
+personForm.$valid = {{ personForm.$valid }}
+personForm.$aaFormExtensions.$changed = {{ personForm.$aaFormExtensions.$changed}}
+personForm.$aaFormExtensions.$childForms.length = {{ personForm.$aaFormExtensions.$childForms.length }}
+personForm.$aaFormExtensions.$invalidAttempt = {{ personForm.$aaFormExtensions.$invalidAttempt}}
+</pre>
 
             <input aa-field-group="person.firstName" required>
 
@@ -54,13 +57,13 @@
 
             <div ng-form="addressForm" class="highlight-form">
                 <h2>Address</h2>
-                <pre>
-                    //current variable status
-                    addressForm.$valid = {{ addressForm.$valid }}
-                    addressForm.$aaFormExtensions.$changed = {{ addressForm.$aaFormExtensions.$changed }}
-                    addressForm.$aaFormExtensions.$childForms.length = {{ addressForm.$aaFormExtensions.$childForms.length }}
-                    addressForm.$aaFormExtensions.$invalidAttempt = {{ addressForm.$aaFormExtensions.$invalidAttempt }}
-                </pre>
+<pre>
+//current variable status
+addressForm.$valid = {{ addressForm.$valid }}
+addressForm.$aaFormExtensions.$changed = {{ addressForm.$aaFormExtensions.$changed }}
+addressForm.$aaFormExtensions.$childForms.length = {{ addressForm.$aaFormExtensions.$childForms.length }}
+addressForm.$aaFormExtensions.$invalidAttempt = {{ addressForm.$aaFormExtensions.$invalidAttempt }}
+</pre>
 
                 <input aa-field-group="person.address.addressLine1" required>
 
@@ -122,7 +125,7 @@
 
             <div class="clearfix">
                 <div class="pull-right">
-                    <button class="btn btn-primary" aa-submit-form="submit()">Submit</button>
+                    <button class="btn btn-primary" aa-submit-form="submit()" ng-disabled="hasNotChanged()">Submit</button>
                 </div>
             </div>
         </div>

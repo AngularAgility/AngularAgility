@@ -352,8 +352,10 @@
                         });
 
                         function changed() {
+                            var start = new Date();
                             changedDependency.isChanged = changedDependency.initialValue !== ngModel.$modelValue;
                             recursiveCheckAndSetFormChanged(ngForm);
+                            console.log("Changed: " + (start - new Date()));
                         }
                     }
 
@@ -1109,18 +1111,18 @@
                         //supports both type of changed deps generically
                         function genericAddChangedDependency(watchNamePart, watchExpr, deepWatch) {
 
-                            if(!angular.$isString(watchExpr)) {
+                            if(!angular.isString(watchExpr)) {
                                 throw "$add" + watchNamePart + "ChangedDependency only supports string watchExprs to allow for form reset support";
                             }
 
-                            aaLoadingWatcher.runWhenDoneLoading(function() {
+                            aaLoadingWatcher.runWhenDoneLoading.push(function() {
 
                                 var changedDep = {
                                     isChanged: false,
                                     initialValue: angular.copy(scope.$eval(watchExpr))
                                 };
 
-                                recursivePushChangedDependency(changedDep);
+                                recursivePushChangedDependency(thisForm, changedDep);
 
                                 scope['$watch' + watchNamePart](watchExpr, function(val, oldVal) {
                                     if(val === oldVal){
