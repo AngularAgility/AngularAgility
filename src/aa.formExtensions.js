@@ -200,12 +200,12 @@
 		
 		/**
 		* @ngdoc directive
-		* @name aaSaveForm
+		* @name aa-save-form
 		* @element form
 		* @deprecated
 		*
 		* @description
-		*  The directive "aaSaveForm" has been deprecated in favour of a more "sensically" named aaSubmitForm.
+		*  The aa-save-form directive has been deprecated in favour of the more "sensically" named aa-submit-form.
 		*/
         .directive('aaSaveForm', function() {
             return {
@@ -215,6 +215,30 @@
             };
         })
 
+		/**
+		* @ngdoc directive
+		* @name aa-submit-form
+		* @element form
+		* @requires aa.FormExtensions
+		* @description
+		* The aa-submit-form directive is used to specify the $scope function that will be called only
+		* if the parent form is valid. If the parent form has invalid inputs, then all validation messages
+		* will appear in the form. 
+		*
+		* Overrides:
+		<pre>
+			None.
+		</pre>
+		* Example:
+		<pre>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-3">
+					<button aa-submit-form="save()" class="btn btn-default">Save</button>
+				</div>
+			</div>
+		</pre>
+		*
+		*/
         .directive('aaSubmitForm', ['aaFormExtensions', '$q', function(aaFormExtensions, $q) {
             return {
                 scope: {
