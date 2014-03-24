@@ -3,9 +3,9 @@ body {
     padding-top: 50px;
 }
 
-pre {
-    color: #A9B7C6;
-    background-color: #2B2B2B;
+.lead {
+    margin-bottom: 10px;
+    font-weight: bold;
 }
 
 .starter-template {

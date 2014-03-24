@@ -30,7 +30,7 @@ app.get('/loadTestPerson', function(req, resp) {
             lastName: 'Culviner',
             friends: [{firstName: 'Angular', lastName: 'Agility'}]
         });
-    }, 2000);
+    }, 1000);
 });
 
 //for select2 demo

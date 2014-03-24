@@ -1,43 +1,90 @@
 <div class="container">
 
     <div class="well">
-        <p class="lead">Some things to note:</p>
-        <ul>
-            <li>
-                <i ng-show="aaIsLoading" class="fa fa-spinner fa-spin fa-5x"></i>
-                isLoading boolean is available from aaLoadingWatcher.isLoading factory or:
-<pre>
-$rootScope.aaIsLoading = {{ aaIsLoading }}
-</pre>
-            </li>
-            <li>
-                ngForm boundaries are indicated like <span class="highlight-form">this</span>
-            </li>
-        </ul>
-    </div>
-
-    <div class="well">
         <p class="lead">Form changed tracking</p>
 
         <p>
-            Form changed tracking means deviation from the initial state of the form AFTER AJAX&dagger; indicates that a form
+            Form changed tracking means deviation from the initial state of the form&dagger; indicates that a form
             changed. You can change a field and set it back to it's initial state and aaFormExtensions considers
             the field AND the form no longer changed (all values are equal to their init state&dagger;).
-            <br />
         </p>
-
         <p>
             Angular considers the field/form dirty still since it was touched (yet changed back to initial state).
         </p>
 
+
+        <p class="lead">Form reset</p>
+        <p>Sets the state of the form back to it's original state&dagger;:</p>
+        <div syntax-highligher-for="javascript">
+            <script type="syntaxhighlighter"><![CDATA[
+                personForm.$aaFormExtensions.$reset();
+            ]]>
+            </script>
+        </div>
+
+        <p class="lead">Reset initial form state</p>
+        <p>The current state of the form will be reset to it's initial state (any changes from here are now $changed):</p>
+        <div syntax-highligher-for="javascript">
+            <script type="syntaxhighlighter"><![CDATA[
+                personForm.$aaFormExtensions.$resetChanged();
+            ]]>
+            </script>
+        </div>
+
+
         <p style="font-size: 80%">
-            &dagger;All native Angular AJAX requests are counted by aaLoadingWatcher. If you have
-            non Angular AJAX loading to account for simply use aaLoadingWatcher.increment()/.decrement() API to count them.
+            &dagger;AFTER AJAX. All native Angular AJAX requests are counted by aaLoadingWatcher and a form isn't considered
+            loaded until pending AJAX requests have completed. If you have other types of loading to account for
+            simply use aaLoadingWatcher.increment()/.decrement() API to count them.
+        </p>
+
+        <p class="lead">Loading indicators</p>
+        <i ng-show="aaIsLoading" class="fa fa-spinner fa-spin fa-5x"></i>
+        isLoading boolean is available from aaLoadingWatcher.isLoading factory or:
+<pre>
+$rootScope.aaIsLoading = {{ aaIsLoading }}
+</pre>
+
+        <p class="lead">On-navigate away handling</p>
+        <p>
+            Includes (by default, overridable) detection of Angular UI Router $stateChangeStart. If the root form in the view
+            is myForm.$aaFormExtensions.$changed it will block with a JavaScript confirm. Please customize this
+            with however you are doing modals. <a href="http://angular-ui.github.io/bootstrap/#/modal" target="_blank">I would recommend this.</a>
+            Then register your own custom strategy:
+            <div syntax-highligher-for="javascript">
+                <script type="syntaxhighlighter"><![CDATA[
+                    aaFormExtensionsProvider.registerOnNavigateAwayStrategy(
+                        'myCustomStrategy',
+                        function(rootFormScope, rootForm, $injector){/*...*/}
+                    );
+                    aaFormExtensionsProvider.setDefaultOnNavigateAwayStrategy('myCustomStrategy');
+                ]]>
+                </script>
+            </div>
+            Use to ignore on a per form basis (if you registered a global default):
+            <div syntax-highligher-for="html">
+                <script type="syntaxhighlighter"><![CDATA[
+                    <div ng-form="myForm" on-navigate-away-strategy="none">...</div>
+                ]]>
+                </script>
+            </div>
         </p>
     </div>
 
+    <div class="well">
+        <p class="lead">Source for this example page</p>
+        <ul>
+            <li><a href="https://github.com/AngularAgility/AngularAgility/blob/master/demo/app/formExtensions/advanced.html" target="_blank">HTML</a></li>
+            <li><a href="https://github.com/AngularAgility/AngularAgility/blob/master/demo/app/formExtensions/advancedFormExtensions.js" target="_blank">Controller JavaScript</a></li>
+        </ul>
+    </div>
+
+    <h2>ngForm boundaries are indicated like <span class="highlight-form">this</span></h2>
+    <br/>
+    <br/>
     <div class="form-horizontal">
 
+        <!-- FIRST FORM STARTS HERE! -->
         <div ng-form="personForm" class="highlight-form">
             <h2>Person</h2>
 
@@ -125,11 +172,19 @@ addressForm.$aaFormExtensions.$invalidAttempt = {{ addressForm.$aaFormExtensions
 
             <div class="clearfix">
                 <div class="pull-right">
-                    <button class="btn btn-primary" aa-submit-form="submit()" ng-disabled="hasNotChanged()">Submit</button>
+                    <button class="btn" ng-click="personForm.$aaFormExtensions.$resetChanged()">
+                        personForm.$aaFormExtensions.$resetChanged()
+                    </button>
+
+                    <button class="btn" ng-click="personForm.$aaFormExtensions.$reset()"
+                            ng-disabled="!personForm.$aaFormExtensions.$changed">
+                        Reset (only enabled if personForm.$aaFormExtensions.$changed)
+                    </button>
+
+                    <button class="btn btn-primary" aa-submit-form="submit()">Submit</button>
                 </div>
             </div>
         </div>
     </div>
-
     <div aa-notify style="position: fixed; top: 60px; right: 25px;"></div>
 </div>

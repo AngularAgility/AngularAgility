@@ -115,6 +115,10 @@
 
                     scope.close = function(notification) {
                         scope.notifications.splice(scope.notifications.indexOf(notification), 1);
+
+                        if(angular.isFunction(notification.onClose)) {
+                            notification.onClose();
+                        }
                     };
                 }
             };

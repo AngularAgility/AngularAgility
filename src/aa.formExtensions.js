@@ -114,6 +114,12 @@
             aaNotifyConfigProvider.addOrUpdateNotifyConfig('aaFormExtensionsValidationErrors', {
                 template:
                     '<div class="alert alert-danger aa-form-extensions-validation-errors">' +
+                        '<div class="pull-right aa-notify-close" ng-click="close(notification)">' +
+                            '<span class="fa-stack fa-lg">' +
+                                '<i class="fa fa-circle fa-stack-2x"></i>' +
+                                '<i class="fa fa-times fa-stack-1x fa-inverse"></i>' +
+                            '</span>' +
+                        '</div>' +
                         '<strong>The following fields have validation errors: </strong>' +
                         '<ul>' +
                             '<li ng-repeat="error in notification.validationErrorsToDisplay()">' +
@@ -161,7 +167,6 @@
                     return pendingRequests;
                 }, function(val) {
                     $rootScope.aaIsLoading = watcher.isLoading = val > 0;
-
                     if(!watcher.isLoading) {
                         angular.forEach(watcher.runWhenDoneLoading, function(func) {
                             func();
@@ -246,7 +251,7 @@
         //constructs myForm.$aaFormExtensions.myFieldName object
         //including validation messages for all ngModels at form.$aaFormExtensions.
         //messages can be used there manually or emitted automatically with aaValMsg
-        .directive('ngModel', ['aaFormExtensions', '$document', 'aaLoadingWatcher', function(aaFormExtensions, $document, aaLoadingWatcher) {
+        .directive('ngModel', ['aaFormExtensions', '$document', 'aaLoadingWatcher', '$timeout', function(aaFormExtensions, $document, aaLoadingWatcher, $timeout) {
             return {
                 require: ['ngModel', '?^form'],
                 priority: 1,
@@ -283,10 +288,9 @@
                         field.hadFocus = true;
                         element.addClass('aa-had-focus');
 
-                        if(!scope.$$phase) {
-                            //sometimes a blur can happen during a digest or apply...
-                            scope.$apply();
-                        }
+                        //want to call $apply after current stack clears
+                        //if clicking on another element. better way?
+                        $timeout(function() {}, 1);
                     });
 
                     scope.$watch(function() {
@@ -309,37 +313,33 @@
 
 
                     var loadingWatchDeReg, //for 'perf'
-                        changedDependency = {
+                        fieldChangeDependency = {
                             field: field,
                             isChanged: false
                         };
-                    recursivePushChangedDependency(ngForm, changedDependency);
+                    recursivePushChangeDependency(ngForm, fieldChangeDependency);
 
-                    if(aaLoadingWatcher.isLoading) {
-                        //delay changed checking until AFTER the form is completely loaded
-                        loadingWatchDeReg = scope.$watch(function() {
-                            return aaLoadingWatcher.isLoading;
-                        }, function(isLoading) {
-                            if(!isLoading) {
-                                loadingWatchDeReg();
-                                setupChanged();
-                            }
-                        });
-                    } else {
-                        setupChanged();
-                    }
-
-
-                    //start watching for changed efficiently!
-                    function setupChanged() {
-
-                        if(ngModel.$modelValue !== ngModel.$modelValue) {
-                            //inited to NaN (which isn't equal to its self...)
-                            changedDependency.initialValue = undefined;
+                    // wait for stack to clear before checking
+                    // todo this seems a little shaky, perhaps there is a better way?
+                    $timeout(function() {
+                        if(aaLoadingWatcher.isLoading) {
+                            //delay changed checking until AFTER the form is completely loaded
+                            loadingWatchDeReg = scope.$watch(function() {
+                                return aaLoadingWatcher.isLoading;
+                            }, function(isLoading) {
+                                if(!isLoading) {
+                                    loadingWatchDeReg();
+                                    setupChanged();
+                                }
+                            });
                         } else {
-                            changedDependency.initialValue = ngModel.$modelValue;
+                            setupChanged();
                         }
+                    });
 
+                    //start watching for changed efficiently
+                    function setupChanged() {
+						fieldChangeDependency.initialValue = ngModel.$modelValue;
 
                         //we can avoid using more expensive watches because angular exposes the built in methods:
                         //ngModel.$modelValue is changing per view change
@@ -352,17 +352,36 @@
                         });
 
                         function changed() {
-                            var start = new Date();
-                            changedDependency.isChanged = changedDependency.initialValue !== ngModel.$modelValue;
-                            recursiveCheckAndSetFormChanged(ngForm);
-                            console.log("Changed: " + (start - new Date()));
+							if(fieldChangeDependency.initialValue !== fieldChangeDependency.initialValue /*NaN check*/) {
+								//Angular initializes fields to NaN before they are 'actually' set.
+								//Don't count changes from NaN as they aren't really changes
+								fieldChangeDependency.initialValue = ngModel.$modelValue;
+							}
+
+                            fieldChangeDependency.isChanged = fieldChangeDependency.initialValue !== ngModel.$modelValue;
+                            recursiveParentCheckAndSetFormChanged(ngForm);
                         }
                     }
+
+                    scope.$on('$destroy', function() {
+                        //clean up any field changed dependencies on parent forms
+                        cleanChangeDependencies(ngForm);
+
+                        function cleanChangeDependencies(form) {
+                            if(form.$aaFormExtensions.$parentForm) {
+                                cleanChangeDependencies(form.$aaFormExtensions.$parentForm);
+                            }
+
+                            arrayRemove(form.$aaFormExtensions.$changeDependencies, fieldChangeDependency);
+                            checkAndSetFormChanged(form);
+
+                        }
+                    });
 
                     function calcErrorMessages() {
                         var fieldErrorMessages = field.$errorMessages,
                             msg,
-                            fieldForms = [];
+                            formsThisFieldIsIn = [];
 
                         //clear out the validation messages that exist on *just the field*
                         fieldErrorMessages.length = 0;
@@ -403,16 +422,16 @@
                         //find all forms recursively that this field is a child of
                         collectForms(ngForm);
                         function collectForms(form) {
-                            fieldForms.push(form);
+                            formsThisFieldIsIn.push(form);
                             if(form.$aaFormExtensions.$parentForm) {
                                 collectForms(form.$aaFormExtensions.$parentForm);
                             }
                         }
 
                         //TODO: perhaps update this in the future so that 'new' validation errors are pushed to the $allValidationErrors
-                        //TODO: array in respect to initial form field order
+                        //array in respect to initial form field order
                         //for each form that has this field in it....
-                        angular.forEach(fieldForms, function(form) {
+                        angular.forEach(formsThisFieldIsIn, function(form) {
 
                             //clear out any validation messages that exist for this field
                             //since we are going to add new ones below based on what was calculated for the field changing
@@ -712,13 +731,13 @@
         }])
 
         //extend Angular form to have $aaFormExtensions and also keep track of the parent form
-        .directive('ngForm', ['aaFormExtensions', 'aaNotify', 'aaLoadingWatcher', '$parse',
-            function(aaFormExtensions, aaNotify, aaLoadingWatcher, $parse) {
-                return aaFormFactory(true, aaFormExtensions, aaNotify, aaLoadingWatcher, $parse);
+        .directive('ngForm', ['aaFormExtensions', 'aaNotify', 'aaLoadingWatcher', '$parse', '$injector',
+            function(aaFormExtensions, aaNotify, aaLoadingWatcher, $parse, $injector) {
+                return aaFormFactory(true, aaFormExtensions, aaNotify, aaLoadingWatcher, $parse, $injector);
             }])
-        .directive('form', ['aaFormExtensions', 'aaNotify', 'aaLoadingWatcher', '$parse',
-            function(aaFormExtensions, aaNotify, aaLoadingWatcher, $parse) {
-                return aaFormFactory(false, aaFormExtensions, aaNotify, aaLoadingWatcher, $parse);
+        .directive('form', ['aaFormExtensions', 'aaNotify', 'aaLoadingWatcher', '$parse', '$injector',
+            function(aaFormExtensions, aaNotify, aaLoadingWatcher, $parse, $injector) {
+                return aaFormFactory(false, aaFormExtensions, aaNotify, aaLoadingWatcher, $parse, $injector);
             }])
 
         .provider('aaFormExtensions', function() {
@@ -867,6 +886,39 @@
                 this.defaultNotifyTarget = notifyTarget;
             };
 
+            //ON NAVIGATE AWAY STRATEGIES
+            //detect navigate away and handle it. UI Router is handled by default
+            this.defaultOnNavigateAwayStrategy = 'confirmUiRouter';
+            this.setDefaultOnNavigateAwayStrategy = function(strategyName) {
+                this.defaultOnNavigateAwayStrategy = strategyName;
+            };
+            this.onNavigateAwayStrategies = {
+
+                //VERY basic. For the love of everything holy please do something better with UI Bootstrap modal or something!
+                //requires >= v0.2.10!
+                confirmUiRouter: function(rootFormScope, rootForm, $injector) {
+                    rootFormScope.$on('$stateChangeStart', function(event, toState, toParams){
+
+                        if(rootForm.$aaFormExtensions.$changed) {
+							if(!toState.aaUnsavedPrompted) {
+								event.preventDefault();					
+								if(confirm('You have unsaved changes are you sure you want to navigate away?')) {
+									//should be able to use options { notify: false } on UI Router
+									//but that doesn't seem to work right (new state never loads!) so this is a workaround
+									toState.aaUnsavedPrompted = true;
+									$injector.get('$state').go(toState.name, toParams);
+								}
+							}
+                        }
+                    });
+                },
+                none: angular.noop
+            };
+            this.registerOnNavigateAwayStrategy = function(name, strategy) {
+                this.onNavigateAwayStrategies[name] = strategy;
+            };
+
+
             //VALIDATION MESSAGES
             this.validationMessages = {
                 required: "{0} is required.",
@@ -911,6 +963,9 @@
 
                     defaultSpinnerClickStrategy: self.defaultSpinnerClickStrategy,
                     spinnerClickStrategies: self.spinnerClickStrategies,
+
+                    defaultOnNavigateAwayStrategy: self.defaultOnNavigateAwayStrategy,
+                    onNavigateAwayStrategies: self.onNavigateAwayStrategies,
 
                     defaultNotifyTarget: self.defaultNotifyTarget
                 };
@@ -977,35 +1032,41 @@
     }
 
     //all parent forms need to know about a changed dependency, crawl up the graph to distribute to all of them
-    function recursivePushChangedDependency(form, dep) {
-        form.$aaFormExtensions.$changedDependencies.push(dep);
+    function recursivePushChangeDependency(form, dep) {
+        form.$aaFormExtensions.$changeDependencies.push(dep);
 
         if(form.$aaFormExtensions.$parentForm) {
-            recursivePushChangedDependency(form.$aaFormExtensions.$parentForm, dep);
+            recursivePushChangeDependency(form.$aaFormExtensions.$parentForm, dep);
         }
     }
 
     //call after changed has changed
     //recursively check this and each parent form for changed fields. set the form (and parent forms)
     //changed indicator accordingly
-    function recursiveCheckAndSetFormChanged(form) {
+    function recursiveParentCheckAndSetFormChanged(form) {
 
+        checkAndSetFormChanged(form);
+
+        if(form.$aaFormExtensions.$parentForm) {
+            recursiveParentCheckAndSetFormChanged(form.$aaFormExtensions.$parentForm);
+        }
+    }
+
+    //checks if a given form has any changes based on it's change dependencies
+    function checkAndSetFormChanged(form) {
         var hasAnyChangedField = false;
 
-        angular.forEach(form.$aaFormExtensions.$changedDependencies, function(dep) {
+        angular.forEach(form.$aaFormExtensions.$changeDependencies, function(dep) {
             if(dep.isChanged) {
                 hasAnyChangedField = true;
             }
         });
 
         form.$aaFormExtensions.$changed = hasAnyChangedField;
-
-        if(form.$aaFormExtensions.$parentForm) {
-            recursiveCheckAndSetFormChanged(form.$aaFormExtensions.$parentForm);
-        }
     }
 
-    function aaFormFactory(isNgForm, aaFormExtensions, aaNotify, aaLoadingWatcher, $parse) {
+
+    function aaFormFactory(isNgForm, aaFormExtensions, aaNotify, aaLoadingWatcher, $parse, $injector) {
         return {
             restrict: isNgForm ? 'EAC' : 'E',
             require: 'form',
@@ -1023,19 +1084,25 @@
                             $parentForm: parentForm,
                             $childForms: [],
                             $allValidationErrors: [],
-                            $changedDependencies: [],
+                            $changeDependencies: [],
                             $changed: false,
                             $invalidAttempt: false,
-                            $addChangedDependency: function(watchExpr, deepWatch){
-                                genericAddChangedDependency('', watchExpr, deepWatch );
-                            },
-                            $addCollectionChangedDependency: function(watchExpr){
-                                genericAddChangedDependency('Collection', watchExpr);
-                            }
+                            $addChangeDependency: $addChangeDependency,
+                            $reset: $reset,
+                            $resetChanged: $resetChanged,
+                            $clearErrors: $clearErrors
                         };
 
                         if(parentForm) {
                             parentForm.$aaFormExtensions.$childForms.push(thisForm);
+                        }
+
+                        //only root forms get the opportunity to block router state changes
+                        if(!parentForm) {
+                            var strategy = aaFormExtensions.onNavigateAwayStrategies[attrs.onNavigateAwayStrategy || aaFormExtensions.defaultOnNavigateAwayStrategy ];
+                            if(angular.isFunction(strategy)) {
+                                strategy(scope, thisForm, $injector);
+                            }
                         }
 
 
@@ -1086,56 +1153,97 @@
                                     //REMOVE this forms reference as being a child form
                                     arrayRemove(form.$aaFormExtensions.$childForms, thisForm);
 
+                                    //REMOVE this forms changed dependencies
+                                    angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
+                                        arrayRemove(form.$aaFormExtensions.$changeDependencies, dep);
+                                        checkAndSetFormChanged(form);
+                                    });
+
+                                    //next parent
                                     if (form.$aaFormExtensions.$parentForm) {
                                         recurseForms(form.$aaFormExtensions.$parentForm);
                                     }
-
-                                    //REMOVE this forms changed dependencies
-                                    angular.forEach(thisForm.$aaFormExtensions.$changedDependencies, function(dep) {
-                                        arrayRemove(form.$aaFormExtensions.$changedDependencies, dep);
-
-                                        var hasAnyChangedField = false;
-
-                                        angular.forEach(form.$aaFormExtensions.$changedDependencies, function(dep) {
-                                            if(dep.isChanged) {
-                                                hasAnyChangedField = true;
-                                            }
-                                        });
-
-                                        form.$aaFormExtensions.$changed = hasAnyChangedField;
-                                    });
                                 }
                             });
                         }
 
-                        //supports both type of changed deps generically
-                        function genericAddChangedDependency(watchNamePart, watchExpr, deepWatch) {
+                        function $addChangeDependency(watchExpr, deepWatch) {
+
+                            if(deepWatch === undefined) {
+                                deepWatch = true; //this yields expected behavior most of the time
+                            }
 
                             if(!angular.isString(watchExpr)) {
-                                throw "$add" + watchNamePart + "ChangedDependency only supports string watchExprs to allow for form reset support";
+                                throw "$addChangeDependency only supports string watchExprs to allow for form reset support";
                             }
 
                             aaLoadingWatcher.runWhenDoneLoading.push(function() {
 
                                 var changedDep = {
+                                    expr: watchExpr,
                                     isChanged: false,
-                                    initialValue: angular.copy(scope.$eval(watchExpr))
+                                    initialValue: angular.copy(scope.$eval(watchExpr)),
+									$form: thisForm
                                 };
 
-                                recursivePushChangedDependency(thisForm, changedDep);
+                                recursivePushChangeDependency(thisForm, changedDep);
 
-                                scope['$watch' + watchNamePart](watchExpr, function(val, oldVal) {
+                                scope.$watch(watchExpr, function(val, oldVal) {
                                     if(val === oldVal){
                                         return; //first run
                                     }
                                     changedDep.isChanged = !angular.equals(changedDep.initialValue, val);
 
-                                    recursiveCheckAndSetFormChanged(thisForm);
+                                    recursiveParentCheckAndSetFormChanged(thisForm);
 
                                 }, deepWatch);
                             });
                         }
+
+                        function $reset() {
+                            angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
+                                if(dep.field && dep.field.$ngModel.$modelValue !== dep.initialValue) {
+                                    dep.field.$ngModel.$setViewValue(dep.initialValue);
+                                    dep.field.$ngModel.$render();
+                                }
+
+                                if(dep.expr) {
+                                    $parse(dep.expr).assign(scope, dep.initialValue);
+                                }
+                            });
+
+                            $clearErrors();
+                        }
+
+                        function $resetChanged() {
+                            angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
+								dep.isChanged = false;
+								
+                                if(dep.field) {
+                                    dep.initialValue = dep.field.$ngModel.$modelValue;
+									checkAndSetFormChanged(dep.field.$form);
+                                }
+
+                                if(dep.expr) {
+									dep.initialValue = angular.copy(scope.$eval(dep.expr));
+									checkAndSetFormChanged(dep.$form);
+                                }
+                            });
+                        }
+
+                        function $clearErrors() {
+                            thisForm.$aaFormExtensions.$invalidAttempt = false;
+
+                            angular.forEach(thisForm.$aaFormExtensions.$allValidationErrors, function(err) {
+                                err.field.hadFocus = false;
+								err.field.$element.removeClass('aa-had-focus');
+                            });
+                        }
                     },
+
+
+
+
                     post: function(scope, element, attrs, form) {
 
                         //if error notifications are enabled
@@ -1144,9 +1252,9 @@
                         //target specified on the form
                         var notifyHandle = null;
                         var customNotifyTarget = scope.$eval(attrs.notifyTarget);
-                        var notifyTarget = customNotifyTarget || aaFormExtensions.defaultNotifyTarget;
+                        var notifyTargetName = customNotifyTarget || aaFormExtensions.defaultNotifyTarget;
 
-                        if(notifyTarget && (!form.$aaFormExtensions.$parentForm || customNotifyTarget)) {
+                        if(notifyTargetName && (!form.$aaFormExtensions.$parentForm || customNotifyTarget)) {
 
                             scope.$watch(function() {
                                 return angular.toJson([ //possible perf issue but what is the alternative?
@@ -1170,14 +1278,17 @@
 
                                 if(notifyHandle && !shouldDisplay) {
                                     //remove the existing notification
-                                    aaNotify.remove(notifyHandle, notifyTarget);
+                                    aaNotify.remove(notifyHandle, notifyTargetName);
                                     notifyHandle = null;
                                 }
 
                                 if(!notifyHandle && shouldDisplay) {
                                     notifyHandle = aaNotify.add({
-                                        validationErrorsToDisplay: validationErrorsToDisplay
-                                    }, notifyTarget, 'aaFormExtensionsValidationErrors');
+                                        validationErrorsToDisplay: validationErrorsToDisplay,
+                                        onClose: function() {
+                                            notifyHandle = null; //it'll come back on next error!
+                                        }
+                                    }, notifyTargetName, 'aaFormExtensionsValidationErrors');
                                 }
                             });
                         }
@@ -1203,7 +1314,7 @@
                         scope.$on('$destroy', function() {
                             if(notifyHandle) {
                                 //form is going away, remove associated notifications!
-                                aaNotify.remove(notifyHandle, notifyTarget);
+                                aaNotify.remove(notifyHandle, notifyTargetName);
                             }
                         });
                     }
