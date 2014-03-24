@@ -8,6 +8,11 @@ body {
     font-weight: bold;
 }
 
+.jumbotron {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
 .starter-template {
     padding: 40px 15px;
     text-align: center;
