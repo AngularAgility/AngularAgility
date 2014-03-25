@@ -10,10 +10,11 @@ Note all JavaScript/CSS that you might want to use is located in /src/*.*
 ###[Live demo of this exact source here](http://angularagility.herokuapp.com/)
 ###[API Docs](https://github.com/AngularAgility/AngularAgility/wiki/)
 
-##Form Extensions
+#Form Extensions
 [Blog Posts](http://johnculviner.com/category/form-extensions/) |
 [Source](https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.formExtensions.js) |
-[API Docs](https://github.com/AngularAgility/AngularAgility/wiki/Form-Extensions-API-Docs)
+[API Docs](https://github.com/AngularAgility/AngularAgility/wiki/Form-Extensions-API-Docs) |
+[Live Demo](http://angularagility.herokuapp.com/#/formExtensions/formExtensions/basic)
 
 Angular.js form validation is likely one of the best takes on form validation out there. Unfortunately it can often be a little TOO flexible for many applications where you want basic error message display and generation
 witout having to dive into the form object model and manually construct basic messages for each field.
@@ -72,4 +73,120 @@ This is where Form Extensions comes in. It **works with built in Angular.js vali
 </div>
 ```
 
+#Advanced Form Extensions
+[Blog Posts](http://johnculviner.com/category/form-extensions/) |
+[Source](https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.formExtensions.js) |
+[API Docs](https://github.com/AngularAgility/AngularAgility/wiki/Form-Extensions-API-Docs) |
+[Live Demo](http://angularagility.herokuapp.com/#/formExtensions/formExtensions/advanced)
+###Form changed tracking
+Form changed tracking means deviation from the initial state of the form† indicates that a form changed. You can change a field and set it back to it's initial state and aaFormExtensions considers the field AND the form no longer changed (all values are equal to their init state†).
 
+Angular considers the field/form dirty still since it was touched (yet changed back to initial state).
+
+###Form reset
+Sets the state of the form back to it's original state†:
+```javascript
+personForm.$aaFormExtensions.$reset();
+```
+†AFTER AJAX. All native Angular AJAX requests are counted by aaLoadingWatcher and a form isn't considered loaded until pending AJAX requests have completed. If you have other types of loading to account for simply use aaLoadingWatcher.increment()/.decrement() API to count them.
+
+###Reset initial form state
+The current state of the form will be reset to it's initial state (any changes from here are now $changed):
+
+```javascript
+personForm.$aaFormExtensions.$resetChanged();
+```
+
+###Loading indicators
+isLoading boolean is available from aaLoadingWatcher.isLoading factory or:
+$rootScope.aaIsLoading = false
+
+###On-navigate away handling
+Includes (by default, overridable) detection of Angular UI Router $stateChangeStart. If the root form in the view is myForm.$aaFormExtensions.$changed it will block with a JavaScript confirm. Please customize this with however you are doing modals. I would recommend Angular UI Modal. Then register your own custom strategy:
+
+```javascript
+aaFormExtensionsProvider.registerOnNavigateAwayStrategy(
+    'myCustomStrategy',
+    function(rootFormScope, rootForm, $injector){/*...*/}
+);
+aaFormExtensionsProvider.setDefaultOnNavigateAwayStrategy('myCustomStrategy');
+```
+Use to ignore on a per form basis (if you registered a global default):
+
+```javascript
+<div ng-form="myForm" on-navigate-away-strategy="none">...</div>
+```
+
+#Notify
+###Fully customizable/configurable growl, toastr style notifications done right
+[Blog Posts](http://johnculviner.com/) |
+[Source](https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.notify.js) |
+[API Docs](https://github.com/AngularAgility/AngularAgility/wiki/Notify-API-Docs) |
+[Live Demo](http://angularagility.herokuapp.com/#/notify)
+
+###1. Put a notification directive somewhere in the DOM with the markup for how you want it positioned
+```html
+<!-- probably use a CSS class IRL but you get the point-->
+<div aa-notify style="position: fixed; bottom: 25px; right: 25px;"></div>
+```
+
+###2. Call it from your code!
+```javascript
+angular.module('myApp')
+.controller('myController', function($scope, aaNotify, $timeout) {
+
+    $scope.trySuccess = function() {
+        //the default notifyConfig sets the life to 4 seconds
+        //you can tweak this globally or add your own default notifyConfig
+        aaNotify.success('Example success message!');
+    };
+
+    $scope.tryInfo = function() {
+        //configure to 1 second life here only
+        aaNotify.info('Example info message!', { ttl: 1000 });
+    };
+
+    $scope.tryWarning = function() {
+        var handle = aaNotify.warning('Example warning message!', { ttl: 999999999 });
+
+        //whoops that message is going to be around a little *too* long with that ttl.
+        //use the handle to remove it after only 4 seconds
+        $timeout(function() { aaNotify.remove(handle); }, 4000);
+
+    };
+
+    $scope.tryDanger = function() {
+        aaNotify.danger('Example danger message!<br/><br/><br/>This text after some <br/>s',
+            {
+                //You can register many different templates and
+                //*do whatever you want* for a notification, wherever/however you want!
+                //(you aren't bound by this dev's idea of what a notification should look like)
+                //if you like the sound of this keep scrolling to Advanced Mode below...
+
+                //the default template has these options
+                //*if you don't like them *easily* make your own template!*
+                showClose: true,                            //close button
+                iconClass: 'fa fa-exclamation-triangle',    //iconClass for a <i></i> style icon to use
+                allowHtml: true,                            //allows HTML in the message to render as HTML
+
+                //common to the framework as a whole
+                ttl: 0  //time to live in ms
+            });
+})
+```
+####It does much more than this, advanced demos coming soon!
+
+#Select 2
+[Blog Posts](http://johnculviner.com/) |
+[Source](https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.select2.js) |
+[API Docs](https://github.com/AngularAgility/AngularAgility/wiki/Select2-Docs) |
+[Live Demo](http://angularagility.herokuapp.com/#/select2)
+###Headache free use of Select2 with Angular for most common tasks
+First off, there are a few other Select2 directives out there. This one is different in that it is specifically designed to easily work with binding ids, objects, arrays, AJAX queries etc. for some pretty common use cases (see examples!)
+
+It abstracts away the complicated Select2 API (lots of examples below!) and should make it pretty easy to do a lot of things without writing a bunch of hacks. You can still always call the select2 API directly if you want. See examples below!
+
+It offers no support for the basic 'replace a <select> list and <option>' functionality: This is desgined for working with JavaScript object data (as you generally do with Angular). Not what you want? Take a look at the AngularUI one.
+
+Interactive demos here:
+[Demos](http://angularagility.herokuapp.com/#/select2) 
