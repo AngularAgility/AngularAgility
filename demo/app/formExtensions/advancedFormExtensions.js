@@ -1,6 +1,6 @@
 angular
     .module('angularAgilityDemo')
-    .controller('advancedFormExtensions', ['$scope', '$http', function($scope, $http) {
+    .controller('advancedFormExtensions', ['$scope', '$http', '$aaFormExtensions', function($scope, $http, $aaFormExtensions) {
 
         $scope.settings.title = "Advanced Form Extensions";
         $scope.settings.subtitle = "Form changed tracking, form resets, loading indicators, on-navigate away handling";
@@ -9,15 +9,16 @@ angular
             .success(function(person) {
                 $scope.person = person;
 
-                //ONLY needed for more advanced non ng-model based changes:
+                //*ONLY* needed for more advanced non ng-model based changes:
                 //person.friends will be considered a change if it deviates from its initial state
-                $scope.personForm.$aaFormExtensions.$addChangeDependency('person.friends', true);
+                $aaFormExtensions.$addChangeDependency('person.friends');
             });
 
         $scope.submit = function() {
             return $http.get('/twosecondwait')
                 .success(function() {
-                    $scope.personForm.$aaFormExtensions.$resetChanged();
+                    //the new state of the form is now the initial state
+                    $aaFormExtensions.$resetChanged();
                     alert('done with ajax! (do you see the loading indicator, locked button?)');
                 });
         };

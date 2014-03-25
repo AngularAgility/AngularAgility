@@ -141,38 +141,27 @@
             //and is required for changed tracking
             //NOTE: if you do non Angular AJAX you will need to call increment/decrement yourself
             $provide.factory('aaLoadingWatcher', ['$rootScope', function($rootScope) {
-
-                function applyIfNeeded() {
-                    if(!$rootScope.$$phase) {
-                        $rootScope.$apply();
-                    }
-                }
-
                 var pendingRequests = 0;
 
                 var watcher = {
                     isLoading: false,
                     increment: function() {
                         pendingRequests++;
-                        applyIfNeeded();
+						loadingChanged();
                     },
                     decrement: function() {
                         pendingRequests--;
-                        applyIfNeeded();
-                    },
-                    runWhenDoneLoading: [] //functions...
-                };
-
-                $rootScope.$watch(function() {
-                    return pendingRequests;
-                }, function(val) {
-                    $rootScope.aaIsLoading = watcher.isLoading = val > 0;
-                    if(!watcher.isLoading) {
-                        angular.forEach(watcher.runWhenDoneLoading, function(func) {
-                            func();
-                        });
+						loadingChanged();
                     }
-                });
+                };
+				
+                function loadingChanged() {
+                    $rootScope.aaIsLoading = watcher.isLoading = pendingRequests > 0;
+
+					if(!$rootScope.$$phase) {
+                        $rootScope.$apply();
+                    }
+                }
 
                 return watcher;
             }]);
@@ -196,6 +185,50 @@
             }]);
             $httpProvider.interceptors.push('aaAjaxInterceptor');
 
+
+            //allows for any controller to inject in $aaFormExtensions to *eventually*
+            //talk to any form that may show up in the DOM without coupling
+            //the below will run on the first child form (or targetFormName matching child form) that appears
+            $provide.decorator('$controller', function($delegate) {
+                return function (expression, locals) {
+                    if(locals.$scope) {
+                        locals.$aaFormExtensions = {
+
+                            $addChangeDependency: function(expr, deepWatch, targetFormName /*optional*/) {
+                                addTodo({
+                                    type: '$addChangeDependency',
+                                    expr: expr,
+                                    deepWatch: deepWatch,
+                                    targetFormName: targetFormName
+                                });
+                            },
+
+                            $resetChanged: function(targetFormName /*optional*/) {
+                                addTodo({
+                                    type: '$resetChanged',
+                                    targetFormName: targetFormName
+                                });
+                            },
+
+                            $reset: function(targetFormName /*optional*/) {
+                                addTodo({
+                                    type: '$reset',
+                                    targetFormName: targetFormName
+                                });
+                            }
+                        };
+                    }
+
+                    function addTodo(todo) {
+                        if(!locals.$scope.$$aaFormExtensionsTodos) {
+                            locals.$scope.$$aaFormExtensionsTodos = [];
+                        }
+                        locals.$scope.$$aaFormExtensionsTodos.push(todo);
+                    }
+
+                    return $delegate(expression, locals);
+                };
+            });
         }])
 		
 		/**
@@ -210,7 +243,7 @@
         .directive('aaSaveForm', function() {
             return {
                 link: function() {
-                    throw "aaSaveForm has been deprecated in favour of a more sensically named aaSubmitForm";
+                    throw new Error("aaSaveForm has been deprecated in favour of a more sensically named aaSubmitForm");
                 }
             };
         })
@@ -363,6 +396,10 @@
 
                     //start watching for changed efficiently
                     function setupChanged() {
+                        if (attrs.aaExcludeChanges) {
+                            return;
+                        }
+
 						fieldChangeDependency.initialValue = ngModel.$modelValue;
 
                         //we can avoid using more expensive watches because angular exposes the built in methods:
@@ -381,9 +418,12 @@
 								//Don't count changes from NaN as they aren't really changes
 								fieldChangeDependency.initialValue = ngModel.$modelValue;
 							}
-
-                            fieldChangeDependency.isChanged = fieldChangeDependency.initialValue !== ngModel.$modelValue;
-                            recursiveParentCheckAndSetFormChanged(ngForm);
+							
+							var newIsChanged = fieldChangeDependency.initialValue !== ngModel.$modelValue;
+							if(fieldChangeDependency.isChanged !== newIsChanged) {
+								fieldChangeDependency.isChanged = newIsChanged;
+								recursiveParentCheckAndSetFormChanged(ngForm);
+							}
                         }
                     }
 
@@ -489,7 +529,7 @@
 
                     //TODO: auto generation of name would be better than an error IMO
                     if(!attrs.name) {
-                        throw "In order to use aaValMsg a name MUST be specified on the element: " + element[0];
+                        throw new Error("In order to use aaValMsg a name MUST be specified on the element: " + element[0]);
                     }
 
                     var msgElement = aaFormExtensions.valMsgPlacementStrategies[attrs.aaValMsg || aaFormExtensions.defaultValMsgPlacementStrategy](
@@ -607,7 +647,7 @@
         .directive('aaAutoField', function() {
             return {
                 link: function() {
-                    throw "aaAutoField has been deprecated in favor aaField";
+                    throw new Error("aaAutoField has been deprecated in favor aaField");
                 }
             };
         })
@@ -662,7 +702,7 @@
         .directive('aaAutoFieldGroup', function() {
             return {
                 link: function() {
-                    throw "aaAutoFieldGroup has been deprecated in favor aaFieldGroup";
+                    throw new Error("aaAutoFieldGroup has been deprecated in favor aaFieldGroup");
                 }
             };
         })
@@ -732,7 +772,7 @@
                     var strategy = aaFormExtensions.spinnerClickStrategies[attrs.spinnerClickStrategy || aaFormExtensions.defaultSpinnerClickStrategy];
 
                     if(!strategy) {
-                        throw "An inline or default spinner click strategy must be specified";
+                        throw new Error("An inline or default spinner click strategy must be specified");
                     }
 
                     element.on('click', function() {
@@ -790,7 +830,7 @@
                     ];
 
                     if(unsupported.indexOf(ele[0].type) !== -1) {
-                        throw "Generating a label for and input type " + ele[0].type + " is unsupported.";
+                        throw new Error("Generating a label for and input type " + ele[0].type + " is unsupported.");
                     }
 
                     ele.parent().parent().prepend(label);
@@ -921,7 +961,7 @@
                 //VERY basic. For the love of everything holy please do something better with UI Bootstrap modal or something!
                 //requires >= v0.2.10!
                 confirmUiRouter: function(rootFormScope, rootForm, $injector) {
-                    rootFormScope.$on('$stateChangeStart', function(event, toState, toParams){
+                    return rootFormScope.$on('$stateChangeStart', function(event, toState, toParams){
 
                         if(rootForm.$aaFormExtensions.$changed) {
 							if(!toState.aaUnsavedPrompted) {
@@ -1112,8 +1152,14 @@
                             $changed: false,
                             $invalidAttempt: false,
                             $addChangeDependency: $addChangeDependency,
+
+                            //reset all changes back to their original values per $changeDependencies
                             $reset: $reset,
+
+                            //reset $changeDependencies. All the current values are now the new inital values
                             $resetChanged: $resetChanged,
+
+                            //clear form errors
                             $clearErrors: $clearErrors
                         };
 
@@ -1122,10 +1168,11 @@
                         }
 
                         //only root forms get the opportunity to block router state changes
+						var onNavigateAwayStrategyDereg;
                         if(!parentForm) {
                             var strategy = aaFormExtensions.onNavigateAwayStrategies[attrs.onNavigateAwayStrategy || aaFormExtensions.defaultOnNavigateAwayStrategy ];
                             if(angular.isFunction(strategy)) {
-                                strategy(scope, thisForm, $injector);
+                                onNavigateAwayStrategyDereg = strategy(scope, thisForm, $injector);
                             }
                         }
 
@@ -1138,14 +1185,47 @@
                             });
                         }
 
-                        //when this form's scope is disposed clean up any references THIS form on parent forms
-                        //to prevent memory leaks in the case of a ng-if switching out child forms etc.
-                        if(thisForm.$aaFormExtensions.$parentForm) {
 
-                            scope.$on('$destroy', function () {
+                        //pick up any todos off the queue for this form
+                        scope.$watchCollection(function() { 
+							return scope.$$aaFormExtensionsTodos;
+						},
+						function(val) {
 
+                            if(!val) {
+                                return;
+                            }
+
+							for(var i = scope.$$aaFormExtensionsTodos.length - 1; i >= 0; i--)
+							{
+								var todo = scope.$$aaFormExtensionsTodos[i];
+
+								if(todo.targetFormName === thisForm.$name || (!todo.targetFormName && !thisForm.$aaFormExtensions.$parentForm)) {
+									if (todo.type === '$addChangeDependency') {
+										$addChangeDependency(todo.expr, todo.deepWatch);
+
+									} else if(todo.type === '$resetChanged') {
+                                        $resetChanged();
+                                    } else if(todo.type === '$reset') {
+                                        $reset();
+                                    }
+
+									scope.$$aaFormExtensionsTodos.splice(i, 1);
+								}
+							}
+                        });
+
+                        scope.$on('$destroy', function () {
+
+                            if (angular.isFunction(onNavigateAwayStrategyDereg)) {
+                                onNavigateAwayStrategyDereg();
+                            }
+
+                            //when this form's scope is disposed clean up any references THIS form on parent forms
+                            //to prevent memory leaks in the case of a ng-if switching out child forms etc.
+                            var ngModelsToRemove = [];
+                            if (thisForm.$aaFormExtensions.$parentForm) {
                                 //collected native form fields (for $allValidationErrors)
-                                var ngModelsToRemove = [];
                                 angular.forEach(thisForm, function (fieldVal, fieldName) {
                                     if (fieldName.indexOf('$') !== 0) {
                                         ngModelsToRemove.push(fieldVal);
@@ -1154,42 +1234,42 @@
 
                                 //remove from parent forms recursively
                                 recurseForms(thisForm.$aaFormExtensions.$parentForm);
+                            }
 
-                                function recurseForms(form) {
+                            function recurseForms(form) {
 
-                                    if(!form.$aaFormExtensions.$allValidationErrors.length) {
-                                        return;
-                                    }
-
-                                    //REMOVE this forms fields from $allValidationErrors
-                                    angular.forEach(ngModelsToRemove, function (fieldToRemove) {
-
-                                        var valErrorField;
-
-                                        for (var i = form.$aaFormExtensions.$allValidationErrors.length; i >= 0, i--;) {
-                                            valErrorField = form.$aaFormExtensions.$allValidationErrors[i];
-                                            if (valErrorField.field.$ngModel === fieldToRemove) {
-                                                form.$aaFormExtensions.$allValidationErrors.splice(i, 1);
-                                            }
-                                        }
-                                    });
-
-                                    //REMOVE this forms reference as being a child form
-                                    arrayRemove(form.$aaFormExtensions.$childForms, thisForm);
-
-                                    //REMOVE this forms changed dependencies
-                                    angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
-                                        arrayRemove(form.$aaFormExtensions.$changeDependencies, dep);
-                                        checkAndSetFormChanged(form);
-                                    });
-
-                                    //next parent
-                                    if (form.$aaFormExtensions.$parentForm) {
-                                        recurseForms(form.$aaFormExtensions.$parentForm);
-                                    }
+                                if (!form.$aaFormExtensions.$allValidationErrors.length) {
+                                    return;
                                 }
-                            });
-                        }
+
+                                //REMOVE this forms fields from $allValidationErrors
+                                angular.forEach(ngModelsToRemove, function (fieldToRemove) {
+
+                                    var valErrorField;
+
+                                    for (var i = form.$aaFormExtensions.$allValidationErrors.length; i >= 0, i--;) {
+                                        valErrorField = form.$aaFormExtensions.$allValidationErrors[i];
+                                        if (valErrorField.field.$ngModel === fieldToRemove) {
+                                            form.$aaFormExtensions.$allValidationErrors.splice(i, 1);
+                                        }
+                                    }
+                                });
+
+                                //REMOVE this forms reference as being a child form
+                                arrayRemove(form.$aaFormExtensions.$childForms, thisForm);
+
+                                //REMOVE this forms changed dependencies
+                                angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function (dep) {
+                                    arrayRemove(form.$aaFormExtensions.$changeDependencies, dep);
+                                    checkAndSetFormChanged(form);
+                                });
+
+                                //next parent
+                                if (form.$aaFormExtensions.$parentForm) {
+                                    recurseForms(form.$aaFormExtensions.$parentForm);
+                                }
+                            }
+                        });
 
                         function $addChangeDependency(watchExpr, deepWatch) {
 
@@ -1198,30 +1278,38 @@
                             }
 
                             if(!angular.isString(watchExpr)) {
-                                throw "$addChangeDependency only supports string watchExprs to allow for form reset support";
+                                throw new Error("$addChangeDependency only supports string watchExprs to allow for form reset support");
                             }
 
-                            aaLoadingWatcher.runWhenDoneLoading.push(function() {
-
-                                var changedDep = {
-                                    expr: watchExpr,
-                                    isChanged: false,
-                                    initialValue: angular.copy(scope.$eval(watchExpr)),
-									$form: thisForm
-                                };
-
-                                recursivePushChangeDependency(thisForm, changedDep);
-
-                                scope.$watch(watchExpr, function(val, oldVal) {
-                                    if(val === oldVal){
-                                        return; //first run
-                                    }
-                                    changedDep.isChanged = !angular.equals(changedDep.initialValue, val);
-
-                                    recursiveParentCheckAndSetFormChanged(thisForm);
-
-                                }, deepWatch);
+                            var exists = false;
+                            angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
+                                if(watchExpr === dep.expr) {
+                                    exists = true;
+                                }
                             });
+
+                            if(exists) {
+                                return;
+                            }
+
+                            var changedDep = {
+                                expr: watchExpr,
+                                isChanged: false,
+                                initialValue: angular.copy(scope.$eval(watchExpr)),
+                                $form: thisForm
+                            };
+
+                            recursivePushChangeDependency(thisForm, changedDep);
+
+                            scope.$watch(watchExpr, function(val, oldVal) {
+                                if(val === oldVal){
+                                    return; //first run
+                                }
+                                changedDep.isChanged = !angular.equals(changedDep.initialValue, val);
+
+                                recursiveParentCheckAndSetFormChanged(thisForm);
+
+                            }, deepWatch);
                         }
 
                         function $reset() {
@@ -1232,7 +1320,16 @@
                                 }
 
                                 if(dep.expr) {
-                                    $parse(dep.expr).assign(scope, dep.initialValue);
+                                    //find the scope context that the expression was created on
+                                    //aka go up the prototype chain until we stop seeing it
+                                    var currentContext = scope,
+										lastContext = null;
+
+                                    while(currentContext.$eval(dep.expr) !== undefined) {
+										lastContext = currentContext;
+                                        currentContext = currentContext.$parent;
+                                    }
+                                    $parse(dep.expr).assign(lastContext, angular.copy(dep.initialValue));
                                 }
                             });
 
