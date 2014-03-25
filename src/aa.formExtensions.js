@@ -186,8 +186,15 @@
             $httpProvider.interceptors.push('aaAjaxInterceptor');
 
 
-            //allows for any controller to inject in $aaFormExtensions to *eventually*
-            //talk to any form that may show up in the DOM without coupling
+            //allows for any controller to inject in $aaFormExtensions to *eventually* talk to any form that may show
+            //up in the DOM without coupling:
+            //
+            //broacast doesn't seem to be the best choice here because parent controllers are always created
+            //prior to their child forms.  the only other thing I could think of would be to use $timeout to allow
+            //the form(s) to init and then a broadcast to run but this would have the issue of REQUIRING
+            //this helper to have the controller scope passed in (don't want to broadcast these messages on rootscope
+            //because there very well could be other forms that we don't want to accidentally mess with)
+            //
             //the below will run on the first child form (or targetFormName matching child form) that appears
             $provide.decorator('$controller', function($delegate) {
                 return function (expression, locals) {
@@ -215,6 +222,13 @@
                                     type: '$reset',
                                     targetFormName: targetFormName
                                 });
+                            },
+
+                            $clearErrors: function(targetFormName /*optional*/) {
+                                addTodo({
+                                    type: '$reset',
+                                    targetFormName: targetFormName
+                                });
                             }
                         };
                     }
@@ -233,12 +247,12 @@
 		
 		/**
 		* @ngdoc directive
-		* @name aa-save-form
+		* @name aaSaveForm
 		* @element form
 		* @deprecated
 		*
 		* @description
-		*  The aa-save-form directive has been deprecated in favour of the more "sensically" named aa-submit-form.
+		*  The directive "aaSaveForm" has been deprecated in favour of a more "sensically" named aaSubmitForm.
 		*/
         .directive('aaSaveForm', function() {
             return {
@@ -248,30 +262,6 @@
             };
         })
 
-		/**
-		* @ngdoc directive
-		* @name aa-submit-form
-		* @element form
-		* @requires aa.FormExtensions
-		* @description
-		* The aa-submit-form directive is used to specify the $scope function that will be called only
-		* if the parent form is valid. If the parent form has invalid inputs, then all validation messages
-		* will appear in the form. 
-		*
-		* Overrides:
-		<pre>
-			None.
-		</pre>
-		* Example:
-		<pre>
-			<div class="form-group">
-				<div class="col-sm-offset-2 col-sm-3">
-					<button aa-submit-form="save()" class="btn btn-default">Save</button>
-				</div>
-			</div>
-		</pre>
-		*
-		*/
         .directive('aaSubmitForm', ['aaFormExtensions', '$q', function(aaFormExtensions, $q) {
             return {
                 scope: {
@@ -358,47 +348,36 @@
                         }
                     });
 
-                    //recalculate field errors every time they change
-                    scope.$watch(function() {
-                        return ngModel.$error;
-                    },
-                    function(val) {
-                        if(val) {
-                            calcErrorMessages();
-                        }
-                    }, true);
+					if (attrs.aaExcludeChanges === undefined) {
 
-
-                    var loadingWatchDeReg, //for 'perf'
-                        fieldChangeDependency = {
-                            field: field,
-                            isChanged: false
-                        };
-                    recursivePushChangeDependency(ngForm, fieldChangeDependency);
-
-                    // wait for stack to clear before checking
-                    // todo this seems a little shaky, perhaps there is a better way?
-                    $timeout(function() {
-                        if(aaLoadingWatcher.isLoading) {
-                            //delay changed checking until AFTER the form is completely loaded
-                            loadingWatchDeReg = scope.$watch(function() {
-                                return aaLoadingWatcher.isLoading;
-                            }, function(isLoading) {
-                                if(!isLoading) {
-                                    loadingWatchDeReg();
-                                    setupChanged();
-                                }
-                            });
-                        } else {
-                            setupChanged();
-                        }
-                    });
+						var loadingWatchDeReg, //for 'perf'
+							fieldChangeDependency = {
+								field: field,
+								isChanged: false
+							};
+						recursivePushChangeDependency(ngForm, fieldChangeDependency);
+	
+						// wait for stack to clear before checking
+						// todo this seems a little shaky, perhaps there is a better way?
+						$timeout(function() {
+							if(aaLoadingWatcher.isLoading) {
+								//delay changed checking until AFTER the form is completely loaded
+								loadingWatchDeReg = scope.$watch(function() {
+									return aaLoadingWatcher.isLoading;
+								}, function(isLoading) {
+									if(!isLoading) {
+										loadingWatchDeReg();
+										setupChanged();
+									}
+								});
+							} else {
+								setupChanged();
+							}
+						});
+					}
 
                     //start watching for changed efficiently
                     function setupChanged() {
-                        if (attrs.aaExcludeChanges) {
-                            return;
-                        }
 
 						fieldChangeDependency.initialValue = ngModel.$modelValue;
 
@@ -438,9 +417,20 @@
 
                             arrayRemove(form.$aaFormExtensions.$changeDependencies, fieldChangeDependency);
                             checkAndSetFormChanged(form);
-
                         }
                     });
+
+
+                    //recalculate field errors every time they change
+                    scope.$watch(function() {
+                        return ngModel.$error;
+                    },
+                    function(val) {
+                        if(val) {
+                            calcErrorMessages();
+                        }
+                    }, true);
+
 
                     function calcErrorMessages() {
                         var fieldErrorMessages = field.$errorMessages,
@@ -795,13 +785,13 @@
         }])
 
         //extend Angular form to have $aaFormExtensions and also keep track of the parent form
-        .directive('ngForm', ['aaFormExtensions', 'aaNotify', 'aaLoadingWatcher', '$parse', '$injector',
-            function(aaFormExtensions, aaNotify, aaLoadingWatcher, $parse, $injector) {
-                return aaFormFactory(true, aaFormExtensions, aaNotify, aaLoadingWatcher, $parse, $injector);
+        .directive('ngForm', ['aaFormExtensions', 'aaNotify', '$parse', '$injector',
+            function(aaFormExtensions, aaNotify, $parse, $injector) {
+                return aaFormFactory(true, aaFormExtensions, aaNotify, $parse, $injector);
             }])
-        .directive('form', ['aaFormExtensions', 'aaNotify', 'aaLoadingWatcher', '$parse', '$injector',
-            function(aaFormExtensions, aaNotify, aaLoadingWatcher, $parse, $injector) {
-                return aaFormFactory(false, aaFormExtensions, aaNotify, aaLoadingWatcher, $parse, $injector);
+        .directive('form', ['aaFormExtensions', 'aaNotify', '$parse', '$injector',
+            function(aaFormExtensions, aaNotify, $parse, $injector) {
+                return aaFormFactory(false, aaFormExtensions, aaNotify, $parse, $injector);
             }])
 
         .provider('aaFormExtensions', function() {
@@ -1130,7 +1120,7 @@
     }
 
 
-    function aaFormFactory(isNgForm, aaFormExtensions, aaNotify, aaLoadingWatcher, $parse, $injector) {
+    function aaFormFactory(isNgForm, aaFormExtensions, aaNotify, $parse, $injector) {
         return {
             restrict: isNgForm ? 'EAC' : 'E',
             require: 'form',
@@ -1208,6 +1198,8 @@
                                         $resetChanged();
                                     } else if(todo.type === '$reset') {
                                         $reset();
+                                    } else if(todo.type === '$clearErrors') {
+                                        $clearErrors();
                                     }
 
 									scope.$$aaFormExtensionsTodos.splice(i, 1);
@@ -1353,11 +1345,17 @@
                         }
 
                         function $clearErrors() {
-                            thisForm.$aaFormExtensions.$invalidAttempt = false;
+                            scope.$evalAsync(function() {
+                                thisForm.$aaFormExtensions.$invalidAttempt = false;
 
-                            angular.forEach(thisForm.$aaFormExtensions.$allValidationErrors, function(err) {
-                                err.field.hadFocus = false;
-								err.field.$element.removeClass('aa-had-focus');
+                                angular.forEach(thisForm.$aaFormExtensions.$allValidationErrors, function(err) {
+                                    err.field.hadFocus = false;
+                                    err.field.$element.removeClass('aa-had-focus');
+
+                                    //i think this makes sense most of the time
+                                    //maybe make configurable
+                                    err.field.$ngModel.$setPristine();
+                                });
                             });
                         }
                     },
