@@ -785,13 +785,13 @@
         }])
 
         //extend Angular form to have $aaFormExtensions and also keep track of the parent form
-        .directive('ngForm', ['aaFormExtensions', 'aaNotify', '$parse', '$injector',
-            function(aaFormExtensions, aaNotify, $parse, $injector) {
-                return aaFormFactory(true, aaFormExtensions, aaNotify, $parse, $injector);
+        .directive('ngForm', ['aaFormExtensions', 'aaNotify', '$parse', '$injector', '$timeout',
+            function(aaFormExtensions, aaNotify, $parse, $injector, $timeout) {
+                return aaFormFactory(true, aaFormExtensions, aaNotify, $parse, $injector, $timeout);
             }])
-        .directive('form', ['aaFormExtensions', 'aaNotify', '$parse', '$injector',
-            function(aaFormExtensions, aaNotify, $parse, $injector) {
-                return aaFormFactory(false, aaFormExtensions, aaNotify, $parse, $injector);
+        .directive('form', ['aaFormExtensions', 'aaNotify', '$parse', '$injector', '$timeout',
+            function(aaFormExtensions, aaNotify, $parse, $injector, $timeout) {
+                return aaFormFactory(false, aaFormExtensions, aaNotify, $parse, $injector, $timeout);
             }])
 
         .provider('aaFormExtensions', function() {
@@ -1120,7 +1120,7 @@
     }
 
 
-    function aaFormFactory(isNgForm, aaFormExtensions, aaNotify, $parse, $injector) {
+    function aaFormFactory(isNgForm, aaFormExtensions, aaNotify, $parse, $injector, $timeout) {
         return {
             restrict: isNgForm ? 'EAC' : 'E',
             require: 'form',
@@ -1133,7 +1133,7 @@
 
                         thisForm.$aaFormExtensions = {
                             $onSubmitAttempt: function() {
-                                setAttemptRecursively(thisForm, thisForm.$invalid);
+                                setInvalidAttemptRecursively(thisForm, thisForm.$invalid);
                             },
                             $parentForm: parentForm,
                             $childForms: [],
@@ -1167,11 +1167,11 @@
                         }
 
 
-                        function setAttemptRecursively(form, isInvalid) {
+                        function setInvalidAttemptRecursively(form, isInvalid) {
                             form.$aaFormExtensions.$invalidAttempt = isInvalid;
 
                             angular.forEach(form.$aaFormExtensions.$childForms, function(childForm) {
-                                setAttemptRecursively(childForm, isInvalid);
+                                setInvalidAttemptRecursively(childForm, isInvalid);
                             });
                         }
 
@@ -1345,15 +1345,13 @@
                         }
 
                         function $clearErrors() {
-                            scope.$evalAsync(function() {
-                                thisForm.$aaFormExtensions.$invalidAttempt = false;
+                            $timeout(function() {
+                                setInvalidAttemptRecursively(thisForm, false);
 
                                 angular.forEach(thisForm.$aaFormExtensions.$allValidationErrors, function(err) {
                                     err.field.hadFocus = false;
                                     err.field.$element.removeClass('aa-had-focus');
-
-                                    //i think this makes sense most of the time
-                                    //maybe make configurable
+                                    //this makes sense i think, maybe make configurable
                                     err.field.$ngModel.$setPristine();
                                 });
                             });

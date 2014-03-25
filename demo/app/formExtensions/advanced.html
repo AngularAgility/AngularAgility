@@ -169,17 +169,36 @@ addressForm.$aaFormExtensions.$invalidAttempt = {{ addressForm.$aaFormExtensions
             </table>
             <button class="btn btn-success" ng-click="person.friends.push({$editMode: true})">Add Friend</button>
             <br/>
+            <br/>
+
+            <button class="btn" ng-click="personForm.$aaFormExtensions.$clearErrors()">
+                <strong>personForm.$aaFormExtensions.$clearErrors()</strong>
+                <br/>
+                Clear any presently displayed errors. They are still errors
+                <br/>
+                and will come back though!
+            </button>
+
+            <button class="btn" ng-click="personForm.$aaFormExtensions.$resetChanged()" ng-disabled="!personForm.$aaFormExtensions.$changed">
+                <strong>personForm.$aaFormExtensions.$resetChanged()</strong>
+                <br/>
+                The present $changed form is now unchanged
+                <br/>
+                Resets the initial states of all form values
+            </button>
+
+            <button class="btn" ng-click="personForm.$aaFormExtensions.$reset()"
+                    ng-disabled="!personForm.$aaFormExtensions.$changed">
+                <strong>personForm.$aaFormExtensions.$reset()</strong>
+                <br/>
+                Reset form to it's unchanged, initial state
+                <br/>
+                <br/>
+            </button>
 
             <div class="clearfix">
                 <div class="pull-right">
-                    <button class="btn" ng-click="personForm.$aaFormExtensions.$resetChanged()">
-                        personForm.$aaFormExtensions.$resetChanged()
-                    </button>
 
-                    <button class="btn" ng-click="personForm.$aaFormExtensions.$reset()"
-                            ng-disabled="!personForm.$aaFormExtensions.$changed">
-                        Reset (only enabled if personForm.$aaFormExtensions.$changed)
-                    </button>
 
                     <button class="btn btn-primary" aa-submit-form="submit()">Submit</button>
                 </div>
