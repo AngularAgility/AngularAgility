@@ -201,7 +201,9 @@
                     if(locals.$scope) {
                         locals.$aaFormExtensions = {
 
-                            $addChangeDependency: function(expr, deepWatch, targetFormName /*optional*/) {
+                            $addChangeDependency: function(expr,
+                                                           deepWatch, /*optional*/
+                                                           targetFormName /*optional*/) {
                                 addTodo({
                                     type: '$addChangeDependency',
                                     expr: expr,
@@ -210,10 +212,12 @@
                                 });
                             },
 
-                            $resetChanged: function(targetFormName /*optional*/) {
+                            $resetChanged: function(runAfterFunc, /*optional*/
+                                                    targetFormName /*optional*/) {
                                 addTodo({
                                     type: '$resetChanged',
-                                    targetFormName: targetFormName
+                                    targetFormName: targetFormName,
+                                    runAfterFunc: runAfterFunc
                                 });
                             },
 
@@ -1205,7 +1209,7 @@
 										$addChangeDependency(todo.expr, todo.deepWatch);
 
 									} else if(todo.type === '$resetChanged') {
-                                        $resetChanged();
+                                        $resetChanged(todo.runAfterFunc);
                                     } else if(todo.type === '$reset') {
                                         $reset();
                                     } else if(todo.type === '$clearErrors') {
@@ -1338,7 +1342,7 @@
                             $clearErrors();
                         }
 
-                        function $resetChanged() {
+                        function $resetChanged(runAfterFunc) {
                             //schedule reset to run AFTER any ng-model binds may occur (after current stack frame)
 							scope.$evalAsync(function() {
 								angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
@@ -1354,6 +1358,10 @@
 										checkAndSetFormChanged(dep.$form);
 									}
 								});
+
+                                if(angular.isFunction(runAfterFunc)) {
+                                    runAfterFunc();
+                                }
 							});
                         }
 
