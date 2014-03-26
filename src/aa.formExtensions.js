@@ -307,8 +307,10 @@
                         ngForm = controllers[1],
                         fieldName = "This field";
 
-                    if(!ngForm) {
-                        return; //only for validation with forms
+                    if(!ngForm || !ngModel.$name) {
+                        //only for validation with forms
+                        //name is required or else angular form stuff doesn't work
+                        return;
                     }
 
                     ensureaaFormExtensionsFieldExists(ngForm, ngModel.$name);
@@ -348,6 +350,7 @@
                         }
                     });
 
+                    //CHANGE TRACKING
 					if (attrs.aaExcludeChanges === undefined) {
 
 						var loadingWatchDeReg, //for 'perf'
@@ -355,6 +358,11 @@
 								field: field,
 								isChanged: false
 							};
+
+                        //if you have a directive that has ng-model on its template and you do
+                        //another $compile of it (in a link or something) you will get multiple instances here
+                        //ng-model has the same issue. not sure if its worth checking since it
+                        //doesn't appear to cause any issues
 						recursivePushChangeDependency(ngForm, fieldChangeDependency);
 	
 						// wait for stack to clear before checking
@@ -374,6 +382,20 @@
 								setupChanged();
 							}
 						});
+
+                        scope.$on('$destroy', function() {
+                            //clean up any field changed dependencies on parent forms
+                            cleanChangeDependencies(ngForm);
+
+                            function cleanChangeDependencies(form) {
+                                if(form.$aaFormExtensions.$parentForm) {
+                                    cleanChangeDependencies(form.$aaFormExtensions.$parentForm);
+                                }
+
+                                arrayRemove(form.$aaFormExtensions.$changeDependencies, fieldChangeDependency);
+                                checkAndSetFormChanged(form);
+                            }
+                        });
 					}
 
                     //start watching for changed efficiently
@@ -406,21 +428,9 @@
                         }
                     }
 
-                    scope.$on('$destroy', function() {
-                        //clean up any field changed dependencies on parent forms
-                        cleanChangeDependencies(ngForm);
-
-                        function cleanChangeDependencies(form) {
-                            if(form.$aaFormExtensions.$parentForm) {
-                                cleanChangeDependencies(form.$aaFormExtensions.$parentForm);
-                            }
-
-                            arrayRemove(form.$aaFormExtensions.$changeDependencies, fieldChangeDependency);
-                            checkAndSetFormChanged(form);
-                        }
-                    });
 
 
+                    //CALCULATE ERROR MESSAGES
                     //recalculate field errors every time they change
                     scope.$watch(function() {
                         return ngModel.$error;
@@ -1329,22 +1339,26 @@
                         }
 
                         function $resetChanged() {
-                            angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
-								dep.isChanged = false;
-								
-                                if(dep.field) {
-                                    dep.initialValue = dep.field.$ngModel.$modelValue;
-									checkAndSetFormChanged(dep.field.$form);
-                                }
-
-                                if(dep.expr) {
-									dep.initialValue = angular.copy(scope.$eval(dep.expr));
-									checkAndSetFormChanged(dep.$form);
-                                }
-                            });
+                            //schedule reset to run AFTER any ng-model binds may occur (after current stack frame)
+							scope.$evalAsync(function() {
+								angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
+									dep.isChanged = false;
+									
+									if(dep.field) {
+										dep.initialValue = dep.field.$ngModel.$modelValue;
+										checkAndSetFormChanged(dep.field.$form);
+									}
+	
+									if(dep.expr) {
+										dep.initialValue = angular.copy(scope.$eval(dep.expr));
+										checkAndSetFormChanged(dep.$form);
+									}
+								});
+							});
                         }
 
                         function $clearErrors() {
+                            //this should be able to use $evalAsync, figure it out...
                             $timeout(function() {
                                 setInvalidAttemptRecursively(thisForm, false);
 
