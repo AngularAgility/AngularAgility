@@ -196,7 +196,7 @@
             //because there very well could be other forms that we don't want to accidentally mess with)
             //
             //the below will run on the first child form (or targetFormName matching child form) that appears
-            $provide.decorator('$controller', function($delegate) {
+            $provide.decorator('$controller', ['$delegate', function($delegate) {
                 return function (expression, locals) {
                     if(locals.$scope) {
                         locals.$aaFormExtensions = {
@@ -246,7 +246,7 @@
 
                     return $delegate(expression, locals);
                 };
-            });
+            }]);
         }])
 		
 		/**
