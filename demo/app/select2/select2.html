@@ -81,7 +81,10 @@
                     mode: 'id',
                     id: 'abbreviation',
                     text: 'name',
-                    options: select2States
+                    options: select2States,
+                    select2: {
+                        minimumInputLength: 2
+                    }
                 };
             })
             ]]></script>
@@ -379,18 +382,102 @@
         </div>
     </div>
 
-    <!--<div ng-controller="select2tagsIdTextSameConstrained">-->
-        <h1>TODO Constrained Tags Id/Text Same</h1>
-        <!--<div class="form-group select2">-->
-            <!--<label class="col-sm-2 control-label">Favorite States:</label>-->
-            <!--<div class="col-sm-3">-->
-                <!--<div aa-select2="select2Config" ng-model="favoriteStates" style="width: 300px;"></div>-->
-            <!--</div>-->
-        <!--</div>-->
-        <!--<br/>-->
-        <!--<div class="alert alert-info">-->
-        <!--</div>-->
-    <!--</div>-->
+    <div ng-controller="select2tagsIdTextSameConstrained">
+        <h1>Constrained Tags Id/Text Same</h1>
+        <div class="form-group select2">
+            <label class="col-sm-2 control-label">Favorite States:</label>
+            <div class="col-sm-3">
+                <div aa-select2="select2Config" ng-model="favoriteStates" style="width: 300px;"></div>
+            </div>
+        </div>
+        <br/>
+        <div class="alert alert-info">
+            <p>
+                Some pre-selected tags in the ng-model bound favoriteStates are set. You can add more from a constrained client-side array
+                of JUST the name of the state
+            </p>
+
+            <h3>Current state of bound scope</h3>
+            <pre>$scope.favoriteStates = {{ favoriteStates | json }}</pre>
+
+
+            <h3>JavaScript</h3>
+            <div syntax-highligher-for="javascript">
+                <script type="syntaxhighlighter"><![CDATA[
+                app.controller('select2tagsIdTextSameConstrained', function($scope, select2States) {
+
+                    var select2StatesJustName = select2States.map(function(state) {
+                        return state.name;
+                    });
+
+                    $scope.favoriteStates = ["Minnesota", "Wisconsin"];
+
+                    $scope.select2Config = {
+                        mode: 'tags-id',
+                        id: '@this',
+                        text: '@this',
+                        options: select2StatesJustName
+                    };
+                })
+            ]]></script>
+            </div>
+
+            <h3>HTML</h3>
+            <div syntax-highligher-for="html">
+                <script type="syntaxhighlighter"><![CDATA[
+                <div aa-select2="select2Config" ng-model="favoriteStates" style="width: 300px;"></div>
+            ]]></script>
+            </div>
+        </div>
+    </div>
+
+    <div ng-controller="select2tagsIdTextSameConstrainedAjax">
+        <h1>Constrained Tags Id/Text Same Ajax</h1>
+        <div class="form-group select2">
+            <label class="col-sm-2 control-label">Favorite States:</label>
+            <div class="col-sm-3">
+                <div aa-select2="select2Config" ng-model="favoriteStates" style="width: 300px;"></div>
+            </div>
+        </div>
+        <br/>
+        <div class="alert alert-info">
+            <p>
+                Some pre-selected tags in the ng-model bound favoriteStates are set. You can add more from a constrained AJAX array
+                of JUST the name of the state
+            </p>
+
+            <h3>Current state of bound scope</h3>
+            <pre>$scope.favoriteStates = {{ favoriteStates | json }}</pre>
+
+
+            <h3>JavaScript</h3>
+            <div syntax-highligher-for="javascript">
+                <script type="syntaxhighlighter"><![CDATA[
+                app.controller('select2tagsIdTextSameConstrainedAjax', function($scope, $http) {
+
+                    $scope.favoriteStates = ["Minnesota", "Wisconsin"];
+
+                    $scope.select2Config = {
+                        mode: 'tags-id',
+                        id: '@this',
+                        text: '@this',
+                        options: function(searchText) {
+                            //search for options with AJAX
+                            return $http.get('/searchStatesJustName/' + searchText);
+                        }
+                    };
+                })
+            ]]></script>
+            </div>
+
+            <h3>HTML</h3>
+            <div syntax-highligher-for="html">
+                <script type="syntaxhighlighter"><![CDATA[
+                <div aa-select2="select2Config" ng-model="favoriteStates" style="width: 300px;"></div>
+            ]]></script>
+            </div>
+        </div>
+    </div>
 
     <div ng-controller="select2tagObjectsConstrained">
         <h1>Constrained Tags Object Example</h1>

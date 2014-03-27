@@ -14,7 +14,7 @@
 
 angular
     .module('aa.select2', [])
-    .directive('aaSelect2', function ($q) {
+    .directive('aaSelect2', ['$q', function ($q) {
 
         return {
             require: 'ngModel',
@@ -104,6 +104,16 @@ angular
 
                                 if(!ngModel.$modelValue) {
                                     return;
+                                }
+                                
+                                if(inThisMode && inTagsMode) {
+                                    var newData = [];
+                                    angular.forEach(ngModel.$modelValue, function(str) {
+                                        newData.push({id: str, text: str});
+                                    });
+                                    callback(newData);
+                                    return;
+
                                 }
 
                                 if(inThisMode) {
@@ -224,4 +234,4 @@ angular
                 }
             }
         };
-    });
+    }]);

@@ -122,6 +122,40 @@ angular
         };
     })
 
+    .controller('select2tagsIdTextSameConstrained', function($scope, select2States) {
+
+        var select2StatesJustName = select2States.map(function(state) {
+            return state.name;
+        });
+
+        $scope.favoriteStates = ["Minnesota", "Wisconsin"];
+
+        $scope.select2Config = {
+            mode: 'tags-id',
+            id: '@this',
+            text: '@this',
+            options: select2StatesJustName
+        };
+    })
+
+    .controller('select2tagsIdTextSameConstrainedAjax', function($scope, $http) {
+
+        $scope.favoriteStates = ["Minnesota", "Wisconsin"];
+
+        $scope.select2Config = {
+            mode: 'tags-id',
+            id: '@this',
+            text: '@this',
+            options: function(searchText) {
+                //search for options with AJAX
+                return $http.get('/searchStatesJustName/' + searchText);
+            },
+            select2: {
+                minimumInputLength: 2
+            }
+        };
+    })
+
     .controller('select2tagIdAjaxConstrained', function($scope, $http) {
 
         $scope.favoriteStates = [ "MN", "WI" ];
