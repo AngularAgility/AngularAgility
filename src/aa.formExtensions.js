@@ -124,7 +124,7 @@
                         '<ul>' +
                             '<li ng-repeat="error in notification.validationErrorsToDisplay()">' +
                             '{{ error.message }}&nbsp;' +
-                            '<a href="" title="Show Field" ng-click="notification.showField(error)"><i class="fa fa-search"></i></a>' +
+                            '<a href="" title="Focus Field" ng-click="notification.showField(error)"><i class="fa fa-search"></i></a>' +
                             '</li>' +
                         '</ul>' +
                     '</div>',
@@ -274,27 +274,33 @@
                 restrict: 'A',
                 require: '^form',
                 link: function(scope, element, attrs, ngForm) {
-                    element.on('click', function() {
-                        scope.$apply(function() {
 
-                            ngForm.$aaFormExtensions.$onSubmitAttempt();
+                    element.on('click', submit);
 
-                            if(ngForm.$valid) {
+                    if(attrs.type === 'submit') {
+                        //this should be the form's default 'on enter' behavior for submission
+                        ngForm.$aaFormExtensions.$onEnterKey = submit;
+                    }
 
-                                var spinnerClickStrategy = aaFormExtensions.spinnerClickStrategies[attrs.spinnerClickStrategy || aaFormExtensions.defaultSpinnerClickStrategy];
-                                var eleSpinnerClickStrategy = spinnerClickStrategy(element);
-                                eleSpinnerClickStrategy.before();
+                    function submit() {
+                        ngForm.$aaFormExtensions.$onSubmitAttempt();
 
-                                //if this isn't a promise it will resolve immediately
-                                $q.when(scope.aaSubmitForm())
-                                    .then(function(result) {
-                                        eleSpinnerClickStrategy.after();
-                                        return result;
-                                    });
-                            }
-                        });
-                    });
+                        if(ngForm.$valid) {
 
+                            var spinnerClickStrategy = aaFormExtensions.spinnerClickStrategies[attrs.spinnerClickStrategy || aaFormExtensions.defaultSpinnerClickStrategy];
+                            var eleSpinnerClickStrategy = spinnerClickStrategy(element);
+                            eleSpinnerClickStrategy.before();
+
+                            //if this isn't a promise it will resolve immediately
+                            $q.when(scope.aaSubmitForm())
+                                .finally(function(result) {
+                                    eleSpinnerClickStrategy.after();
+                                    return result;
+                                });
+                        }
+
+                        scope.$apply();
+                    }
                 }
             };
         }])
@@ -536,11 +542,13 @@
                         throw new Error("In order to use aaValMsg a name MUST be specified on the element: " + element[0]);
                     }
 
+                    var newScope = scope.$new(); //allow strategy to muck with scope in an isolated manner
+
                     var msgElement = aaFormExtensions.valMsgPlacementStrategies[attrs.aaValMsg || aaFormExtensions.defaultValMsgPlacementStrategy](
-                        element, form.$name, attrs.name
+                        element, form.$name, attrs.name, newScope
                     );
 
-                    $compile(msgElement)(scope);
+                    $compile(msgElement)(newScope);
                 }
             };
         }])
@@ -722,7 +730,7 @@
                     element.removeAttr('aa-field-group');
                     element.attr("aa-field", attrs.aaFieldGroup);
 
-                    var strat = aaFormExtensions.fieldGroupStrategies[attrs.fieldGroupStrategy || aaFormExtensions.defaultFieldGroupStrategy];
+                    var strat = aaFormExtensions.fieldGroupStrategies[attrs.aaFieldGroupStrategy || aaFormExtensions.defaultFieldGroupStrategy];
                     strat(element);
 
                     return function(scope, element) {
@@ -878,13 +886,13 @@
 
 
             //VALIDATION MESSAGE PLACEMENT STRATEGIES
-            this.defaultValMsgPlacementStrategy = "default";
+            this.defaultValMsgPlacementStrategy = 'below-field';
             this.setDefaultValMsgPlacementStrategy = function(strategyName) {
                 this.defaultValMsgPlacementStrategy = strategyName;
             };
             this.valMsgPlacementStrategies = {
 
-                'default': function(formFieldElement, formName, formFieldName) {
+                'below-field': function(formFieldElement, formName, formFieldName) {
 
                     var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}"></div>', formName, formFieldName));
                     var fieldType = formFieldElement[0].type;
@@ -897,6 +905,24 @@
                     } else {
                         formFieldElement.after(msgElement);
                     }
+
+                    return msgElement;
+                },
+
+                'hover': function(formFieldElement, formName, formFieldName, scope) {
+                    var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}" ng-show="showMessages && isHovered && errorMessages.length > 0"></div>', formName, formFieldName));
+
+                    formFieldElement.on('mouseenter', function() {
+                        scope.isHovered = true;
+                        scope.$apply();
+                    });
+
+                    formFieldElement.on('mouseleave', function() {
+                        scope.isHovered = false;
+                        scope.$apply();
+                    });
+
+                    formFieldElement.after(msgElement);
 
                     return msgElement;
                 }
@@ -1006,14 +1032,23 @@
                 self.validationMessages = messages;
             };
 
-            this.valMsgForTemplate = '<div class="validation-error" ng-show="showMessages" ng-repeat="msg in errorMessages">{{msg}}</div>';
+            this.valMsgForTemplate = '<div class="validation-errors">' +
+                                        '<div class="validation-error" ng-show="showMessages" ng-repeat="msg in errorMessages">{{msg}}</div>' +
+                                        '<div class="notch notch-border"></div>' +
+                                        '<div class="notch"></div>' +
+                                     '</div>';
             this.setValMsgForTemplate = function(valMsgForTemplate) {
                 this.valMsgForTemplate = valMsgForTemplate;
             };
 
+            //todo wire up
+            this.globalSettings = {
+                messageOnBlur: true
+            };
 
             this.$get = function() {
                 return {
+
                     defaultLabelStrategy: self.defaultLabelStrategy,
                     labelStrategies: self.labelStrategies,
 
@@ -1035,7 +1070,10 @@
                     defaultOnNavigateAwayStrategy: self.defaultOnNavigateAwayStrategy,
                     onNavigateAwayStrategies: self.onNavigateAwayStrategies,
 
-                    defaultNotifyTarget: self.defaultNotifyTarget
+                    defaultNotifyTarget: self.defaultNotifyTarget,
+
+                    //todo wire up
+                    globalSettings: self.globalSettings
                 };
             };
         });
@@ -1147,7 +1185,7 @@
 
                         thisForm.$aaFormExtensions = {
                             $onSubmitAttempt: function() {
-                                setInvalidAttemptRecursively(thisForm, thisForm.$invalid);
+                                setAttemptRecursively(thisForm, thisForm.$invalid);
                             },
                             $parentForm: parentForm,
                             $childForms: [],
@@ -1181,11 +1219,11 @@
                         }
 
 
-                        function setInvalidAttemptRecursively(form, isInvalid) {
+                        function setAttemptRecursively(form, isInvalid) {
                             form.$aaFormExtensions.$invalidAttempt = isInvalid;
 
                             angular.forEach(form.$aaFormExtensions.$childForms, function(childForm) {
-                                setInvalidAttemptRecursively(childForm, isInvalid);
+                                setAttemptRecursively(childForm, isInvalid);
                             });
                         }
 
@@ -1368,7 +1406,7 @@
                         function $clearErrors() {
                             //this should be able to use $evalAsync, figure it out...
                             $timeout(function() {
-                                setInvalidAttemptRecursively(thisForm, false);
+                                setAttemptRecursively(thisForm, false);
 
                                 angular.forEach(thisForm.$aaFormExtensions.$allValidationErrors, function(err) {
                                     err.field.hadFocus = false;
@@ -1384,6 +1422,14 @@
 
 
                     post: function(scope, element, attrs, form) {
+
+                        element.on('keyup', function (event) {
+                            if (event.keyCode === 13 &&
+                                angular.isFunction(form.$aaFormExtensions.$onEnterKey) &&
+                                event.target.tagName.toUpperCase() !== "TEXTAREA") {
+                                form.$aaFormExtensions.$onEnterKey();
+                            }
+                        });
 
                         //if error notifications are enabled
                         //create/destroy notifications as necessary to display form validity
