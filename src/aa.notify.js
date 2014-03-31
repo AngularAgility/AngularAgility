@@ -241,15 +241,12 @@
                     }
                 }
             );
-            self.setDefaultNotifyConfig = function(defaultName) {
-                self.defaultNotifyConfig = defaultName;
-            };
             self.defaultNotifyConfig = 'default';
 
             this.$get = function() {
                 return {
                     notifyConfigs: self.notifyConfigs,
-                    defaultNotifyConfig: self.defaultNotifyConfig,
+                    defaultNotifyConfig: self.defaultNotifyConfig
                 };
             };
         })

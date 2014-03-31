@@ -663,6 +663,8 @@
                 }
             };
         })
+
+
         .directive('aaField', ['$compile', function($compile) {
             return {
                 restrict: 'A',
@@ -711,6 +713,7 @@
             };
         }])
 
+
         .directive('aaAutoFieldGroup', function() {
             return {
                 link: function() {
@@ -718,6 +721,8 @@
                 }
             };
         })
+
+
         .directive('aaFieldGroup', ['$compile', 'aaFormExtensions', function($compile, aaFormExtensions) {
             return {
                 restrict: 'A',
@@ -822,9 +827,6 @@
 
             //LABEL STRATEGIES
             this.defaultLabelStrategy = "default";
-            this.setDefaultLabelStrategy = function(strategyName) {
-                this.defaultLabelStrategy = strategyName;
-            };
             this.labelStrategies = {
 
                 //create a bootstrap3 style label
@@ -859,16 +861,10 @@
 
                 //add you own here using registerLabelStrategy
             };
-            this.registerLabelStrategy = function(name, strategy) {
-                this.labelStrategies[name] = strategy;
-            };
 
 
             //AUTO FIELD GROUP STRATEGIES
             this.defaultFieldGroupStrategy = "bootstrap3InlineForm";
-            this.setDefaultFieldGroupStrategy = function(strategyName) {
-                this.defaultFieldGroupStrategy = strategyName;
-            };
             this.fieldGroupStrategies = {
                 bootstrap3InlineForm: function(element) {
 
@@ -880,16 +876,10 @@
                     element.wrap('<div class="form-group"><div class="col-sm-3"></div></div>');
                 }
             };
-            this.registerFieldGroupStrategy = function(name, strategy) {
-                this.fieldGroupStrategies[name] = strategy;
-            };
 
 
             //VALIDATION MESSAGE PLACEMENT STRATEGIES
             this.defaultValMsgPlacementStrategy = 'below-field';
-            this.setDefaultValMsgPlacementStrategy = function(strategyName) {
-                this.defaultValMsgPlacementStrategy = strategyName;
-            };
             this.valMsgPlacementStrategies = {
 
                 'below-field': function(formFieldElement, formName, formFieldName) {
@@ -927,9 +917,6 @@
                     return msgElement;
                 }
             };
-            this.registerValMsgPlacementStrategy = function(name, strategy) {
-                this.valMsgPlacementStrategies[name] = strategy;
-            };
 
 
             //VALID ICON STRATEGIES
@@ -942,15 +929,9 @@
                     return ele;
                 }
             };
-            this.setValidIconStrategy = function(strategy) {
-                self.validIconStrategy = strategy;
-            };
 
             //aaSpinnerClick strategies
             this.defaultSpinnerClickStrategy = "fontAwesomeInsideButton";
-            this.setDefaultSpinnerClickStrategy = function(strategyName) {
-                this.defaultSpinnerClickStrategy = strategyName;
-            };
             this.spinnerClickStrategies = {
                 fontAwesomeInsideButton: function(buttonElement) {
 
@@ -968,24 +949,15 @@
                     };
                 }
             };
-            this.registerSpinnerClickStrategy = function(name, strategy) {
-                this.spinnerClickStrategies[name] = strategy;
-            };
 
 
-            //notify target
+            //NOTIFY TARGET
             //set to false to disable notifications for all forms unless explicitly overridden on the form
             this.defaultNotifyTarget = "default";
-            this.setDefaultNotifyTarget = function(notifyTarget) {
-                this.defaultNotifyTarget = notifyTarget;
-            };
 
             //ON NAVIGATE AWAY STRATEGIES
             //detect navigate away and handle it. UI Router is handled by default
             this.defaultOnNavigateAwayStrategy = 'confirmUiRouter';
-            this.setDefaultOnNavigateAwayStrategy = function(strategyName) {
-                this.defaultOnNavigateAwayStrategy = strategyName;
-            };
             this.onNavigateAwayStrategies = {
 
                 //VERY basic. For the love of everything holy please do something better with UI Bootstrap modal or something!
@@ -1008,9 +980,6 @@
                 },
                 none: angular.noop
             };
-            this.registerOnNavigateAwayStrategy = function(name, strategy) {
-                this.onNavigateAwayStrategies[name] = strategy;
-            };
 
 
             //VALIDATION MESSAGES
@@ -1025,21 +994,12 @@
                 url: "{0} must be a valid URL.",
                 number: "{0} must be number."
             };
-            this.setValidationMessage = function(directiveName, message) {
-                self.validationMessages[directiveName] = message;
-            };
-            this.setValidationMessages = function(messages) {
-                self.validationMessages = messages;
-            };
 
             this.valMsgForTemplate = '<div class="validation-errors">' +
                                         '<div class="validation-error" ng-show="showMessages" ng-repeat="msg in errorMessages">{{msg}}</div>' +
                                         '<div class="notch notch-border"></div>' +
                                         '<div class="notch"></div>' +
                                      '</div>';
-            this.setValMsgForTemplate = function(valMsgForTemplate) {
-                this.valMsgForTemplate = valMsgForTemplate;
-            };
 
             //todo wire up
             this.globalSettings = {
