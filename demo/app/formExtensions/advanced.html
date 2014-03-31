@@ -47,17 +47,15 @@ $rootScope.aaIsLoading = {{ aaIsLoading }}
 
         <p class="lead">On-navigate away handling</p>
         <p>
-            Includes (by default, overridable) detection of Angular UI Router $stateChangeStart. If the root form in the view
+            Includes (by default, overridable) detection of Angular UI Router $stateChangeStart AND native DOM beforeunload. If the root form in the view
             is myForm.$aaFormExtensions.$changed it will block with a JavaScript confirm. Please customize this
-            with however you are doing modals. <a href="http://angular-ui.github.io/bootstrap/#/modal" target="_blank">I would recommend this.</a>
+            with however you are doing modals for the UI Router case. <a href="http://angular-ui.github.io/bootstrap/#/modal" target="_blank">I would recommend this.</a>
             Then register your own custom strategy:
             <div syntax-highligher-for="javascript">
                 <script type="syntaxhighlighter"><![CDATA[
-                    aaFormExtensionsProvider.registerOnNavigateAwayStrategy(
-                        'myCustomStrategy',
-                        function(rootFormScope, rootForm, $injector){/*...*/}
-                    );
-                    aaFormExtensionsProvider.setDefaultOnNavigateAwayStrategy('myCustomStrategy');
+                    aaFormExtensionsProvider.myCustomStrategy = function(rootFormScope, rootForm, $injector){/*...*/};
+
+                    aaFormExtensionsProvider.defaultOnNavigateAwayStrategy = 'myCustomStrategy';
                 ]]>
                 </script>
             </div>

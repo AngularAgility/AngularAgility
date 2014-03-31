@@ -956,14 +956,16 @@
             this.defaultNotifyTarget = "default";
 
             //ON NAVIGATE AWAY STRATEGIES
-            //detect navigate away and handle it. UI Router is handled by default
-            this.defaultOnNavigateAwayStrategy = 'confirmUiRouter';
+            //detect navigate away and handle it. UI Router / native DOM is handled by default
+            this.defaultOnNavigateAwayStrategy = 'confirmUiRouterAndDom';
             this.onNavigateAwayStrategies = {
 
                 //VERY basic. For the love of everything holy please do something better with UI Bootstrap modal or something!
                 //requires >= v0.2.10!
-                confirmUiRouter: function(rootFormScope, rootForm, $injector) {
-                    return rootFormScope.$on('$stateChangeStart', function(event, toState, toParams){
+                confirmUiRouterAndDom: function(rootFormScope, rootForm, $injector) {
+
+                    //ANGULAR UI ROUTER
+                    var onDereg = rootFormScope.$on('$stateChangeStart', function(event, toState, toParams){
 
                         if(rootForm.$aaFormExtensions.$changed) {
 							if(!toState.aaUnsavedPrompted) {
@@ -977,6 +979,21 @@
 							}
                         }
                     });
+
+                    //NATIVE DOM IE9+
+                    function beforeUnload() {
+                        if(rootForm.$aaFormExtensions.$changed) {
+                            return 'You have unsaved changes are you sure you want to navigate away?';
+                        }
+                    }
+
+                    window.addEventListener('beforeunload', beforeUnload);
+
+                    rootFormScope.$on('$destroy', function() {
+                        onDereg();
+                        window.removeEventListener('beforeunload', beforeUnload);
+                    });
+
                 },
                 none: angular.noop
             };
@@ -1170,11 +1187,10 @@
                         }
 
                         //only root forms get the opportunity to block router state changes
-						var onNavigateAwayStrategyDereg;
                         if(!parentForm) {
                             var strategy = aaFormExtensions.onNavigateAwayStrategies[attrs.onNavigateAwayStrategy || aaFormExtensions.defaultOnNavigateAwayStrategy ];
                             if(angular.isFunction(strategy)) {
-                                onNavigateAwayStrategyDereg = strategy(scope, thisForm, $injector);
+                                strategy(scope, thisForm, $injector);
                             }
                         }
 
@@ -1220,10 +1236,6 @@
                         });
 
                         scope.$on('$destroy', function () {
-
-                            if (angular.isFunction(onNavigateAwayStrategyDereg)) {
-                                onNavigateAwayStrategyDereg();
-                            }
 
                             //when this form's scope is disposed clean up any references THIS form on parent forms
                             //to prevent memory leaks in the case of a ng-if switching out child forms etc.
