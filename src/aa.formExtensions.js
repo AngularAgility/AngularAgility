@@ -153,6 +153,7 @@
                         pendingRequests--;
 						loadingChanged();
                     }
+                    //perhaps add a 'runWhenDoneLoading' here
                 };
 				
                 function loadingChanged() {
@@ -372,12 +373,11 @@
                         //if you have a directive that has ng-model on its template and you do
                         //another $compile of it (in a link or something) you will get multiple instances here
                         //ng-model has the same issue. not sure if its worth checking since it
-                        //doesn't appear to cause any issues
+                        //doesn't appear to cause any issues and this happens with native angular forms too internally!
 						recursivePushChangeDependency(ngForm, fieldChangeDependency);
 	
 						// wait for stack to clear before checking
-						// todo this seems a little shaky, perhaps there is a better way?
-						$timeout(function() {
+						scope.$evalAsync(function() {
 							if(aaLoadingWatcher.isLoading) {
 								//delay changed checking until AFTER the form is completely loaded
 								loadingWatchDeReg = scope.$watch(function() {
@@ -1288,44 +1288,47 @@
                         });
 
                         function $addChangeDependency(watchExpr, deepWatch) {
-
-                            if(deepWatch === undefined) {
-                                deepWatch = true; //this yields expected behavior most of the time
-                            }
-
-                            if(!angular.isString(watchExpr)) {
-                                throw new Error("$addChangeDependency only supports string watchExprs to allow for form reset support");
-                            }
-
-                            var exists = false;
-                            angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
-                                if(watchExpr === dep.expr) {
-                                    exists = true;
+                            //start watching in a deferred manner (because some directives like datepickers will actually
+                            //modify the $modelValue but we DON'T want to track that as page is still initializing)
+                            scope.$evalAsync(function() {
+                                if(deepWatch === undefined) {
+                                    deepWatch = true; //this yields expected behavior most of the time
                                 }
+
+                                if(!angular.isString(watchExpr)) {
+                                    throw new Error("$addChangeDependency only supports string watchExprs to allow for form reset support");
+                                }
+
+                                var exists = false;
+                                angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
+                                    if(watchExpr === dep.expr) {
+                                        exists = true;
+                                    }
+                                });
+
+                                if(exists) {
+                                    return;
+                                }
+
+                                var changedDep = {
+                                    expr: watchExpr,
+                                    isChanged: false,
+                                    initialValue: angular.copy(scope.$eval(watchExpr)),
+                                    $form: thisForm
+                                };
+
+                                recursivePushChangeDependency(thisForm, changedDep);
+
+                                scope.$watch(watchExpr, function(val, oldVal) {
+                                    if(val === oldVal){
+                                        return; //first run
+                                    }
+                                    changedDep.isChanged = !angular.equals(changedDep.initialValue, val);
+
+                                    recursiveParentCheckAndSetFormChanged(thisForm);
+
+                                }, deepWatch);
                             });
-
-                            if(exists) {
-                                return;
-                            }
-
-                            var changedDep = {
-                                expr: watchExpr,
-                                isChanged: false,
-                                initialValue: angular.copy(scope.$eval(watchExpr)),
-                                $form: thisForm
-                            };
-
-                            recursivePushChangeDependency(thisForm, changedDep);
-
-                            scope.$watch(watchExpr, function(val, oldVal) {
-                                if(val === oldVal){
-                                    return; //first run
-                                }
-                                changedDep.isChanged = !angular.equals(changedDep.initialValue, val);
-
-                                recursiveParentCheckAndSetFormChanged(thisForm);
-
-                            }, deepWatch);
                         }
 
                         function $reset() {
