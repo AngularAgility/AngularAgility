@@ -377,7 +377,7 @@
 						recursivePushChangeDependency(ngForm, fieldChangeDependency);
 	
 						// wait for stack to clear before checking
-						scope.$evalAsync(function() {
+						$timeout(function() {
 							if(aaLoadingWatcher.isLoading) {
 								//delay changed checking until AFTER the form is completely loaded
 								loadingWatchDeReg = scope.$watch(function() {
