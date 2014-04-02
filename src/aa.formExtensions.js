@@ -1290,7 +1290,7 @@
                         function $addChangeDependency(watchExpr, deepWatch) {
                             //start watching in a deferred manner (because some directives like datepickers will actually
                             //modify the $modelValue but we DON'T want to track that as page is still initializing)
-                            scope.$evalAsync(function() {
+                            $timeout(function() {
                                 if(deepWatch === undefined) {
                                     deepWatch = true; //this yields expected behavior most of the time
                                 }
@@ -1357,7 +1357,7 @@
 
                         function $resetChanged(runAfterFunc) {
                             //schedule reset to run AFTER any ng-model binds may occur (after current stack frame)
-							scope.$evalAsync(function() {
+							$timeout(function() {
 								angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
 									dep.isChanged = false;
 									
