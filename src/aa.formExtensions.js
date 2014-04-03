@@ -737,7 +737,6 @@
                 require: 'ngModel',
                 scope: false,
                 compile: function(element) {
-
                     var container = aaFormExtensions.validIconStrategy.getContainer(element);
 
                     var validIcon = angular.element(aaFormExtensions.validIconStrategy.validIcon);
@@ -911,7 +910,7 @@
                 validIcon: '<i class="fa fa-check fa-lg"></i>',
                 invalidIcon: '<i class="fa fa-exclamation-circle fa-lg"></i>',
                 getContainer: function(element) {
-                    var ele = angular.element('<div class="col-xs-1 validation-icons"></span>');
+                    var ele = angular.element('<div class="col-xs-1 validation-icons"></div>');
                     element.parent().after(ele);
                     return ele;
                 }

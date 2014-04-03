@@ -48,7 +48,7 @@ module.exports = function (grunt) {
 			options:{
 				dest:'docs',
 				html5Mode:true,
-				scripts: [ 'docs/js/angular.min.js','src/aa.formExtensions.js','src/aa.notify.js','src/aa.select2.js'],
+				scripts: [ 'docs/js/angular.min.js','src/aa.formExtensions.js','src/aa.notify.js','src/aa.select2.js','src/aa.formExternalConfiguration.js'],
 				title: 'Angular Agility - Form Extensions',
 				startPage: '/api/aa.formExtensions'
 			},
