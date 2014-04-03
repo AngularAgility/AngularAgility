@@ -123,8 +123,8 @@
                         '<strong>The following fields have validation errors: </strong>' +
                         '<ul>' +
                             '<li ng-repeat="error in notification.validationErrorsToDisplay()">' +
-                            '<a href="" title="Focus Field" ng-click="notification.showField(error)"><i class="fa fa-search"></i></a>&nbsp;' +
-                            '{{ error.message }}' +
+                                '{{ error.message }}&nbsp;' +
+                                '<a href="" title="Focus Field" ng-click="notification.showField(error)"><i class="fa fa-search"></i></a>' +
                             '</li>' +
                         '</ul>' +
                     '</div>',
@@ -394,6 +394,11 @@
 						});
 
                         scope.$on('$destroy', function() {
+
+                            delete ngForm.$aaFormExtensions[ngModel.$name];
+
+                            clearAndUpdateValidationMessages(ngForm);
+
                             //clean up any field changed dependencies on parent forms
                             cleanChangeDependencies(ngForm);
 
@@ -454,8 +459,7 @@
 
                     function calcErrorMessages() {
                         var fieldErrorMessages = field.$errorMessages,
-                            msg,
-                            formsThisFieldIsIn = [];
+                            msg;
 
                         //clear out the validation messages that exist on *just the field*
                         fieldErrorMessages.length = 0;
@@ -502,36 +506,35 @@
                             }
                         }
 
-                        //find all forms recursively that this field is a child of
-                        collectForms(ngForm);
-                        function collectForms(form) {
-                            formsThisFieldIsIn.push(form);
-                            if(form.$aaFormExtensions.$parentForm) {
-                                collectForms(form.$aaFormExtensions.$parentForm);
+                        clearAndUpdateValidationMessages(ngForm, fieldErrorMessages);
+                    }
+
+
+                    //TODO: update this in the future so that newErrorMessages are pushed to the $allValidationErrors
+                    //array in respect to initial form field order
+                    function clearAndUpdateValidationMessages(form, newErrorMessages /*optional*/) {
+
+                        //clear out any validation messages that exist for this field
+                        for(var i = form.$aaFormExtensions.$allValidationErrors.length - 1; i >= 0; i--) {
+                            if(form.$aaFormExtensions.$allValidationErrors[i].field === field) {
+                                form.$aaFormExtensions.$allValidationErrors.splice(i, 1);
                             }
                         }
 
-                        //TODO: perhaps update this in the future so that 'new' validation errors are pushed to the $allValidationErrors
-                        //array in respect to initial form field order
-                        //for each form that has this field in it....
-                        angular.forEach(formsThisFieldIsIn, function(form) {
-
-                            //clear out any validation messages that exist for this field
-                            //since we are going to add new ones below based on what was calculated for the field changing
-                            for(var i = form.$aaFormExtensions.$allValidationErrors.length - 1; i >= 0; i--) {
-                                if(form.$aaFormExtensions.$allValidationErrors[i].field === field) {
-                                    form.$aaFormExtensions.$allValidationErrors.splice(i, 1);
-                                }
-                            }
-
-                            //push any new ones on
-                            angular.forEach(fieldErrorMessages, function(msg) {
+                        //add new fields errors if specified
+                        if(newErrorMessages) {
+                            angular.forEach(newErrorMessages, function(msg) {
                                 form.$aaFormExtensions.$allValidationErrors.push({
                                     field: field,
                                     message: msg
                                 });
                             });
-                        });
+                        }
+
+                        //find all forms recursively upward that this field is a child of
+                        if(form.$aaFormExtensions.$parentForm) {
+                            clearAndUpdateValidationMessages(form.$aaFormExtensions.$parentForm, newErrorMessages);
+                        }
                     }
                 }
             };
