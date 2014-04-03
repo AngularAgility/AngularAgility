@@ -189,7 +189,7 @@
             //allows for any controller to inject in $aaFormExtensions to *eventually* talk to any form that may show
             //up in the DOM without coupling:
             //
-            //broacast doesn't seem to be the best choice here because parent controllers are always created
+            //broadcast doesn't seem to be the best choice here because parent controllers are always created
             //prior to their child forms.  the only other thing I could think of would be to use $timeout to allow
             //the form(s) to init and then a broadcast to run but this would have the issue of REQUIRING
             //this helper to have the controller scope passed in (don't want to broadcast these messages on rootscope
@@ -309,7 +309,7 @@
                 link: function(scope, element, attrs, controllers) {
                     var ngModel = controllers[0],
                         ngForm = controllers[1],
-                        fieldName = "This field";
+                        fieldName = aaFormExtensions.validationMessages.lbl_thisfield;
 
                     if(!ngForm || !ngModel.$name) {
                         //only for validation with forms
@@ -996,7 +996,8 @@
                 max: "{0} must be at most {1}.",
                 pattern: "{0} is invalid.",
                 url: "{0} must be a valid URL.",
-                number: "{0} must be number."
+                number: "{0} must be number.",
+                lbl_thisfield: "This field"
             };
             this.setValidationMessage = function(directiveName, message) {
                 self.validationMessages[directiveName] = message;

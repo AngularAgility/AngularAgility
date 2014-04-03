@@ -10,5 +10,6 @@ var formExtensionTranslations = {
     max: "{0} moet maximaal {1} zijn.",
     pattern: "{0} is ongeldig.",
     url: "{0} moet een geldige URL zijn.",
-    number: "{0} moet een getal zijn."
+    number: "{0} moet een getal zijn.",
+    lbl_thisfield:'Dit veld'
 };
