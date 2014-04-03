@@ -123,8 +123,8 @@
                         '<strong>The following fields have validation errors: </strong>' +
                         '<ul>' +
                             '<li ng-repeat="error in notification.validationErrorsToDisplay()">' +
-                            '{{ error.message }}&nbsp;' +
-                            '<a href="" title="Focus Field" ng-click="notification.showField(error)"><i class="fa fa-search"></i></a>' +
+                            '<a href="" title="Focus Field" ng-click="notification.showField(error)"><i class="fa fa-search"></i></a>&nbsp;' +
+                            '{{ error.message }}' +
                             '</li>' +
                         '</ul>' +
                     '</div>',
@@ -464,9 +464,13 @@
                             if(ngModel.$error[key]) {
 
                                 //for each possible validation message check if there is a custom
-                                //validation message template on the element otherwise use
-                                //the globally registered one
-                                if(key === 'minlength') {
+                                //validation message string on the element otherwise use
+                                //the globally registered one or a catchall 'unknown'
+                                if(attrs[key + 'Msg']) {
+                                    //there is a custom message on the element. it wins
+                                    msg = stringFormat(attrs[key + 'Msg'], fieldName, attrs[key]);
+                                    fieldErrorMessages.push(msg);
+                                } else if(key === 'minlength') {
                                     msg = stringFormat(attrs.ngMinlengthMsg || aaFormExtensions.validationMessages.minlength, fieldName, attrs.ngMinlength);
                                     fieldErrorMessages.push(msg);
                                 } else if(key === 'maxlength') {
@@ -487,7 +491,12 @@
                                     msg = stringFormat(attrs.numberMsg || aaFormExtensions.validationMessages.number, fieldName);
                                     fieldErrorMessages.push(msg);
                                 } else if(aaFormExtensions.validationMessages[key]) {
-                                    msg = stringFormat(attrs[key + 'Msg'] || aaFormExtensions.validationMessages[key], fieldName);
+                                    //globally registered custom message
+                                    msg = stringFormat(aaFormExtensions.validationMessages[key], fieldName);
+                                    fieldErrorMessages.push(msg);
+                                } else {
+                                    //unknown what the message should be, use unknown key
+                                    msg = stringFormat(aaFormExtensions.validationMessages.unknown, fieldName);
                                     fieldErrorMessages.push(msg);
                                 }
                             }
@@ -1008,7 +1017,8 @@
                 max: "{0} must be at most {1}.",
                 pattern: "{0} is invalid.",
                 url: "{0} must be a valid URL.",
-                number: "{0} must be number."
+                number: "{0} must be number.",
+                unknown: "{0} is invalid."
             };
 
             this.valMsgForTemplate = '<div class="validation-errors">' +
