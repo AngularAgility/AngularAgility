@@ -309,7 +309,7 @@
                 link: function(scope, element, attrs, controllers) {
                     var ngModel = controllers[0],
                         ngForm = controllers[1],
-                        fieldName = aaFormExtensions.validationMessages.lbl_thisfield;
+                        fieldName = aaFormExtensions.validationMessages.thisFieldLabel;
 
                     if(!ngForm || !ngModel.$name) {
                         //only for validation with forms
@@ -388,6 +388,7 @@
 						});
 
                         scope.$on('$destroy', function() {
+                            element.unbind('blur');
                             //clean up any field changed dependencies on parent forms
                             cleanChangeDependencies(ngForm);
 
@@ -997,7 +998,7 @@
                 pattern: "{0} is invalid.",
                 url: "{0} must be a valid URL.",
                 number: "{0} must be number.",
-                lbl_thisfield: "This field"
+                thisFieldLabel: "This field"
             };
             this.setValidationMessage = function(directiveName, message) {
                 self.validationMessages[directiveName] = message;
