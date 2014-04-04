@@ -105,11 +105,9 @@ $rootScope.aaIsLoading = false
 Includes (by default, overridable) detection of Angular UI Router $stateChangeStart. If the root form in the view is myForm.$aaFormExtensions.$changed it will block with a JavaScript confirm. Please customize this with however you are doing modals. I would recommend Angular UI Modal. Then register your own custom strategy:
 
 ```javascript
-aaFormExtensionsProvider.registerOnNavigateAwayStrategy(
-    'myCustomStrategy',
-    function(rootFormScope, rootForm, $injector){/*...*/}
-);
-aaFormExtensionsProvider.setDefaultOnNavigateAwayStrategy('myCustomStrategy');
+aaFormExtensionsProvider.myCustomStrategy = function(rootFormScope, rootForm, $injector){/*...*/};
+ 
+aaFormExtensionsProvider.defaultOnNavigateAwayStrategy = 'myCustomStrategy';
 ```
 Use to ignore on a per form basis (if you registered a global default):
 

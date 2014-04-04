@@ -21,20 +21,20 @@
 
             return {
                 //simple api uses aaNotifyConfigProvider.defaultNotifyConfig
-                success: function(message, options) {
-                    return this.add(angular.extend({ message: message, messageType: 'success'}, options));
+                success: function (message, options) {
+                    return aaNotifyConfig.notifyConfigs[aaNotifyConfig.defaultNotifyConfig].namedDefaults.success(message, options, this);
                 },
-                info: function(message, options) {
-                    return this.add(angular.extend({ message: message, messageType: 'info'}, options));
+                info: function (message, options) {
+                    return aaNotifyConfig.notifyConfigs[aaNotifyConfig.defaultNotifyConfig].namedDefaults.info(message, options, this);
                 },
-                warning: function(message, options) {
-                    return this.add(angular.extend({ message: message, messageType: 'warning'}, options));
+                warning: function (message, options) {
+                    return aaNotifyConfig.notifyConfigs[aaNotifyConfig.defaultNotifyConfig].namedDefaults.warning(message, options, this);
                 },
-                danger: function(message, options) {
-                    return this.add(angular.extend({ message: message, messageType: 'danger'}, options));
+                danger: function (message, options) {
+                    return aaNotifyConfig.notifyConfigs[aaNotifyConfig.defaultNotifyConfig].namedDefaults.danger(message, options, this);
                 },
-                error: function(message, options) {
-                    return this.add(angular.extend({ message: message, messageType: 'error'}, options));
+                error: function (message, options) {
+                    return aaNotifyConfig.notifyConfigs[aaNotifyConfig.defaultNotifyConfig].namedDefaults.error(message, options, this);
                 },
 
                 //complicated API with full options
@@ -70,6 +70,11 @@
                 remove: function(messageHandle, targetContainerName) {
                     targetContainerName = targetContainerName || aaNotifyConfig.notifyConfigs[aaNotifyConfig.defaultNotifyConfig].defaultTargetContainerName;
                     $rootScope.$broadcast('aaNotifyContainer-' + targetContainerName + '-remove', messageHandle);
+                },
+
+                clearAll: function(targetContainerName) {
+                    targetContainerName = targetContainerName || aaNotifyConfig.notifyConfigs[aaNotifyConfig.defaultNotifyConfig].defaultTargetContainerName;
+                    $rootScope.$broadcast('aaNotifyContainer-' + targetContainerName + '-clearAll');
                 }
             };
         }])
@@ -93,12 +98,19 @@
 
                     scope.$on('aaNotifyContainer-' + containerName + '-add', function(e, options) {
 
-                        scope.notifications.push(options);
+                        if(options.replaceExisting) {
+                            scope.notifications.length = 0;
+                        }
 
+                        scope.notifications.push(options);
+                        
                         if (options.ttl > 0) {
                             $timeout(function() {
 
-                                scope.notifications.splice(scope.notifications.indexOf(options), 1);
+                                var idx = scope.notifications.indexOf(options);
+                                if(idx > -1) {
+                                    scope.notifications.splice(idx, 1);
+                                }
 
                             }, options.ttl);
                         }
@@ -111,6 +123,10 @@
                                 break;
                             }
                         }
+                    });
+
+                    scope.$on('aaNotifyContainer-' + containerName + '-clearAll', function() {
+                        scope.notifications.length = 0;
                     });
 
                     scope.close = function(notification) {
@@ -176,7 +192,25 @@
                             '<span ng-if="notification.allowHtml" class="aa-notify-message" ng-bind-html="notification.message"></span>' +
                         '</div>',
                     options: {
-                        ttl: 4000 //overridable on a per-call basis
+                        ttl: 4000,              //overridable on a per-call basis
+                        replaceExisting: false  //replace any existing messages. only one will show up at a time
+                    },
+                    namedDefaults: {
+                        success: function (message, options, notifier) {
+                            return notifier.add(angular.extend({ message: message, messageType: 'success'}, options));
+                        },
+                        info: function (message, options, notifier) {
+                            return notifier.add(angular.extend({ message: message, messageType: 'info'}, options));
+                        },
+                        warning: function (message, options, notifier) {
+                            return notifier.add(angular.extend({ message: message, messageType: 'warning'}, options));
+                        },
+                        danger: function (message, options, notifier) {
+                            return notifier.add(angular.extend({ message: message, messageType: 'danger'}, options));
+                        },
+                        error: function (message, options, notifier) {
+                            return notifier.add(angular.extend({ message: message, messageType: 'error'}, options));
+                        }
                     },
                     defaultTargetContainerName: 'default',
                     optionsTransformer: function(options, $sce) {
@@ -207,9 +241,6 @@
                     }
                 }
             );
-            self.setDefaultNotifyConfig = function(defaultName) {
-                self.defaultNotifyConfig = defaultName;
-            };
             self.defaultNotifyConfig = 'default';
 
             this.$get = function() {

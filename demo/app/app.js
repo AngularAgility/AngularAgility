@@ -37,7 +37,7 @@ angular
                 });
 
             //a built in label strategy that works with bootstrap
-            aaFormExtensionsProvider.setDefaultLabelStrategy('bootstrap3InlineForm');
+            aaFormExtensionsProvider.defaultLabelStrategy = 'bootstrap3InlineForm';
     }])
     .directive('syntaxHighligherFor', function() {
         return {

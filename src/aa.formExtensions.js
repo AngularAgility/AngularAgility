@@ -11,14 +11,14 @@
 
 (function() {
     'use strict';
-	
+
 	/**
 	* @ngdoc overview
 	* @name aa.formExtensions
 	* @requires aa.notify
 	*
 	* @description
-	* This module contains the form extension directives that are used to easily generate 
+	* This module contains the form extension directives that are used to easily generate
 	* angular form elements.
 	*
 	* Form extensions is a set of directives that can be used to generate common form
@@ -26,16 +26,16 @@
 	* By specifying a form extensions directive, you can write fewer lines
 	* of code and still create fully functional, Angular compatible forms. Because form
 	* extensions is powered by Angular, you can also combine Angular ng attributes to override
-	* the behaviour of form extensions. 
+	* the behaviour of form extensions.
 	*
-	* Form extensions also supports automatic generation of toaster alerts. Out of the box, form 
-	* extension directives will tie themselves to $error. When an error does occur (such as a required 
+	* Form extensions also supports automatic generation of toaster alerts. Out of the box, form
+	* extension directives will tie themselves to $error. When an error does occur (such as a required
 	* field not being filled in ), form extensions will automatically pop-up a toast notification alerting
 	* the user what field is missing. This, by default, appears in the lower right corner of the view port.
 	* The toast also has support for click-able error direction, meaning that the user can click the error
-	* message that appears in the toast notification, and the cursor will put itself in the input element 
+	* message that appears in the toast notification, and the cursor will put itself in the input element
 	* with the offending error, even if it is located off screen.
-	* 
+	*
 	* Without Form Extensions:
 	*
 	<pre>
@@ -95,7 +95,7 @@
 		</div>
 	</pre>
 	*
-	* With Form Extensions: 
+	* With Form Extensions:
 	*
 	<pre>
 		<div ng-form="exampleForm" class="form-horizontal">
@@ -154,7 +154,7 @@
 						loadingChanged();
                     }
                 };
-				
+
                 function loadingChanged() {
                     $rootScope.aaIsLoading = watcher.isLoading = pendingRequests > 0;
 
@@ -248,7 +248,7 @@
                 };
             }]);
         }])
-		
+
 		/**
 		* @ngdoc directive
 		* @name aaSaveForm
@@ -368,7 +368,7 @@
                         //ng-model has the same issue. not sure if its worth checking since it
                         //doesn't appear to cause any issues
 						recursivePushChangeDependency(ngForm, fieldChangeDependency);
-	
+
 						// wait for stack to clear before checking
 						// todo this seems a little shaky, perhaps there is a better way?
 						$timeout(function() {
@@ -388,7 +388,6 @@
 						});
 
                         scope.$on('$destroy', function() {
-                            element.unbind('blur');
                             //clean up any field changed dependencies on parent forms
                             cleanChangeDependencies(ngForm);
 
@@ -424,7 +423,7 @@
 								//Don't count changes from NaN as they aren't really changes
 								fieldChangeDependency.initialValue = ngModel.$modelValue;
 							}
-							
+
 							var newIsChanged = fieldChangeDependency.initialValue !== ngModel.$modelValue;
 							if(fieldChangeDependency.isChanged !== newIsChanged) {
 								fieldChangeDependency.isChanged = newIsChanged;
@@ -969,7 +968,7 @@
 
                         if(rootForm.$aaFormExtensions.$changed) {
 							if(!toState.aaUnsavedPrompted) {
-								event.preventDefault();					
+								event.preventDefault();
 								if(confirm('You have unsaved changes are you sure you want to navigate away?')) {
 									//should be able to use options { notify: false } on UI Router
 									//but that doesn't seem to work right (new state never loads!) so this is a workaround
@@ -1192,7 +1191,7 @@
 
 
                         //pick up any todos off the queue for this form
-                        scope.$watchCollection(function() { 
+                        scope.$watchCollection(function() {
 							return scope.$$aaFormExtensionsTodos;
 						},
 						function(val) {
@@ -1348,12 +1347,12 @@
 							scope.$evalAsync(function() {
 								angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
 									dep.isChanged = false;
-									
+
 									if(dep.field) {
 										dep.initialValue = dep.field.$ngModel.$modelValue;
 										checkAndSetFormChanged(dep.field.$form);
 									}
-	
+
 									if(dep.expr) {
 										dep.initialValue = angular.copy(scope.$eval(dep.expr));
 										checkAndSetFormChanged(dep.$form);
