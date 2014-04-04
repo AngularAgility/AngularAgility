@@ -17,16 +17,16 @@
         <p>Sets the state of the form back to it's original state&dagger;:</p>
         <div syntax-highligher-for="javascript">
             <script type="syntaxhighlighter"><![CDATA[
-                personForm.$aaFormExtensions.$reset();
+                personForm.$aaFormExtensions.$reset(/*optional runAfterFunc(){ }*/);
             ]]>
             </script>
         </div>
 
         <p class="lead">Reset initial form state</p>
-        <p>The current state of the form will be reset to it's initial state (any changes from here are now $changed):</p>
+        <p>The current state of the form will be considered it's initial state (any changes from here are now $changed):</p>
         <div syntax-highligher-for="javascript">
             <script type="syntaxhighlighter"><![CDATA[
-                personForm.$aaFormExtensions.$resetChanged();
+                personForm.$aaFormExtensions.$resetChanged(/*optional runAfterFunc(){ }*/);
             ]]>
             </script>
         </div>
