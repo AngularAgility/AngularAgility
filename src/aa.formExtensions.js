@@ -207,8 +207,7 @@
                                                            targetFormName /*optional*/) {
                                 addTodo({
                                     type: '$addChangeDependency',
-                                    expr: expr,
-                                    deepWatch: deepWatch,
+                                    args: [expr, deepWatch],
                                     targetFormName: targetFormName
                                 });
                             },
@@ -217,21 +216,25 @@
                                                     targetFormName /*optional*/) {
                                 addTodo({
                                     type: '$resetChanged',
-                                    targetFormName: targetFormName,
-                                    runAfterFunc: runAfterFunc
-                                });
-                            },
-
-                            $reset: function(targetFormName /*optional*/) {
-                                addTodo({
-                                    type: '$reset',
+                                    args: [runAfterFunc],
                                     targetFormName: targetFormName
                                 });
                             },
 
-                            $clearErrors: function(targetFormName /*optional*/) {
+                            $reset: function(runAfterFunc, /*optional*/
+                                             targetFormName /*optional*/) {
                                 addTodo({
                                     type: '$reset',
+                                    args: [runAfterFunc],
+                                    targetFormName: targetFormName
+                                });
+                            },
+
+                            $clearErrors: function(runAfterFunc, /*optional*/
+                                                    targetFormName /*optional*/) {
+                                addTodo({
+                                    type: '$reset',
+                                    args: [runAfterFunc],
                                     targetFormName: targetFormName
                                 });
                             }
@@ -823,13 +826,13 @@
         }])
 
         //extend Angular form to have $aaFormExtensions and also keep track of the parent form
-        .directive('ngForm', ['aaFormExtensions', 'aaNotify', '$parse', '$injector', '$timeout',
-            function(aaFormExtensions, aaNotify, $parse, $injector, $timeout) {
-                return aaFormFactory(true, aaFormExtensions, aaNotify, $parse, $injector, $timeout);
+        .directive('ngForm', ['aaFormExtensions', 'aaNotify', '$parse', '$injector', '$timeout', '$q',
+            function(aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q) {
+                return aaFormFactory(true, aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q);
             }])
-        .directive('form', ['aaFormExtensions', 'aaNotify', '$parse', '$injector', '$timeout',
-            function(aaFormExtensions, aaNotify, $parse, $injector, $timeout) {
-                return aaFormFactory(false, aaFormExtensions, aaNotify, $parse, $injector, $timeout);
+        .directive('form', ['aaFormExtensions', 'aaNotify', '$parse', '$injector', '$timeout', '$q',
+            function(aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q) {
+                return aaFormFactory(false, aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q);
             }])
 
         .provider('aaFormExtensions', function() {
@@ -981,7 +984,7 @@
                         if(rootForm.$aaFormExtensions.$changed) {
 							if(!toState.aaUnsavedPrompted) {
 								event.preventDefault();					
-								if(confirm('You have unsaved changes are you sure you want to navigate away?')) {
+								if(window.confirm('You have unsaved changes are you sure you want to navigate away?')) {
 									//should be able to use options { notify: false } on UI Router
 									//but that doesn't seem to work right (new state never loads!) so this is a workaround
 									toState.aaUnsavedPrompted = true;
@@ -1030,6 +1033,12 @@
                                         '<div class="notch"></div>' +
                                      '</div>';
 
+
+            this.confirmResetStrategy = function() {
+                //this can be a promise or immediate like below
+                return window.confirm('Are you sure you want to reset any unsaved changes?');
+            };
+
             //todo wire up
             this.globalSettings = {
                 messageOnBlur: true
@@ -1060,6 +1069,8 @@
                     onNavigateAwayStrategies: self.onNavigateAwayStrategies,
 
                     defaultNotifyTarget: self.defaultNotifyTarget,
+
+                    confirmResetStrategy: self.confirmResetStrategy,
 
                     //todo wire up
                     globalSettings: self.globalSettings
@@ -1161,7 +1172,7 @@
     }
 
 
-    function aaFormFactory(isNgForm, aaFormExtensions, aaNotify, $parse, $injector, $timeout) {
+    function aaFormFactory(isNgForm, aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q) {
         return {
             restrict: isNgForm ? 'EAC' : 'E',
             require: 'form',
@@ -1231,18 +1242,9 @@
 								var todo = scope.$$aaFormExtensionsTodos[i];
 
 								if(todo.targetFormName === thisForm.$name || (!todo.targetFormName && !thisForm.$aaFormExtensions.$parentForm)) {
-									if (todo.type === '$addChangeDependency') {
-										$addChangeDependency(todo.expr, todo.deepWatch);
 
-									} else if(todo.type === '$resetChanged') {
-                                        $resetChanged(todo.runAfterFunc);
-                                    } else if(todo.type === '$reset') {
-                                        $reset();
-                                    } else if(todo.type === '$clearErrors') {
-                                        $clearErrors();
-                                    }
-
-									scope.$$aaFormExtensionsTodos.splice(i, 1);
+                                    thisForm.$aaFormExtensions[todo.type].apply(this, todo.args);   //call the func
+									scope.$$aaFormExtensionsTodos.splice(i, 1);                     //remove from queue
 								}
 							}
                         });
@@ -1343,28 +1345,38 @@
                             });
                         }
 
-                        function $reset() {
-                            angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
-                                if(dep.field && dep.field.$ngModel.$modelValue !== dep.initialValue) {
-                                    dep.field.$ngModel.$setViewValue(dep.initialValue);
-                                    dep.field.$ngModel.$render();
-                                }
+                        function $reset(runAfterFunc) {
 
-                                if(dep.expr) {
-                                    //find the scope context that the expression was created on
-                                    //aka go up the prototype chain until we stop seeing it
-                                    var currentContext = scope,
-										lastContext = null;
-
-                                    while(currentContext.$eval(dep.expr) !== undefined) {
-										lastContext = currentContext;
-                                        currentContext = currentContext.$parent;
+                            $q.when(aaFormExtensions.confirmResetStrategy())
+                                .then(function(resp) {
+                                    if(resp) {
+                                        reset();
                                     }
-                                    $parse(dep.expr).assign(lastContext, angular.copy(dep.initialValue));
-                                }
-                            });
+                                });
 
-                            $clearErrors();
+                            function reset() {
+                                angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
+                                    if(dep.field && dep.field.$ngModel.$modelValue !== dep.initialValue) {
+                                        dep.field.$ngModel.$setViewValue(dep.initialValue);
+                                        dep.field.$ngModel.$render();
+                                    }
+
+                                    if(dep.expr) {
+                                        //find the scope context that the expression was created on
+                                        //aka go up the prototype chain until we stop seeing it
+                                        var currentContext = scope,
+                                            lastContext = null;
+
+                                        while(currentContext.$eval(dep.expr) !== undefined) {
+                                            lastContext = currentContext;
+                                            currentContext = currentContext.$parent;
+                                        }
+                                        $parse(dep.expr).assign(lastContext, angular.copy(dep.initialValue));
+                                    }
+                                });
+
+                                $clearErrors(runAfterFunc);
+                            }
                         }
 
                         function $resetChanged(runAfterFunc) {
@@ -1390,7 +1402,7 @@
 							});
                         }
 
-                        function $clearErrors() {
+                        function $clearErrors(runAfterFunc) {
                             //this should be able to use $evalAsync, figure it out...
                             $timeout(function() {
                                 setAttemptRecursively(thisForm, false);
@@ -1401,6 +1413,10 @@
                                     //this makes sense i think, maybe make configurable
                                     err.field.$ngModel.$setPristine();
                                 });
+
+                                if(angular.isFunction(runAfterFunc)) {
+                                    runAfterFunc();
+                                }
                             });
                         }
                     },
