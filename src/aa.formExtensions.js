@@ -253,23 +253,6 @@
             }]);
         }])
 		
-		/**
-		* @ngdoc directive
-		* @name aaSaveForm
-		* @element form
-		* @deprecated
-		*
-		* @description
-		*  The directive "aaSaveForm" has been deprecated in favour of a more "sensically" named aaSubmitForm.
-		*/
-        .directive('aaSaveForm', function() {
-            return {
-                link: function() {
-                    throw new Error("aaSaveForm has been deprecated in favour of a more sensically named aaSubmitForm");
-                }
-            };
-        })
-
         .directive('aaSubmitForm', ['aaFormExtensions', '$q', function(aaFormExtensions, $q) {
             return {
                 scope: {
@@ -671,15 +654,6 @@
             };
         }])
 
-        .directive('aaAutoField', function() {
-            return {
-                link: function() {
-                    throw new Error("aaAutoField has been deprecated in favor aaField");
-                }
-            };
-        })
-
-
         .directive('aaField', ['$compile', function($compile) {
             return {
                 restrict: 'A',
@@ -727,16 +701,6 @@
                 }
             };
         }])
-
-
-        .directive('aaAutoFieldGroup', function() {
-            return {
-                link: function() {
-                    throw new Error("aaAutoFieldGroup has been deprecated in favor aaFieldGroup");
-                }
-            };
-        })
-
 
         .directive('aaFieldGroup', ['$compile', 'aaFormExtensions', function($compile, aaFormExtensions) {
             return {
