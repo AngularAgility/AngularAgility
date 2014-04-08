@@ -233,7 +233,7 @@
                             $clearErrors: function(runAfterFunc, /*optional*/
                                                     targetFormName /*optional*/) {
                                 addTodo({
-                                    type: '$reset',
+                                    type: '$clearErrors',
                                     args: [runAfterFunc],
                                     targetFormName: targetFormName
                                 });
@@ -1360,6 +1360,8 @@
 									}
 								});
 
+								checkAndSetFormChanged(thisForm);
+								
                                 if(angular.isFunction(runAfterFunc)) {
                                     runAfterFunc();
                                 }
