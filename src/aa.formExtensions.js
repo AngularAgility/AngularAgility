@@ -1175,7 +1175,8 @@
                         }
 
                         //only root forms get the opportunity to block router state changes
-                        if(!parentForm) {
+                        //add option to disable confirmation messages e.g. after form submit user redirection
+                        if(!parentForm  && attrs.aaConfirmationMessage !== "false") {
                             var strategy = aaFormExtensions.onNavigateAwayStrategies[attrs.onNavigateAwayStrategy || aaFormExtensions.defaultOnNavigateAwayStrategy ];
                             if(angular.isFunction(strategy)) {
                                 strategy(scope, thisForm, $injector);
