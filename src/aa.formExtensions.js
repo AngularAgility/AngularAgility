@@ -155,7 +155,7 @@
                     }
                     //perhaps add a 'runWhenDoneLoading' here
                 };
-				
+
                 function loadingChanged() {
                     $rootScope.aaIsLoading = watcher.isLoading = pendingRequests > 0;
 
@@ -363,6 +363,7 @@
 						recursivePushChangeDependency(ngForm, fieldChangeDependency);
 	
 						// wait for stack to clear before checking
+                        //TODO consolidate this pattern onto aaLoadingWatcher it's self
 						$timeout(function() {
 							if(aaLoadingWatcher.isLoading) {
 								//delay changed checking until AFTER the form is completely loaded
@@ -371,7 +372,7 @@
 								}, function(isLoading) {
 									if(!isLoading) {
 										loadingWatchDeReg();
-										setupChanged();
+                                        $timeout(setupChanged);
 									}
 								});
 							} else {
@@ -790,13 +791,13 @@
         }])
 
         //extend Angular form to have $aaFormExtensions and also keep track of the parent form
-        .directive('ngForm', ['aaFormExtensions', 'aaNotify', '$parse', '$injector', '$timeout', '$q',
-            function(aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q) {
-                return aaFormFactory(true, aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q);
+        .directive('ngForm', ['aaFormExtensions', 'aaNotify', '$parse', '$injector', '$timeout', '$q', 'aaLoadingWatcher',
+            function(aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q, aaLoadingWatcher) {
+                return aaFormFactory(true, aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q, aaLoadingWatcher);
             }])
-        .directive('form', ['aaFormExtensions', 'aaNotify', '$parse', '$injector', '$timeout', '$q',
-            function(aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q) {
-                return aaFormFactory(false, aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q);
+        .directive('form', ['aaFormExtensions', 'aaNotify', '$parse', '$injector', '$timeout', '$q', 'aaLoadingWatcher',
+            function(aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q, aaLoadingWatcher) {
+                return aaFormFactory(false, aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q, aaLoadingWatcher);
             }])
 
         .provider('aaFormExtensions', function() {
@@ -1136,7 +1137,7 @@
     }
 
 
-    function aaFormFactory(isNgForm, aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q) {
+    function aaFormFactory(isNgForm, aaFormExtensions, aaNotify, $parse, $injector, $timeout, $q, aaLoadingWatcher) {
         return {
             restrict: isNgForm ? 'EAC' : 'E',
             require: 'form',
@@ -1297,15 +1298,36 @@
 
                                 recursivePushChangeDependency(thisForm, changedDep);
 
-                                scope.$watch(watchExpr, function(val, oldVal) {
-                                    if(val === oldVal){
-                                        return; //first run
+
+                                var loadingWatchDeReg;
+                                //TODO consolidate this pattern onto aaLoadingWatcher it's self
+                                $timeout(function() {
+                                    if(aaLoadingWatcher.aaIsLoading) {
+                                        //delay changed checking until AFTER the form is completely loaded
+                                        loadingWatchDeReg = scope.$watch(function() {
+                                            return aaLoadingWatcher.aaIsLoading;
+                                        }, function(isLoading) {
+                                            if(!isLoading) {
+                                                loadingWatchDeReg();
+                                                $timeout(setupChangedWatch);
+                                            }
+                                        });
+                                    } else {
+                                        setupChangedWatch();
                                     }
-                                    changedDep.isChanged = !angular.equals(changedDep.initialValue, val);
+                                });
 
-                                    recursiveParentCheckAndSetFormChanged(thisForm);
+                                function setupChangedWatch() {
+                                    scope.$watch(watchExpr, function(val, oldVal) {
+                                        if(val === oldVal){
+                                            return; //first run
+                                        }
+                                        changedDep.isChanged = !angular.equals(changedDep.initialValue, val);
 
-                                }, deepWatch);
+                                        recursiveParentCheckAndSetFormChanged(thisForm);
+
+                                    }, deepWatch);
+                                }
                             });
                         }
 
