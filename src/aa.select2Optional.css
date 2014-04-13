@@ -1,0 +1,6 @@
+/*some optional CSS that will make your aa.formExtensions experience a little prettier*/
+.select2-container.ng-dirty.ng-invalid .select2-choice,
+.select2-container.ng-invalid.aa-invalid-attempt .select2-choice,
+.select2-container.ng-invalid.aa-had-focus .select2-choice {
+    border: 1px solid #A90000;
+}

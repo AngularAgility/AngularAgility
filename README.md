@@ -86,15 +86,15 @@ Angular considers the field/form dirty still since it was touched (yet changed b
 ###Form reset
 Sets the state of the form back to it's original state†:
 ```javascript
-personForm.$aaFormExtensions.$reset();
+personForm.$aaFormExtensions.$reset(/*optional runAfterFunc(){ }*/);
 ```
 †AFTER AJAX. All native Angular AJAX requests are counted by aaLoadingWatcher and a form isn't considered loaded until pending AJAX requests have completed. If you have other types of loading to account for simply use aaLoadingWatcher.increment()/.decrement() API to count them.
 
 ###Reset initial form state
-The current state of the form will be reset to it's initial state (any changes from here are now $changed):
+The current state of the form will be considered it's initial state (any changes from here are now $changed):
 
 ```javascript
-personForm.$aaFormExtensions.$resetChanged();
+personForm.$aaFormExtensions.$resetChanged(/*optional runAfterFunc(){ }*/);
 ```
 
 ###Loading indicators
