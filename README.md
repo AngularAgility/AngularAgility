@@ -73,6 +73,34 @@ This is where Form Extensions comes in. It **works with built in Angular.js vali
 </div>
 ```
 
+### Or configure it from your code:
+```javascript
+var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
+    .controller('main', ['$scope', function(scope) {
+       scope.user = {
+           name:'Test1',
+       };
+       scope.formconfig = {
+           validations: {
+               user:{
+                   name: {
+                       'ng-minlength':8,
+                       required:true
+                   },
+               }
+           }
+       };
+    }]);
+```
+```html
+<div ng-controller="main">
+    <aa-configured-form validation-config="formconfig" form-name="'exampleForm'">
+        <input type="text" ng-model="user.name" />
+    </aa-configured-form>
+</div>
+```
+
+
 #Advanced Form Extensions
 [Blog Posts](http://johnculviner.com/category/form-extensions/) |
 [Source](https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.formExtensions.js) |
@@ -173,32 +201,6 @@ angular.module('myApp')
 })
 ```
 
-###3. Configure it from your code!
-```javascript
-var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
-    .controller('main', ['$scope', function(scope) {
-       scope.user = {
-           name:'Test1',
-       };
-       scope.formconfig = {
-           validations: {
-               user:{
-                   name: {
-                       'ng-minlength':8,
-                       required:true
-                   },
-               }
-           }
-       };
-    }]);
-```
-```html
-<div ng-controller="main">
-    <aa-configured-form validation-config="formconfig" form-name="'exampleForm'">
-        <input type="text" ng-model="user.name" />
-    </aa-configured-form>
-</div>
-```
 ####It does much more than this, advanced demos coming soon!
 
 #Select 2
