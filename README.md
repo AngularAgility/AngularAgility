@@ -111,7 +111,7 @@ aaFormExtensionsProvider.defaultOnNavigateAwayStrategy = 'myCustomStrategy';
 ```
 Use to ignore on a per form basis (if you registered a global default):
 
-```javascript
+```html
 <div ng-form="myForm" on-navigate-away-strategy="none">...</div>
 ```
 
@@ -171,6 +171,33 @@ angular.module('myApp')
                 ttl: 0  //time to live in ms
             });
 })
+```
+
+###3. Configure it from your code!
+```javascript
+var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
+    .controller('main', ['$scope', function(scope) {
+       scope.user = {
+           name:'Test1',
+       };
+       scope.formconfig = {
+           validations: {
+               user:{
+                   name: {
+                       'ng-minlength':8,
+                       required:true
+                   },
+               }
+           }
+       };
+    }]);
+```
+```html
+<div ng-controller="main">
+    <aa-configured-form validation-config="formconfig" form-name="'exampleForm'">
+        <input type="text" ng-model="user.name" />
+    </aa-configured-form>
+</div>
 ```
 ####It does much more than this, advanced demos coming soon!
 
