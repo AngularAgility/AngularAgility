@@ -388,6 +388,7 @@
 						});
 
                         scope.$on('$destroy', function() {
+                            element.unbind('blur');
                             //clean up any field changed dependencies on parent forms
                             cleanChangeDependencies(ngForm);
 
