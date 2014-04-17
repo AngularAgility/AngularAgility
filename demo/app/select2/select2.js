@@ -165,8 +165,7 @@ angular
             id: 'abbreviation',
             text: 'name',
             textLookup: function(id) {
-                //find the text for the selected id
-                //looks at 'text' field above (name)
+                //find the text for each 'abbreviation' (the 'id') stored in $scope.favoriteStates
                 return $http.get('/states/' + id);
             },
             options: function(searchText) {

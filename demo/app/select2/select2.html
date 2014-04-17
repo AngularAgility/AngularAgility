@@ -99,7 +99,6 @@
         </div>
     </div>
 
-
     <div ng-controller="select2basicObject">
         <h1>Basic Object Example</h1>
         <div class="form-group select2">
@@ -526,7 +525,7 @@
     </div>
 
     <div ng-controller="select2tagIdAjaxConstrained">
-        <h1>TODO: Constrained Tags Id AJAX Example</h1>
+        <h1>Constrained Tags Id AJAX Example</h1>
         <div class="form-group select2">
             <label class="col-sm-2 control-label">Favorite States:</label>
             <div class="col-sm-3">
@@ -536,7 +535,11 @@
         <br/>
         <div class="alert alert-info">
             <p>
-                Some pre-selected tags in the ng-model bound favoriteStates are set. You can add more from a constrained AJAX list.
+                Some pre-selected tags in the ng-model bound favoriteStates are set.
+                The tags are represented by 'abbreviation' on the full state object. Only 'abbreviation' is stored
+                in the ng-model. Each 'abbrevation' must be looked up on 'textLookup' when the page initializes
+                to get the friendly 'name' for the selected 'abbreviation'.
+                You can add more tags from a constrained AJAX list.
             </p>
 
             <h3>Current state of bound scope</h3>
@@ -554,8 +557,7 @@
                         id: 'abbreviation',
                         text: 'name',
                         textLookup: function(id) {
-                            //find the text for the selected id
-                            //looks at 'text' field above (name)
+                            //find the text for each 'abbreviation' (the 'id') stored in $scope.favoriteStates
                             return $http.get('/states/' + id);
                         },
                         options: function(searchText) {

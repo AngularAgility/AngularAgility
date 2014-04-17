@@ -121,25 +121,52 @@ angular
                                     return;
                                 }
 
+                                //allow for multiple lookups in tags mode (or just one in other modes)
+                                var modelValueIsArray = angular.isArray(ngModel.$modelValue),
+                                    lookups = [];
+
+                                if(modelValueIsArray) {
+                                    angular.forEach(ngModel.$modelValue, function(val) {
+                                        lookups.push(settings.textLookup(val));
+                                    });
+                                } else {
+                                    lookups.push(settings.textLookup(ngModel.$modelValue));
+                                }
+
                                 //resolves promises and resolved values alike
-                                $q.when(settings.textLookup(ngModel.$modelValue))
-                                    .then(function(data) {
+                                $q.all(lookups)
+                                    .then(function(results) {
 
-                                        var result;
-                                        if(angular.isUndefined(data.data)) {
-                                            result = data;
+                                        if(modelValueIsArray) {
+                                            var mappedResults = [];
+
+                                            angular.forEach(results, function(result) {
+                                                mappedResults.push(resultMapper(result));
+                                            });
+
+                                            callback(mappedResults);
                                         } else {
-                                            result = data.data;
+                                            callback(resultMapper(results[0]));
                                         }
 
-                                        if(!angular.isObject(result)) {
-                                            //passed back just the text. resolve:
-                                            var newResult = {};
-                                            newResult[settings.id] = ngModel.$modelValue;
-                                            newResult[settings.text] = result;
-                                            result = newResult;
+
+                                        function resultMapper(data) {
+                                            var result;
+                                            if(angular.isUndefined(data.data)) {
+                                                result = data;
+                                            } else {
+                                                result = data.data;
+                                            }
+
+                                            if(!angular.isObject(result)) {
+                                                //passed back just the text. resolve:
+                                                var newResult = {};
+                                                newResult[settings.id] = ngModel.$modelValue;
+                                                newResult[settings.text] = result;
+                                                result = newResult;
+                                            }
+                                            return result;
                                         }
-                                        callback(result);
                                     });
                             };
                         }
