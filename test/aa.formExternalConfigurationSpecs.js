@@ -26,8 +26,8 @@ describe('aa.formExternalConfiguration.js >', function () {
                 name:'test'
             };
 
-            var directive = angular.element("<aa-configured-form validation-config=\"config\" form-name=\"'exampleForm'\"></aa-configured-form>");
-            var element = angular.element('<input type="test" ng-model="user.name"/>');
+            var directive = angular.element("<div aa-configured-form validation-config=\"config\" ng-form=\"exampleForm\"></div>");
+            var element = angular.element('<input type="text" ng-model="user.name"/>');
             directive.append(element);
 
             compile(directive)(scope);
@@ -52,8 +52,8 @@ describe('aa.formExternalConfiguration.js >', function () {
                 name:'test'
             };
 
-            var directive = angular.element("<aa-configured-form validation-config=\"config\" form-name=\"'exampleForm'\"></aa-configured-form>");
-            var element = angular.element('<input type="test" ng-model="user.name"/>');
+            var directive = angular.element("<div aa-configured-form validation-config=\"config\" ng-form=\"exampleForm\"></div>");
+            var element = angular.element('<input type="text" ng-model="user.name"/>');
             directive.append(element);
 
             compile(directive)(scope);
@@ -78,8 +78,8 @@ describe('aa.formExternalConfiguration.js >', function () {
                 name:'test'
             };
 
-            var directive = angular.element("<aa-configured-form validation-config=\"config\" form-name=\"'exampleForm'\"></aa-configured-form>");
-            var element = angular.element('<input type="test" ng-model="user.name"/>');
+            var directive = angular.element("<div aa-configured-form validation-config=\"config\" ng-form=\"exampleForm\"></div>");
+            var element = angular.element('<input type="text" ng-model="user.name"/>');
             directive.append(element);
 
             compile(directive)(scope);
@@ -104,8 +104,8 @@ describe('aa.formExternalConfiguration.js >', function () {
                 name:'test'
             };
 
-            var directive = angular.element("<aa-configured-form validation-config=\"config\" form-name=\"'exampleForm'\"></aa-configured-form>");
-            var element = angular.element('<input type="test" ng-model="user.name"/>');
+            var directive = angular.element("<div aa-configured-form validation-config=\"config\" ng-form=\"exampleForm\"></div>");
+            var element = angular.element('<input type="text" ng-model="user.name"/>');
             directive.append(element);
 
             compile(directive)(scope);

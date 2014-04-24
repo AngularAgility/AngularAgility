@@ -217,8 +217,8 @@ var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
                 priority: 500,
                 terminal: true,
                 compile: function() {
+                    var _this = this;
                     return function (scope, elem, attr) {
-                        var _this = this;
                         var validationConfig = $parse(attr.validationConfig)(scope);
                         elem.removeAttr('validation-config');
                         elem.removeAttr('form-name');
@@ -226,7 +226,7 @@ var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
                         if (validationConfig) {
                             validationConfig.ignore = validationConfig.ignore || {};
                             _this.findFormElements(elem.children(), validationConfig);
-                            $compile(elem.get(0))(scope);
+                            $compile(elem)(scope);
                         }
                     };
                 },
@@ -236,7 +236,7 @@ var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
                         var jqElm = angular.element(element);
                         var modelAttr = jqElm.attr('ng-model') || jqElm.attr('ngModel');
                         if (modelAttr) {
-                            if (validationConfig.ignore[jqElm.get(0).name]) {
+                            if (validationConfig.ignore[jqElm[0].name]) {
                                 return;
                             }
                             _this.processElement(jqElm, modelAttr, validationConfig);
