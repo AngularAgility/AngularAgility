@@ -94,9 +94,9 @@ var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
 ```
 ```html
 <div ng-controller="main">
-    <aa-configured-form validation-config="formconfig" form-name="'exampleForm'">
+    <div aa-configured-form validation-config="formconfig" ng-form="exampleForm">
         <input type="text" ng-model="user.name" />
-    </aa-configured-form>
+    </div>
 </div>
 ```
 
