@@ -221,7 +221,6 @@ var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
                     return function (scope, elem, attr) {
                         var validationConfig = $parse(attr.validationConfig)(scope);
                         elem.removeAttr('validation-config');
-                        elem.removeAttr('form-name');
                         elem.removeAttr('aa-configured-form');
                         if (validationConfig) {
                             validationConfig.ignore = validationConfig.ignore || {};
