@@ -58,9 +58,9 @@ var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
     }]);
 </script>
 <div ng-controller="main">
-    <aa-configured-form validation-config="formconfig" form-name="'exampleForm'">
+    <div aa-configured-form validation-config="formconfig" ng-form="exampleForm">
         <input type="text" ng-model="user.name" />
-    </aa-configured-form>
+    </div>
 </div>
     </pre>
     *
@@ -90,9 +90,9 @@ var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
     }]);
 </script>
 <div ng-controller="main">
-    <aa-configured-form validation-config="formconfig" form-name="'exampleForm'">
+    <div aa-configured-form validation-config="formconfig" ng-form="exampleForm">
         <input type="text" ng-model="user.name" />
-    </aa-configured-form>
+    </div>
 </div>
     </pre>
     *
@@ -122,9 +122,9 @@ var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
     }]);
 </script>
 <div ng-controller="main">
-    <aa-configured-form validation-config="formconfig" form-name="'exampleForm'">
+    <div aa-configured-form validation-config="formconfig" ng-form="exampleForm">
         <input type="text" ng-model="user.name" />
-    </aa-configured-form>
+    </div>
 </div>
     </pre>
     *
@@ -160,11 +160,48 @@ var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
     }]);
 </script>
 <div ng-controller="main">
-    <aa-configured-form validation-config="formconfig" form-name="'exampleForm'">
+    <div aa-configured-form validation-config="formconfig" ng-form="exampleForm">
         <input type="text" ng-model="user.name" />
-    </aa-configured-form>
+    </div>
 </div>
     </pre>
+     *
+     * Named input fields can be added to the 'ignore' section of the configuration,
+     * that way they won't be processed (so also the globals won't be added):
+     *
+     <pre>
+<script>
+	var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
+	.controller('main', ['$scope', function(scope) {
+	scope.user = {
+	   name:'Test1',
+	   lastname:'Test2'
+	};
+	scope.formconfig = {
+	   globals: {
+		   'aa-valid-icon':''
+	   },
+	   ignore: {
+		   'last-name':true
+	   },
+	   validations: {
+		   'user':{
+			   name: {
+				   'ng-minlength':8,
+				   required:true
+			   },
+		   }
+	   }
+	};
+	}]);
+</script>
+<div ng-controller="main">
+	<div aa-configured-form validation-config="formconfig" ng-form="exampleForm">
+	<input type="text" ng-model="user.name" />
+	<input type="text" ng-model="user.lastname" name="last-name/>
+</div>
+</div>
+     </pre>
     *
     * Known issue: Using aa-field or aa-field-group inside the aaConfiguredForm directive
     * will result in errors like this:
@@ -172,50 +209,50 @@ var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
     *
     */
     angular.module('aa.formExternalConfiguration', [])
-        .directive('aaConfiguredForm', ['$compile', function($compile) {
+        .directive('aaConfiguredForm', ['$compile', '$parse', function($compile, $parse) {
             return {
-                restrict: 'EA',
-                replace:true,
-                template:'<div ng-transclude ng-form="{{formName}}"></div>',
-                transclude:true,
-                scope: {
-                    validationConfig:'=',
-                    formName:'='
-                },
-                compile: function(elem) {
-                    var _this = this;
-                    elem.removeAttr('ng-transclude');
+                restrict: 'A',
+                scope: false,
+                replace: true,
+                priority: 500,
+                terminal: true,
+                compile: function() {
                     return function (scope, elem, attr) {
-                        if (scope.validationConfig) {
-                            _this.findFormElements(['input', 'select'], elem, scope);
+                        s = scope;
+                        var validationConfig = $parse(attr.validationConfig)(scope);
+                        elem.removeAttr('validation-config');
+                        elem.removeAttr('form-name');
+                        elem.removeAttr('aa-configured-form');
+                        if (validationConfig) {
+                            validationConfig.ignore = validationConfig.ignore || {};
+                            _this.findFormElements(elem.children(), validationConfig);
+                            $compile(elem.get(0))(scope);
                         }
-                        $compile(elem)(scope);
                     };
                 },
-                findFormElements: function(names, rootElement, scope) {
+                findFormElements: function(elements, validationConfig) {
                     var _this = this;
-                    angular.forEach(names, function(name) {
-                        _this.processElements(name, rootElement, scope);
+                    angular.forEach(elements, function (element) {
+                        var jqElm = angular.element(element);
+                        var modelAttr = jqElm.attr('ng-model') || jqElm.attr('ngModel');
+                        if (modelAttr) {
+                            if (validationConfig.ignore[jqElm.get(0).name]) {
+                                return;
+                            }
+                            _this.processElement(jqElm, modelAttr, validationConfig);
+                        }
+                        _this.findFormElements(jqElm.children(), validationConfig);
                     });
                 },
-                processElements: function(name, rootElement, scope) {
-                    var elements = rootElement.find(name);
-                    for(var i= 0, ii = elements.length; i < ii; i++) {
-                        this.processElement(elements[i], scope);
-                    }
-                },
-                processElement:function(element, scope) {
-                    var jqElm = angular.element(element);
-                    var nameAttr = jqElm.attr('ng-model') || jqElm.attr('ngModel');
-                    if (nameAttr) {
+                processElement:function(jqElm, nameAttr, validationConfig) {
+                    if (!jqElm.attr('name')) {
                         jqElm.attr('name', nameAttr.split('.').join('-'));
-                        this.addAttributes(scope, jqElm, nameAttr);
                     }
+                    this.addAttributes(jqElm, nameAttr, validationConfig);
                 },
-                addAttributes: function(scope, jqElm, modelValue) {
+                addAttributes: function(jqElm, modelValue, validationConfig) {
                     var parts;
                     var name;
-                    var config = scope.validationConfig;
 
                     if (modelValue.indexOf('.') > -1) {
                         parts = modelValue.split('.');
@@ -226,20 +263,19 @@ var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
                     var modelName = parts[parts.length-2];
                     var propName = parts[parts.length-1];
 
-                    modelName = this.resolveModelName(modelName, modelValue, config);
+                    modelName = this.resolveModelName(modelName, modelValue, validationConfig);
 
-                    var validation = config.validations[modelName];
+                    var validation = validationConfig.validations[modelName];
                     if (validation) {
                         var validationAttrs = validation[propName];
                         for (name in validationAttrs) {
                             jqElm.attr(name, validationAttrs[name]);
                         }
-
-                        var globals = config.globals;
-                        if (globals) {
-                            for (name in globals) {
-                                jqElm.attr(name, globals[name]);
-                            }
+                    }
+                    var globals = validationConfig.globals;
+                    if (globals) {
+                        for (name in globals) {
+                            jqElm.attr(name, globals[name]);
                         }
                     }
                 },
