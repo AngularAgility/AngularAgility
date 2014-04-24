@@ -218,7 +218,7 @@ var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
                 terminal: true,
                 compile: function() {
                     return function (scope, elem, attr) {
-                        s = scope;
+                        var _this = this;
                         var validationConfig = $parse(attr.validationConfig)(scope);
                         elem.removeAttr('validation-config');
                         elem.removeAttr('form-name');
