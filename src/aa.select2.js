@@ -24,7 +24,7 @@ angular
 
                 //native select2 options directly from the user. always takes prescedence
                 //copy the object before we muck with it incase multiple select2s are sharing settings
-                var settings = scope.$eval(attrs.aaSelect2);
+                var settings = angular.copy(scope.$eval(attrs.aaSelect2));
 
                 if(!angular.isObject(settings) || isEmptyObject(settings)) {
                     throw 'aa-select2 options must be specified. Ex: <div aa-select2="*options here*"...\r\n';
