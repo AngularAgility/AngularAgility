@@ -61,6 +61,39 @@ describe('aa.formExternalConfiguration.js >', function () {
             expect(element.attr('aa-valid-icon')).toEqual('');
         });
 
+        it('copies the validation and global config to the input element but skips the element whose name is in the ignore list.', function () {
+            scope.config = {
+                globals:{
+                    'aa-valid-icon':''
+                },
+                ignore: {
+                    'user-lastname':true
+                },
+                validations: {
+                    user:{
+                        name: {
+                            'ng-minlength':5
+                        }
+                    }
+                }
+            };
+            scope.user = {
+                name:'test'
+            };
+
+            var directive = angular.element("<div aa-configured-form validation-config=\"config\" ng-form=\"exampleForm\"></div>");
+            var element = angular.element('<input type="text" ng-model="user.name"/>');
+            var element2 = angular.element('<input type="text" ng-model="user.lastname" name="user-lastname"/>');
+            directive.append(element);
+            directive.append(element2);
+
+            compile(directive)(scope);
+            element = angular.element(directive.find('input')[0]);
+            expect(element.attr('aa-valid-icon')).toEqual('');
+            element = angular.element(directive.find('input')[1]);
+            expect(element.attr('aa-valid-icon')).toBeUndefined();
+        });
+
         it('resolves the validation name using the "resolve" property', function () {
             scope.config = {
                 resolve: {
