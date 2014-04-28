@@ -360,7 +360,7 @@
                     var _this = this;
                     angular.forEach(elements, function (element) {
                         var jqElm = angular.element(element);
-                        var modelAttr = jqElm.attr('ng-model') || jqElm.attr('ngModel');
+                        var modelAttr = jqElm.attr('ng-model') || jqElm.attr('data-ng-model') || jqElm.attr('ngModel');
                         if (modelAttr) {
                             if (validationConfig.ignore[jqElm[0].name]) {
                                 return;
