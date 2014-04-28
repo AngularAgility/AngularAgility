@@ -267,15 +267,15 @@
                    'aa-label':'Name'
                },
                property2: {
-                   'aa-inherit':'person.name',
+                   'aa-inherit':'name',
                    'aa-label':'Property 2'
                },
                property3: {
-                   'aa-inherit':'person.name',
+                   'aa-inherit':'name',
                    'aa-label':'Property 3'
                },
                property4: {
-                   'aa-inherit':'person.name',
+                   'aa-inherit':'name',
                    'aa-label':'Property 4'
                }
            }
@@ -337,6 +337,7 @@
     angular.module('aa.formExternalConfiguration', [])
         .directive('aaConfiguredForm', ['$compile', '$parse', function($compile, $parse) {
             return {
+                mergedAttrs:[],
                 restrict: 'A',
                 scope: false,
                 replace: true,
@@ -392,32 +393,45 @@
 
                     var modelValidations = validationConfig.validations[modelName];
                     if (modelValidations) {
-                        this.addAttributes(jqElm, modelValidations[propName], modelValidations, validationConfig.validations);
+                        if (!this.checkIfAlreadyMerged(modelName + '.' + propName)){
+                            if (modelValidations[propName]['aa-inherit']){
+                                this.mergeInheritedAttributes(modelValidations[propName], modelValidations[propName]['aa-inherit'], modelValidations, validationConfig.validations);
+                            }
+                        }
+                        this.addAttributes(jqElm, modelValidations[propName]);
+                    } else {
+                        console.log('nopes');
                     }
                     var globals = validationConfig.globals;
                     if (globals) {
                         this.addAttributes(jqElm, globals, modelValidations, validationConfig);
                     }
                 },
-                addAttributes: function(jqElm, attrs, validations, allValidations) {
-                    if (attrs['aa-inherit']){
-                        this.mergeInheritedAttributes(attrs, attrs['aa-inherit'], validations, allValidations);
+                checkIfAlreadyMerged: function(name) {
+                    if (this.mergedAttrs.indexOf(name) < 0) {
+                        this.mergedAttrs.push(name);
+                        return false;
                     }
-                    for (var name in attrs) {
-                        jqElm.attr(name, attrs[name]);
-                    }
+                    return true;
                 },
-                mergeInheritedAttributes: function(attrs, inheritedName, validations, allValidations) {
-                    var inheritedAttrs = this.getInheritedAttributes(inheritedName, validations, allValidations);
-                    for (var name in inheritedAttrs) {
-                        if (!attrs.hasOwnProperty(name)) {
-                            if (name !== 'aa-inherit') {
-                                attrs[name] = inheritedAttrs[name];
-                            }
+                addAttributes: function(jqElm, attrs) {
+                    for (var name in attrs) {
+                        if (name !== 'aa-inherit') {
+                            jqElm.attr(name, attrs[name]);
                         }
                     }
-                    if (inheritedAttrs['aa-inherit']){
-                        this.mergeInheritedAttributes(attrs, inheritedAttrs['aa-inherit'], validations, allValidations);
+                },
+                mergeInheritedAttributes: function(targetAttrs, inheritedName, validations, allValidations) {
+                    var inheritedAttrs = this.getInheritedAttributes(inheritedName, validations, allValidations);
+                    if ((inheritedAttrs['aa-inherit'] && (!this.checkIfAlreadyMerged(inheritedAttrs['aa-inherit'])))) {
+                        this.mergeInheritedAttributes(inheritedAttrs, inheritedAttrs['aa-inherit'], validations, allValidations);
+                    }
+                    for (var name in inheritedAttrs) {
+                        if (!targetAttrs.hasOwnProperty(name)) {
+                            if (name !== 'aa-inherit') {
+                                targetAttrs[name] = inheritedAttrs[name];
+                            }
+                        }
                     }
                 },
                 getInheritedAttributes: function(validationName, validations, allValidations) {

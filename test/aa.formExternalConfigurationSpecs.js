@@ -192,31 +192,31 @@ describe('aa.formExternalConfiguration.js >', function () {
             expect(element2.attr('ng-minlength')).toEqual('2');
         });
 
-        it('needs to be able inherit recursively', function() {
+        it('needs to be able to inherit recursively', function() {
             scope.config = {
-                resolveFn: function(modelValue){
-                    return 'UserType';
+                resolve: {
+                    user:'UserType'
                 },
                 validations: {
                     'BaseType': {
                         name: {
-                            'aa-valid-icon':''
+                            'aa-valid-icon': ''
                         }
                     },
                     'PersonType': {
                         name: {
-                            'aa-inherit':'BaseType.name',
-                            required:true
+                            'aa-inherit': 'BaseType.name',
+                            required: true
                         }
                     },
-                    'UserType':{
+                    'UserType': {
                         name: {
-                            'aa-inherit':'PersonType.name',
-                            'ng-minlength':'1'
+                            'aa-inherit': 'PersonType.name',
+                            'ng-minlength': '1'
                         },
                         lastname: {
-                            'aa-inherit':'PersonType.name',
-                            'ng-minlength':'2'
+                            'aa-inherit': 'name',
+                            'ng-minlength': '2'
                         }
                     }
                 }
