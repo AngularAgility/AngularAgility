@@ -413,10 +413,11 @@
                         if (!attrs.hasOwnProperty(name)) {
                             if (name !== 'aa-inherit') {
                                 attrs[name] = inheritedAttrs[name];
-                            } else {
-                                this.mergeInheritedAttributes(attrs, inheritedAttrs[name], validations, allValidations);
                             }
                         }
+                    }
+                    if (inheritedAttrs['aa-inherit']){
+                        this.mergeInheritedAttributes(attrs, inheritedAttrs['aa-inherit'], validations, allValidations);
                     }
                 },
                 getInheritedAttributes: function(validationName, validations, allValidations) {

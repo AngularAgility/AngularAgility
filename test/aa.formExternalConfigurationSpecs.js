@@ -192,5 +192,55 @@ describe('aa.formExternalConfiguration.js >', function () {
             expect(element2.attr('ng-minlength')).toEqual('2');
         });
 
+        it('needs to be able inherit recursively', function() {
+            scope.config = {
+                resolveFn: function(modelValue){
+                    return 'UserType';
+                },
+                validations: {
+                    'BaseType': {
+                        name: {
+                            'aa-valid-icon':''
+                        }
+                    },
+                    'PersonType': {
+                        name: {
+                            'aa-inherit':'BaseType.name',
+                            required:true
+                        }
+                    },
+                    'UserType':{
+                        name: {
+                            'aa-inherit':'PersonType.name',
+                            'ng-minlength':'1'
+                        },
+                        lastname: {
+                            'aa-inherit':'PersonType.name',
+                            'ng-minlength':'2'
+                        }
+                    }
+                }
+            };
+            scope.user = {
+                name:'test'
+            };
+
+            var directive = angular.element("<div aa-configured-form validation-config=\"config\" ng-form=\"exampleForm\"></div>");
+            var element1 = angular.element('<input type="text" ng-model="user.name"/>');
+            var element2 = angular.element('<input type="text" ng-model="user.lastname"/>');
+            directive.append(element1);
+            directive.append(element2);
+
+            compile(directive)(scope);
+            element1 = angular.element(directive.find('input')[0]);
+            element2 = angular.element(directive.find('input')[1]);
+            expect(element1.attr('aa-valid-icon')).toEqual('');
+            expect(element1.attr('required')).toEqual('required');
+            expect(element1.attr('ng-minlength')).toEqual('1');
+            expect(element2.attr('aa-valid-icon')).toEqual('');
+            expect(element2.attr('required')).toEqual('required');
+            expect(element2.attr('ng-minlength')).toEqual('2');
+        });
+
     });
 });
