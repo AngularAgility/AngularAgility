@@ -17,7 +17,7 @@ Note all JavaScript/CSS that you might want to use is located in /src/*.*
 [Live Demo](http://angularagility.herokuapp.com/#/formExtensions/formExtensions/basic)
 
 Angular.js form validation is likely one of the best takes on form validation out there. Unfortunately it can often be a little TOO flexible for many applications where you want basic error message display and generation
-witout having to dive into the form object model and manually construct basic messages for each field.
+without having to dive into the form object model and manually construct basic messages for each field.
 
 This is where Form Extensions comes in. It **works with built in Angular.js validation** to:
 * Drastically reduce the amount of boilerplate, repetitive, error-prone HTML required to produce forms, labels and validation messages.
@@ -73,6 +73,34 @@ This is where Form Extensions comes in. It **works with built in Angular.js vali
 </div>
 ```
 
+### Or configure it from your code:
+```javascript
+var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
+    .controller('main', ['$scope', function(scope) {
+       scope.user = {
+           name:'Test1',
+       };
+       scope.formconfig = {
+           validations: {
+               user:{
+                   name: {
+                       'ng-minlength':8,
+                       required:true
+                   },
+               }
+           }
+       };
+    }]);
+```
+```html
+<div ng-controller="main">
+    <div aa-configured-form validation-config="formconfig" ng-form="exampleForm">
+        <input type="text" ng-model="user.name" />
+    </div>
+</div>
+```
+
+
 #Advanced Form Extensions
 [Blog Posts](http://johnculviner.com/category/form-extensions/) |
 [Source](https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.formExtensions.js) |
@@ -111,7 +139,7 @@ aaFormExtensionsProvider.defaultOnNavigateAwayStrategy = 'myCustomStrategy';
 ```
 Use to ignore on a per form basis (if you registered a global default):
 
-```javascript
+```html
 <div ng-form="myForm" on-navigate-away-strategy="none">...</div>
 ```
 
@@ -172,6 +200,7 @@ angular.module('myApp')
             });
 })
 ```
+
 ####It does much more than this, advanced demos coming soon!
 
 #Select 2
