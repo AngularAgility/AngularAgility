@@ -216,4 +216,4 @@ It abstracts away the complicated Select2 API (lots of examples below!) and shou
 It offers no support for the basic 'replace a <select> list and <option>' functionality: This is desgined for working with JavaScript object data (as you generally do with Angular). Not what you want? Take a look at the AngularUI one.
 
 Interactive demos here:
-[Demos](http://angularagility.herokuapp.com/#/select2) 
+[Demos](http://angularagility.herokuapp.com/#/select2)  
