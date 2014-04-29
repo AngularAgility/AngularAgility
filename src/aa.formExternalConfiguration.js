@@ -417,7 +417,11 @@
                 addAttributes: function(jqElm, attrs) {
                     for (var name in attrs) {
                         if (name !== 'aa-inherit') {
-                            jqElm.attr(name, attrs[name]);
+                            if (name !== 'required') {
+                                jqElm.attr(name, attrs[name]);
+                            } else {
+                                jqElm.prop(name, attrs[name]);
+                            }
                         }
                     }
                 },
