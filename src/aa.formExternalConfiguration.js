@@ -29,6 +29,7 @@
      * The configuration object has an interface like this:
      * var formconfig = {
     *   validations:Object,
+    *   ignore?:Object,
     *   globals?:Object,
     *   resolve?:Object,
     *   resolveFn?:Function
