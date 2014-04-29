@@ -268,10 +268,10 @@ describe('aa.formExternalConfiguration.js >', function () {
             element1 = angular.element(directive.find('input')[0]);
             element2 = angular.element(directive.find('input')[1]);
             expect(element1.attr('aa-valid-icon')).toEqual('');
-            expect(element1.attr('required')).toEqual('required');
+            expect(element1.prop('required')).toBeTruthy();
             expect(element1.attr('ng-minlength')).toEqual('1');
             expect(element2.attr('aa-valid-icon')).toEqual('');
-            expect(element2.attr('required')).toEqual('required');
+            expect(element2.prop('required')).toBeTruthy();
             expect(element2.attr('ng-minlength')).toEqual('2');
         });
 
