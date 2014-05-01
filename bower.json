@@ -10,7 +10,13 @@
     "keywords": [
         "angular",
         "forms",
-        "validation"
+        "validation",
+        "dsl",
+        "dirty",
+        "changed",
+        "select2",
+        "notification",
+        "growl"
     ],
     "license": "MIT",
     "ignore": [
