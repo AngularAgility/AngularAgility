@@ -853,6 +853,17 @@
                     }
 
                     element.wrap('<div class="form-group"><div class="col-sm-3"></div></div>');
+                },
+                bootstrap3BasicFormWithSize: function(element) {
+
+                    //add form-control if it is missing
+                    if(!element.prop('class')) {
+                        element.addClass('form-control');
+                    }
+
+                    var col = element.attr('aa-col') || "sm-3";
+
+                    element.wrap('<div class="form-group col-' + col + '"></div>');
                 }
             };
 
