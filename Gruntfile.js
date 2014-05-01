@@ -1,25 +1,28 @@
 module.exports = function (grunt) {
 
+    var banner = '/*! <%= pkg.name %> v<%= pkg.version %> @ <%= grunt.template.today("isoDateTime") %> */\n\n';
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         concat: {
             options: {
-                separator: ';'
-            }//, put back when feature stable
-            //dist: {
-            //    src: ['src/**/*.js'],
-            //    dest: 'dist/<%= pkg.name %>.js'
-            //}
+                separator: ';',
+                banner: banner
+            },
+            dist: {
+                src: ['src/*.js'],
+                dest: 'dist/<%= pkg.name %>.js'
+            }
         },
         uglify: {
             options: {
-                banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n'
-            }//, put back when when feature stable
-            //dist: {
-            //    files: {
-            //        'dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
-            //    }
-            //}
+                banner: banner
+            },
+            dist: {
+                files: {
+                    'dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
+                }
+            }
         },
         jshint: {
             files: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js'],
