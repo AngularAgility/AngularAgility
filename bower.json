@@ -1,6 +1,6 @@
 {
     "name": "angular-agility",
-    "version": "0.8.0",
+    "version": "0.8.1",
     "homepage": "https://github.com/AngularAgility/AngularAgility",
     "authors": [
         "John Culviner <john@johnculviner.com>"
@@ -21,8 +21,17 @@
     ],
     "license": "MIT",
     "ignore": [
-        "**/*.*",
-        "!dist/angular-agility.js",
-        "!dist/angular-agility.min.js"
-    ]
+        "demo",
+        "test",
+        "docs",
+        ".gitignore",
+        ".jshintrc",
+        ".travis.yml",
+        "Gruntfile.js",
+        "karma.conf.js",
+        "Procfile"
+    ],
+    "dependencies": {
+        "angular": ">=1.2.0"
+    }
 }

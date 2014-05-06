@@ -1,4 +1,4 @@
-/*! angular-agility v0.8.0 @ 2014-05-01T00:10:10 */
+/*! angular-agility v0.8.1 @ 2014-05-05T22:51:15 */
 
 /*
  * AngularAgility Form Extensions
