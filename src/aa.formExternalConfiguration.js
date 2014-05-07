@@ -29,6 +29,7 @@
      * The configuration object has an interface like this:
      * var formconfig = {
     *   validations:Object,
+    *   ignore?:Object,
     *   globals?:Object,
     *   resolve?:Object,
     *   resolveFn?:Function
@@ -394,7 +395,7 @@
                     var modelValidations = validationConfig.validations[modelName];
                     if (modelValidations) {
                         if (!this.checkIfAlreadyMerged(modelName + '.' + propName)){
-                            if (modelValidations[propName]['aa-inherit']){
+                            if (modelValidations[propName] && modelValidations[propName]['aa-inherit']){
                                 this.mergeInheritedAttributes(modelValidations[propName], modelValidations[propName]['aa-inherit'], modelValidations, validationConfig.validations);
                             }
                         }
@@ -417,7 +418,11 @@
                 addAttributes: function(jqElm, attrs) {
                     for (var name in attrs) {
                         if (name !== 'aa-inherit') {
-                            jqElm.attr(name, attrs[name]);
+                            if (name !== 'required') {
+                                jqElm.attr(name, attrs[name]);
+                            } else {
+                                jqElm.prop(name, attrs[name]);
+                            }
                         }
                     }
                 },
