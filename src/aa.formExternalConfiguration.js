@@ -395,7 +395,7 @@
                     var modelValidations = validationConfig.validations[modelName];
                     if (modelValidations) {
                         if (!this.checkIfAlreadyMerged(modelName + '.' + propName)){
-                            if (modelValidations[propName]['aa-inherit']){
+                            if (modelValidations[propName] && modelValidations[propName]['aa-inherit']){
                                 this.mergeInheritedAttributes(modelValidations[propName], modelValidations[propName]['aa-inherit'], modelValidations, validationConfig.validations);
                             }
                         }
