@@ -971,9 +971,11 @@
                     });
 
                     //NATIVE DOM IE9+
-                    function beforeUnload() {
+                    function beforeUnload(e) {
                         if(rootForm.$aaFormExtensions.$changed) {
-                            return 'You have unsaved changes are you sure you want to navigate away?';
+                            var confirmationMessage = 'You have unsaved changes are you sure you want to navigate away?';
+                            (e || window.event).returnValue = confirmationMessage;
+                            return confirmationMessage;
                         }
                     }
 
