@@ -1347,11 +1347,13 @@
 
                         function $reset(runAfterFunc) {
 
-                            $q.when(aaFormExtensions.confirmResetStrategy())
+                            return $q.when(aaFormExtensions.confirmResetStrategy())
                                 .then(function(resp) {
                                     if(resp) {
                                         reset();
                                     }
+
+                                    return resp;
                                 });
 
                             function reset() {
