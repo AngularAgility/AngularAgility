@@ -11,14 +11,14 @@
 
 (function() {
     'use strict';
-	
+
 	/**
 	* @ngdoc overview
 	* @name aa.formExtensions
 	* @requires aa.notify
 	*
 	* @description
-	* This module contains the form extension directives that are used to easily generate 
+	* This module contains the form extension directives that are used to easily generate
 	* angular form elements.
 	*
 	* Form extensions is a set of directives that can be used to generate common form
@@ -26,16 +26,16 @@
 	* By specifying a form extensions directive, you can write fewer lines
 	* of code and still create fully functional, Angular compatible forms. Because form
 	* extensions is powered by Angular, you can also combine Angular ng attributes to override
-	* the behaviour of form extensions. 
+	* the behaviour of form extensions.
 	*
-	* Form extensions also supports automatic generation of toaster alerts. Out of the box, form 
-	* extension directives will tie themselves to $error. When an error does occur (such as a required 
+	* Form extensions also supports automatic generation of toaster alerts. Out of the box, form
+	* extension directives will tie themselves to $error. When an error does occur (such as a required
 	* field not being filled in ), form extensions will automatically pop-up a toast notification alerting
 	* the user what field is missing. This, by default, appears in the lower right corner of the view port.
 	* The toast also has support for click-able error direction, meaning that the user can click the error
-	* message that appears in the toast notification, and the cursor will put itself in the input element 
+	* message that appears in the toast notification, and the cursor will put itself in the input element
 	* with the offending error, even if it is located off screen.
-	* 
+	*
 	* Without Form Extensions:
 	*
 	<pre>
@@ -95,7 +95,7 @@
 		</div>
 	</pre>
 	*
-	* With Form Extensions: 
+	* With Form Extensions:
 	*
 	<pre>
 		<div ng-form="exampleForm" class="form-horizontal">
@@ -120,11 +120,11 @@
                                 '<i class="fa fa-times fa-stack-1x fa-inverse"></i>' +
                             '</span>' +
                         '</div>' +
-                        '<strong>The following fields have validation errors: </strong>' +
+                        '<strong>There are some validation errors: </strong>' +
                         '<ul>' +
                             '<li ng-repeat="error in notification.validationErrorsToDisplay()">' +
                                 '{{ error.message }}&nbsp;' +
-                                '<a href="" title="Focus Field" ng-click="notification.showField(error)"><i class="fa fa-search"></i></a>' +
+                                '<a href="" title="Focus Field" ng-show="error.field" ng-click="notification.showField(error)"><i class="fa fa-search"></i></a>' +
                             '</li>' +
                         '</ul>' +
                     '</div>',
@@ -168,7 +168,8 @@
             }]);
 
             //tracks JUST ANGULAR http requests.
-            $provide.factory('aaAjaxInterceptor', ['aaLoadingWatcher', '$q', function(aaLoadingWatcher, $q) {
+            $provide.factory('aaAjaxInterceptor', ['aaLoadingWatcher', '$q', 'aaFormExtensions',
+                                                    function(aaLoadingWatcher, $q, aaFormExtensions) {
                 return {
                     request: function(request) {
                         aaLoadingWatcher.increment();
@@ -180,6 +181,13 @@
                     },
                     responseError: function(response) {
                         aaLoadingWatcher.decrement();
+
+                        if(aaFormExtensions.ajaxValidationErrorMappingStrategy) {
+                            aaFormExtensions.ajaxValidationErrorMappingStrategy(
+                                response, aaFormExtensions.availableForms
+                            );
+                        }
+
                         return $q.reject(response);
                     }
                 };
@@ -237,6 +245,16 @@
                                     args: [runAfterFunc],
                                     targetFormName: targetFormName
                                 });
+                            },
+
+                            $addValidationError: function (messageText,
+                                                            optionalFieldNamesOrFieldReferences,
+                                                            targetFormName /*optional*/) {
+                                addTodo({
+                                    type: '$addValidationError',
+                                    args: [messageText, optionalFieldNamesOrFieldReferences],
+                                    targetFormName: targetFormName
+                                });
                             }
                         };
                     }
@@ -252,7 +270,7 @@
                 };
             }]);
         }])
-		
+
         .directive('aaSubmitForm', ['aaFormExtensions', '$q', function(aaFormExtensions, $q) {
             return {
                 scope: {
@@ -312,6 +330,11 @@
 
                     ensureaaFormExtensionsFieldExists(ngForm, ngModel.$name);
                     var field = ngForm.$aaFormExtensions[ngModel.$name];
+                    field.$form = ngForm;
+                    field.$element = element;
+                    field.$ngModel = ngModel;
+                    field.$calcErrorMessages = calcErrorMessages;
+                    field.$addError = addError;
 
                     if(attrs.aaLabel || attrs.aaFieldName) {
                         //use default label
@@ -326,12 +349,10 @@
                         });
                     }
 
-                    field.$element = element;
-                    field.$ngModel = ngModel;
-                    field.$form = ngForm;
+
 
                     element.on('blur', function() {
-                        field.hadFocus = true;
+                        field.showErrorReasons.push('hadFocus');
                         element.addClass('aa-had-focus');
 
                         //want to call $apply after current stack clears
@@ -361,7 +382,7 @@
                         //ng-model has the same issue. not sure if its worth checking since it
                         //doesn't appear to cause any issues and this happens with native angular forms too internally!
 						recursivePushChangeDependency(ngForm, fieldChangeDependency);
-	
+
 						// wait for stack to clear before checking
                         //TODO consolidate this pattern onto aaLoadingWatcher it's self
 						$timeout(function() {
@@ -421,7 +442,7 @@
 								//Don't count changes from NaN as they aren't really changes
 								fieldChangeDependency.initialValue = ngModel.$modelValue;
 							}
-							
+
 							var newIsChanged = fieldChangeDependency.initialValue !== ngModel.$modelValue;
 							if(fieldChangeDependency.isChanged !== newIsChanged) {
 								fieldChangeDependency.isChanged = newIsChanged;
@@ -430,7 +451,9 @@
                         }
                     }
 
-
+                    //any errors that were added with field.$addError
+                    //these are custom and dynamically added (often by the server)
+                    var addErrorErrors = {};
 
                     //CALCULATE ERROR MESSAGES
                     //recalculate field errors every time they change
@@ -439,10 +462,9 @@
                     },
                     function(val) {
                         if(val) {
-                            calcErrorMessages();
+                            field.$calcErrorMessages();
                         }
                     }, true);
-
 
                     function calcErrorMessages() {
                         var fieldErrorMessages = field.$errorMessages,
@@ -460,36 +482,31 @@
                                 if(attrs[key + 'Msg']) {
                                     //there is a custom message on the element. it wins
                                     msg = stringFormat(attrs[key + 'Msg'], fieldName, attrs[key]);
-                                    fieldErrorMessages.push(msg);
                                 } else if(key === 'minlength') {
                                     msg = stringFormat(attrs.ngMinlengthMsg || aaFormExtensions.validationMessages.minlength, fieldName, attrs.ngMinlength);
-                                    fieldErrorMessages.push(msg);
                                 } else if(key === 'maxlength') {
                                     msg = stringFormat(attrs.ngMaxlengthMsg || aaFormExtensions.validationMessages.maxlength, fieldName, attrs.ngMaxlength);
-                                    fieldErrorMessages.push(msg);
                                 } else if(key === 'min') {
                                     msg = stringFormat(attrs.minMsg || aaFormExtensions.validationMessages.min, fieldName, attrs.min);
-                                    fieldErrorMessages.push(msg);
                                 } else if(key === 'max') {
                                     msg = stringFormat(attrs.maxMsg || aaFormExtensions.validationMessages.max, fieldName, attrs.max);
-                                    fieldErrorMessages.push(msg);
                                 } else if(key === 'pattern') {
                                     msg = stringFormat(attrs.ngPatternMsg || aaFormExtensions.validationMessages.pattern, fieldName);
-                                    fieldErrorMessages.push(msg);
                                 } else if(key === 'required' && element[0].type === 'number') {
                                     //angular doesn't correctly flag numbers as invalid rather as required when something wrong is filled in
                                     //hack around it
                                     msg = stringFormat(attrs.numberMsg || aaFormExtensions.validationMessages.number, fieldName);
-                                    fieldErrorMessages.push(msg);
                                 } else if(aaFormExtensions.validationMessages[key]) {
                                     //globally registered custom message
                                     msg = stringFormat(aaFormExtensions.validationMessages[key], fieldName);
-                                    fieldErrorMessages.push(msg);
+                                } else if(addErrorErrors[key]) {
+                                    msg = addErrorErrors[key];
                                 } else {
                                     //unknown what the message should be, use unknown key
                                     msg = stringFormat(aaFormExtensions.validationMessages.unknown, fieldName);
-                                    fieldErrorMessages.push(msg);
                                 }
+
+                                fieldErrorMessages.push(msg);
                             }
                         }
 
@@ -513,7 +530,8 @@
                             angular.forEach(newErrorMessages, function(msg) {
                                 form.$aaFormExtensions.$allValidationErrors.push({
                                     field: field,
-                                    message: msg
+                                    message: msg,
+                                    forceDisplay: true
                                 });
                             });
                         }
@@ -522,6 +540,42 @@
                         if(form.$aaFormExtensions.$parentForm) {
                             clearAndUpdateValidationMessages(form.$aaFormExtensions.$parentForm, newErrorMessages);
                         }
+                    }
+
+                    //programatically add an error message to a field. a good use case would be adding one from the
+                    //server after an unsuccessful submission attempt
+                    //message: the message you'd like
+                    //optional$errorKeyName: the key name you'd like the add to add the error as to myForm.myField.$errors[optional$errorKeyName]
+                    //callerHandledValidStrategy: (OPTIONAL!) if false field will be valid again on next mutation
+                    function addError(message, optional$errorKeyName, optionalCallerHandledValidStrategy) {
+                        if(!optional$errorKeyName) {
+                            optional$errorKeyName = message.replace(/[^a-z0-9]/gi,'-'); //generate a key without spaces
+                        }
+
+                        ngModel.$setValidity(optional$errorKeyName, false);
+                        addErrorErrors[optional$errorKeyName] = message;
+                        field.showErrorReasons.push(optional$errorKeyName);
+                        field.$calcErrorMessages();
+                        element.addClass('explicit-add-error');
+
+                        if(optionalCallerHandledValidStrategy){
+                            return;
+                        }
+
+                        var listener = function() {
+
+                            ngModel.$setValidity(optional$errorKeyName, true);
+
+                            //schedule to remove after the stack clears as this is no longer needed
+                            //don't remove before because angular is in a loop on $viewChangeListeners
+                            $timeout(function() {
+                                delete addErrorErrors[optional$errorKeyName];
+                                arrayRemove(ngModel.$viewChangeListeners, listener);
+                                element.removeClass('explicit-add-error');
+                            });
+                        };
+
+                        ngModel.$viewChangeListeners.unshift(listener);
                     }
                 }
             };
@@ -580,19 +634,20 @@
                         }
                     );
 
-                    $scope.$watchCollection(
+                    $scope.$watch(
                         function() {
                             return [
                                 formObj.$aaFormExtensions.$invalidAttempt,
-                                fieldInFormExtensions.hadFocus
+                                fieldInFormExtensions.showErrorReasons
                             ];
                         },
                         function(watches) {
                             var invalidAttempt = watches[0],
-                                hadFocus = watches[1];
+                                showErrorReasons = watches[1];
 
-                            $scope.showMessages = invalidAttempt || hadFocus;
-                        }
+                            $scope.showMessages = invalidAttempt || showErrorReasons.length;
+                        },
+                        true
                     );
                 },
                 template: aaFormExtensions.valMsgForTemplate,
@@ -959,7 +1014,7 @@
 
                         if(rootForm.$aaFormExtensions.$changed) {
 							if(!toState.aaUnsavedPrompted) {
-								event.preventDefault();					
+								event.preventDefault();
 								if(window.confirm('You have unsaved changes are you sure you want to navigate away?')) {
 									//should be able to use options { notify: false } on UI Router
 									//but that doesn't seem to work right (new state never loads!) so this is a workaround
@@ -1017,6 +1072,42 @@
                 return window.confirm('Are you sure you want to reset any unsaved changes?');
             };
 
+            this.ajaxValidationErrorMappingStrategy = function(response, availableForms) {
+                //The below is a example of how to map server side validation errors back to client form fields. That
+                //fully supports multiple fields with the same validation error. As most server stuff is done differently
+                //you will probably need to define your own mapping strategy. Null this out to disable it.
+                //example server resp
+                //{
+                //    errors:[
+                //        {
+                //            fieldNames: ['firstName', 'lastName'],
+                //            errorMessage: 'John Culviner already exists!'
+                //        }
+                //    ]
+                //}
+
+                if(response.status !== 400 || !response.data.errors) {
+                    return; //NOT bad request, a validation error or there aren't any errors to push
+                }
+
+                //for each of the error(s) indicated find the form with the correct fields and push the validation
+                //error to it
+                angular.forEach(response.data.errors, function(error) {
+                    angular.forEach(availableForms, function(form) {
+                        var containsAllFields = true;
+                        angular.forEach(error.fieldNames, function(fieldName) {
+                            if(!form[fieldName]) {
+                                containsAllFields = false;
+                            }
+                        });
+
+                        if(containsAllFields) {
+                            form.$aaFormExtensions.$addValidationError(error.errorMessage, error.fieldNames);
+                        }
+                    });
+                });
+            };
+
             //todo wire up
             this.globalSettings = {
                 messageOnBlur: true
@@ -1049,6 +1140,9 @@
                     defaultNotifyTarget: self.defaultNotifyTarget,
 
                     confirmResetStrategy: self.confirmResetStrategy,
+
+                    ajaxValidationErrorMappingStrategy: self.ajaxValidationErrorMappingStrategy,
+                    availableForms: [], //all available ngForms in the application that could have errors *right now*
 
                     //todo wire up
                     globalSettings: self.globalSettings
@@ -1096,7 +1190,7 @@
     function ensureaaFormExtensionsFieldExists(form, fieldName) {
         if(!form.$aaFormExtensions[fieldName]) {
             form.$aaFormExtensions[fieldName] = {
-                hadFocus: false,
+                showErrorReasons: [],
                 $errorMessages: [],
                 $element: null
             };
@@ -1180,7 +1274,11 @@
                             $resetChanged: $resetChanged,
 
                             //clear form errors
-                            $clearErrors: $clearErrors
+                            $clearErrors: $clearErrors,
+
+                            $addValidationError: $addValidationError
+
+//                            $multiFieldValidationErrors: [] //todo: add this back if multiple messages repeated is bad
                         };
 
                         if(parentForm) {
@@ -1207,7 +1305,7 @@
 
 
                         //pick up any todos off the queue for this form
-                        scope.$watchCollection(function() { 
+                        scope.$watchCollection(function() {
 							return scope.$$aaFormExtensionsTodos;
 						},
 						function(val) {
@@ -1386,12 +1484,12 @@
 							$timeout(function() {
 								angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function(dep) {
 									dep.isChanged = false;
-									
+
 									if(dep.field) {
 										dep.initialValue = dep.field.$ngModel.$modelValue;
 										checkAndSetFormChanged(dep.field.$form);
 									}
-	
+
 									if(dep.expr) {
 										dep.initialValue = angular.copy(scope.$eval(dep.expr));
 										checkAndSetFormChanged(dep.$form);
@@ -1399,7 +1497,7 @@
 								});
 
 								checkAndSetFormChanged(thisForm);
-								
+
                                 if(angular.isFunction(runAfterFunc)) {
                                     runAfterFunc();
                                 }
@@ -1412,10 +1510,12 @@
                                 setAttemptRecursively(thisForm, false);
 
                                 angular.forEach(thisForm.$aaFormExtensions.$allValidationErrors, function(err) {
-                                    err.field.hadFocus = false;
-                                    err.field.$element.removeClass('aa-had-focus');
-                                    //this makes sense i think, maybe make configurable
-                                    err.field.$ngModel.$setPristine();
+                                    if(err.field) {
+                                        err.field.showErrorReasons.length = 0;
+                                        err.field.$element.removeClass('aa-had-focus');
+                                        //this makes sense i think, maybe make configurable
+                                        err.field.$ngModel.$setPristine();
+                                    }
                                 });
 
                                 if(angular.isFunction(runAfterFunc)) {
@@ -1423,12 +1523,96 @@
                                 }
                             });
                         }
+
+                        //add a validation error message for field(s)
+                        //allows for *multiple* fields to share the same validation message
+                        //allows for casing differences 'fieldName' <-> 'FieldName' for client/server simplicity
+                        function $addValidationError(messageText, optionalFieldNamesOrFieldReferences /*nullable*/) {
+
+                            if(!optionalFieldNamesOrFieldReferences) {
+                                //this error will just exist but NOT attached to any field
+                                var error = {
+                                    message: messageText,
+                                    forceDisplay: true
+                                };
+
+                                thisForm.$aaFormExtensions.$allValidationErrors.push(error);
+                                return; //done!
+                            }
+
+                            if(angular.isArray(optionalFieldNamesOrFieldReferences)) {
+                                //these fields share the same validation message
+                                var fieldRefs = [],
+                                    errorKeyName = messageText.replace(/[^a-z0-9]/gi,'-');
+
+                                angular.forEach(optionalFieldNamesOrFieldReferences, function(fieldNameOrRef) {
+                                    fieldRefs.push(getFieldRef(fieldNameOrRef));
+                                });
+
+
+                                //this removes the model error from ALL fields here when the model
+                                //on any of them changes
+                                var listenerFactory = function(ngModel) {
+
+                                    var listener = function() {
+
+                                        ngModel.$setValidity(errorKeyName, true);
+
+                                        //remove all listeners on all fields that exist under this $addValidationError
+                                        //call
+                                        //schedule to remove after the stack clears as this is no longer needed
+                                        //don't remove before because angular is in a loop on $viewChangeListeners
+                                        $timeout(function() {
+                                            angular.forEach(fieldRefs, function(ref) {
+                                                arrayRemove(ref.$ngModel.$viewChangeListeners, listener);
+                                            });
+                                        });
+                                    };
+
+                                    return listener;
+                                };
+
+                                angular.forEach(fieldRefs, function(ref) {
+                                    ref.$addError(messageText, errorKeyName, true);
+                                    ref.$ngModel.$viewChangeListeners.unshift(listenerFactory(ref.$ngModel));
+                                });
+
+                                //TODO: add this back if multiple messages repeated is bad, not sure how i feel yet...
+//                                thisForm.$aaFormExtensions.$multiFieldValidationErrors
+//                                    .push({fields: fieldRefs, keyName: errorKeyName});
+                            } else {
+                                getFieldRef(optionalFieldNamesOrFieldReferences).$addError(messageText);
+                            }
+
+                            function getFieldRef(fieldNameOrRef) {
+                                if(angular.isObject(fieldNameOrRef)) {
+                                    return fieldNameOrRef;
+                                }
+
+                                var ref = thisForm.$aaFormExtensions[fieldNameOrRef];
+
+                                if(!ref) {
+                                    //try to find it removing casing as a variable
+                                    angular.forEach(thisForm.$aaFormExtensions, function(val,key) {
+                                        if(key.toLowerCase() === fieldNameOrRef.toLowerCase()) {
+                                            ref = val;
+                                        }
+                                    });
+                                }
+
+                                if(!ref) {
+                                    throw new Error("Could not find field '" + fieldNameOrRef + "' to add an error to");
+                                }
+
+                                return ref;
+                            }
+                        }
                     },
 
 
-
-
                     post: function(scope, element, attrs, form) {
+
+                        aaFormExtensions.availableForms.push(form);
 
                         element.on('keyup', function (event) {
                             if (event.keyCode === 13 &&
@@ -1456,13 +1640,12 @@
                             }, function() {
 
                                 //should validation errors be displayed?
-                                //only display if the field had had focus or an invalid submit attempt occured
                                 var shouldDisplay = form.$aaFormExtensions.$invalidAttempt && form.$invalid;
 
+                                //not yet... check to see if any fields have and reasons
                                 if(!shouldDisplay) {
-                                    //any fields have focus?
                                     angular.forEach(form.$aaFormExtensions.$allValidationErrors, function(error) {
-                                        if(error.field.hadFocus) {
+                                        if(error.field.showErrorReasons.length) {
                                             shouldDisplay = true;
                                         }
                                     });
@@ -1492,10 +1675,10 @@
                                 return form.$aaFormExtensions.$allValidationErrors;
                             } else {
 
-                                //only display ones that resulted from a hadFocus
+                                //only display ones that resulted from a field showErrorReasons or forceDisplay
                                 var toDisplay = [];
                                 angular.forEach(form.$aaFormExtensions.$allValidationErrors, function(error) {
-                                    if(error.field.hadFocus) {
+                                    if(error.field.showErrorReasons.length) {
                                         toDisplay.push(error);
                                     }
                                 });
@@ -1508,6 +1691,7 @@
                                 //form is going away, remove associated notifications!
                                 aaNotify.remove(notifyHandle, notifyTargetName);
                             }
+                            arrayRemove(aaFormExtensions.availableForms, form);
                         });
                     }
                 };

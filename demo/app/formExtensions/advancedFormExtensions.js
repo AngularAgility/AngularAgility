@@ -15,7 +15,7 @@ angular
             });
 
         $scope.submit = function() {
-            return $http.get('/twosecondwait')
+            return $http.post('/savePerson', $scope.person)
                 .success(function() {
                     //the new state of the form is now the initial state
                     $aaFormExtensions.$resetChanged();

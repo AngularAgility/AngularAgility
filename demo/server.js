@@ -7,6 +7,7 @@ var express = require('express');
 var _ = require('lodash');
 
 var app = express();
+app.use(express.json());
 app.use("/", express.static(__dirname));
 app.use("/src", express.static(__dirname + "/../src"));
 
@@ -31,6 +32,29 @@ app.get('/loadTestPerson', function(req, resp) {
             friends: [{firstName: 'Angular', lastName: 'Agility'}]
         });
     }, 1000);
+});
+
+app.post('/savePerson', function(req, resp) {
+    setTimeout(function() {
+        console.log(req);
+
+        if(req.body.firstName === 'John' && req.body.lastName === 'Culviner') {
+            //simulate a server side error when the user name already exists
+            resp
+                .status(400)
+                .send({
+                    errors:[
+                        {
+                            fieldNames: ['firstName', 'lastName'],
+                            errorMessage: 'John Culviner already exists!'
+                        }
+                    ]
+                });
+        } else {
+            resp.send({});
+        }
+    }, 2000);//pretend node isn't so fast...
+
 });
 
 //for select2 demo

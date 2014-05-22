@@ -169,38 +169,48 @@ addressForm.$aaFormExtensions.$invalidAttempt = {{ addressForm.$aaFormExtensions
             <br/>
             <br/>
 
-            <button class="btn" ng-click="personForm.$aaFormExtensions.$clearErrors()">
-                <strong>personForm.$aaFormExtensions.$clearErrors()</strong>
-                <br/>
-                Clear any presently displayed errors. They are still errors
-                <br/>
-                and will come back though!
-            </button>
+            <div>
+                <div class="tip">Try interacting with the advanced features of the forms:</div>
+                <button class="btn" ng-click="personForm.$aaFormExtensions.$clearErrors()">
+                    <strong>personForm.$aaFormExtensions.$clearErrors()</strong>
+                    <br/>
+                    Clear any presently displayed errors. They are still errors
+                    <br/>
+                    and will come back though!
+                </button>
 
-            <button class="btn" ng-click="personForm.$aaFormExtensions.$resetChanged()" ng-disabled="!personForm.$aaFormExtensions.$changed">
-                <strong>personForm.$aaFormExtensions.$resetChanged()</strong>
-                <br/>
-                The present $changed form is now unchanged
-                <br/>
-                Resets the initial states of all form values
-            </button>
+                <button class="btn" ng-click="personForm.$aaFormExtensions.$resetChanged()" ng-disabled="!personForm.$aaFormExtensions.$changed">
+                    <strong>personForm.$aaFormExtensions.$resetChanged()</strong>
+                    <br/>
+                    The present $changed form is now unchanged
+                    <br/>
+                    Resets the initial states of all form values
+                </button>
 
-            <button class="btn" ng-click="personForm.$aaFormExtensions.$reset()"
-                    ng-disabled="!personForm.$aaFormExtensions.$changed">
-                <strong>personForm.$aaFormExtensions.$reset()</strong>
-                <br/>
-                Reset form to it's unchanged, initial state
-                <br/>
-                <br/>
-            </button>
+                <button class="btn" ng-click="personForm.$aaFormExtensions.$reset()"
+                        ng-disabled="!personForm.$aaFormExtensions.$changed">
+                    <strong>personForm.$aaFormExtensions.$reset()</strong>
+                    <br/>
+                    Reset form to it's unchanged, initial state
+                    <br/>
+                    <br/>
+                </button>
+            </div>
 
             <div class="clearfix">
                 <div class="pull-right">
-
-
+                    <div class="tip">Try saving the form:</div>
                     <button class="btn btn-primary" aa-submit-form="submit()">Submit</button>
                 </div>
             </div>
+
+            <!--<div>-->
+                <!--<h1>Miscellaneous Other Examples</h1>-->
+
+                <!--<div class="well">-->
+                    <!---->
+                <!--</div>-->
+            <!--</div>-->
         </div>
     </div>
     <div aa-notify style="position: fixed; top: 60px; right: 25px;"></div>

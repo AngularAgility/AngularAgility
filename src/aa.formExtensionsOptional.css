@@ -4,7 +4,8 @@ input.ng-dirty.ng-valid, select.ng-dirty.ng-valid {
 }
 input.ng-dirty.ng-invalid, select.ng-dirty.ng-invalid,
 input.ng-invalid.aa-invalid-attempt, select.ng-invalid.aa-invalid-attempt,
-input.ng-invalid.aa-had-focus, select.ng-invalid.aa-had-focus {
+input.ng-invalid.aa-had-focus, select.ng-invalid.aa-had-focus,
+input.explicit-add-error, select.explicit-add-error {
     border:1px solid Red;
 }
 
