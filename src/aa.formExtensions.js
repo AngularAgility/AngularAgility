@@ -530,8 +530,7 @@
                             angular.forEach(newErrorMessages, function(msg) {
                                 form.$aaFormExtensions.$allValidationErrors.push({
                                     field: field,
-                                    message: msg,
-                                    forceDisplay: true
+                                    message: msg
                                 });
                             });
                         }
@@ -1532,8 +1531,7 @@
                             if(!optionalFieldNamesOrFieldReferences) {
                                 //this error will just exist but NOT attached to any field
                                 var error = {
-                                    message: messageText,
-                                    forceDisplay: true
+                                    message: messageText
                                 };
 
                                 thisForm.$aaFormExtensions.$allValidationErrors.push(error);
@@ -1643,9 +1641,10 @@
                                 var shouldDisplay = form.$aaFormExtensions.$invalidAttempt && form.$invalid;
 
                                 //not yet... check to see if any fields have and reasons
+                                //if there isnt a field then the error must show up
                                 if(!shouldDisplay) {
                                     angular.forEach(form.$aaFormExtensions.$allValidationErrors, function(error) {
-                                        if(error.field.showErrorReasons.length) {
+                                        if(!error.field || error.field.showErrorReasons.length) {
                                             shouldDisplay = true;
                                         }
                                     });
@@ -1675,10 +1674,11 @@
                                 return form.$aaFormExtensions.$allValidationErrors;
                             } else {
 
-                                //only display ones that resulted from a field showErrorReasons or forceDisplay
+                                //only display ones that resulted from a field showErrorReasons
+                                //if there isn't a field the error must show up
                                 var toDisplay = [];
                                 angular.forEach(form.$aaFormExtensions.$allValidationErrors, function(error) {
-                                    if(error.field.showErrorReasons.length) {
+                                    if(!error.field || error.field.showErrorReasons.length) {
                                         toDisplay.push(error);
                                     }
                                 });
