@@ -1,6 +1,9 @@
 module.exports = function (grunt) {
 
-    var banner = '/*! <%= pkg.name %> v<%= pkg.version %> @ <%= grunt.template.today("isoDateTime") %> */\n\n';
+    var banner =
+        '/*\n<%= pkg.name %> v<%= pkg.version %> @ <%= grunt.template.today("isoDateTime") %>\n' +
+        'Copyright (c) 2014 - John Culviner\n' +
+        'Licensed under the MIT license\n*/\n\n';
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -10,7 +13,7 @@ module.exports = function (grunt) {
                 banner: banner
             },
             dist: {
-                src: ['src/*.js'],
+                src: ['src/*.js', 'src/formExtensions/*.js', 'src/formExtensions/**/*.js'],
                 dest: 'dist/<%= pkg.name %>.js'
             }
         },
@@ -80,5 +83,4 @@ module.exports = function (grunt) {
     grunt.registerTask('build', ['test', 'concat', 'uglify']);
 
     grunt.registerTask('default', ['build', 'ngdocs']);
-
 };

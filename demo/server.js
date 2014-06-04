@@ -9,11 +9,13 @@ var _ = require('lodash');
 var app = express();
 app.use(express.json());
 app.use("/", express.static(__dirname));
+app.use("/dist", express.static(__dirname + "/../dist"));
 app.use("/src", express.static(__dirname + "/../src"));
+
 
 var port = process.env.PORT || 1337;
 app.listen(port, function() {
-    console.log("Serving files on locahost:1337 from " + __dirname)
+    console.log("Serving files on locahost:1337 from " + __dirname);
 });
 
 

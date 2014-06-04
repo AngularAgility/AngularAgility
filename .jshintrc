@@ -13,7 +13,6 @@
     "regexp": true,
     "undef": true,
     "unused": false,
-    "strict": false,
     "trailing": false,
     "smarttabs": true,
     "white": false,
@@ -35,13 +34,11 @@
         "it": false,
         "jasmine": false,
         "JSHINT": false,
-        "mostRecentAjaxRequest": false,
         "qq": false,
         "runs": false,
         "spyOn": false,
         "spyOnEvent": false,
         "waitsFor": false,
-        "xdescribe": false,
-        "stringFormat": false
+        "xdescribe": false
     }
 }

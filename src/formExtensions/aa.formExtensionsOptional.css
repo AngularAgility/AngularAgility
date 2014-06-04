@@ -1,12 +1,13 @@
 /*some optional CSS that will make your aa.formExtensions experience a little prettier*/
 input.ng-dirty.ng-valid, select.ng-dirty.ng-valid {
-    border:1px solid Green;
+    border: 1px solid Green;
 }
+
 input.ng-dirty.ng-invalid, select.ng-dirty.ng-invalid,
 input.ng-invalid.aa-invalid-attempt, select.ng-invalid.aa-invalid-attempt,
 input.ng-invalid.aa-had-focus, select.ng-invalid.aa-had-focus,
 input.explicit-add-error, select.explicit-add-error {
-    border:1px solid Red;
+    border: 1px solid Red;
 }
 
 div.validation-icons {
@@ -15,7 +16,7 @@ div.validation-icons {
 }
 
 /*requires font awesome*/
-div.validation-icons i.fa-check  {
+div.validation-icons i.fa-check {
     color: green;
 }
 
