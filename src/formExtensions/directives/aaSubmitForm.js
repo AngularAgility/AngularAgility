@@ -29,7 +29,7 @@
 
                             //if this isn't a promise it will resolve immediately
                             $q.when(scope.aaSubmitForm())
-                                .finally(function(result) {
+                                ["finally"](function(result) {
                                     eleSpinnerClickStrategy.after();
                                     return result;
                                 });
