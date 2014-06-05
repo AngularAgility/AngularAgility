@@ -16,6 +16,15 @@ or
 bower install angular-agility
 ```
 
+## Installation
+
+AngularJS is the only dependency.
+
+Add the AngularAgility dependencies to your Angular module definition:
+
+```javascript
+angular.module('myModule', ['aa.formExtensions', 'aa.notify']);
+```
 
 #Form Extensions
 [Blog Posts](http://johnculviner.com/category/form-extensions/) |
