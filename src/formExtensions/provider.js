@@ -54,7 +54,7 @@
                         element.addClass('form-control');
                     }
 
-                    element.wrap('<div class="form-group"><div class="col-sm-3"></div></div>');
+                    wrap(element, '<div class="form-group"><div class="col-sm-3"></div></div>');
                 },
                 bootstrap3BasicFormWithSize: function(element) {
 
@@ -65,7 +65,7 @@
 
                     var col = element.attr('aa-col') || "sm-3";
 
-                    element.wrap('<div class="form-group col-' + col + '"></div>');
+                    wrap(element, '<div class="form-group col-' + col + '"></div>');
                 }
             };
 
@@ -296,6 +296,36 @@
                 };
             };
         });
+
+    function wrap(elms, wrapper) {
+        var wrapperDiv = document.createElement('div');
+        wrapperDiv.innerHTML = wrapper;
+
+        if (!elms.length) {
+            elms = [elms];
+        }
+
+        for (var i = elms.length - 1; i >= 0; i--) {
+            var el = elms[i];
+
+            var child = wrapperDiv.firstChild.cloneNode(true);
+            var appendNode = child;
+            while (appendNode.firstChild) {
+                appendNode = appendNode.firstChild;
+            }
+
+            var parent = el.parentNode;
+            var sibling = el.nextSibling;
+
+            appendNode.appendChild(el);
+
+            if (sibling) {
+                parent.insertBefore(child, sibling);
+            } else {
+                parent.appendChild(child);
+            }
+        }
+    }
 
     function stringFormat(format) {
         var args = Array.prototype.slice.call(arguments, 1);
