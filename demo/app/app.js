@@ -35,9 +35,6 @@ angular
                     templateUrl: 'app/notify/notify.html',
                     controller: 'notify'
                 });
-
-            //a built in label strategy that works with bootstrap
-            aaFormExtensionsProvider.defaultLabelStrategy = 'bootstrap3InlineForm';
     }])
     .directive('syntaxHighligherFor', function() {
         return {

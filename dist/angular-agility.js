@@ -1,5 +1,5 @@
 /*
-angular-agility v0.8.3 @ 2014-06-15T13:24:29
+angular-agility v0.8.4 @ 2014-06-15T15:45:25
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1170,7 +1170,7 @@ angular
             var self = this;
 
             //LABEL STRATEGIES
-            this.defaultLabelStrategy = "default";
+            this.defaultLabelStrategy = "bootstrap3InlineForm";
             this.labelStrategies = {
 
                 //create a bootstrap3 style label
@@ -1195,7 +1195,7 @@ angular
                 },
 
                 //create a no-frills label directly before the element
-                'default': function(ele, labelText, isRequired) {
+                simple: function(ele, labelText, isRequired) {
                     ele[0].parentNode.insertBefore(
                         angular.element('<label>')
                             .attr('for', ele[0].id)

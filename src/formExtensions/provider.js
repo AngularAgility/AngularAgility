@@ -7,7 +7,7 @@
             var self = this;
 
             //LABEL STRATEGIES
-            this.defaultLabelStrategy = "default";
+            this.defaultLabelStrategy = "bootstrap3InlineForm";
             this.labelStrategies = {
 
                 //create a bootstrap3 style label
@@ -32,7 +32,7 @@
                 },
 
                 //create a no-frills label directly before the element
-                'default': function(ele, labelText, isRequired) {
+                simple: function(ele, labelText, isRequired) {
                     ele[0].parentNode.insertBefore(
                         angular.element('<label>')
                             .attr('for', ele[0].id)
