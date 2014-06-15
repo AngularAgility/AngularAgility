@@ -1,5 +1,5 @@
 /*
-angular-agility v0.8.2 @ 2014-06-04T01:53:02
+angular-agility v0.8.2 @ 2014-06-15T13:02:39
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1217,7 +1217,7 @@ angular
                         element.addClass('form-control');
                     }
 
-                    element.wrap('<div class="form-group"><div class="col-sm-3"></div></div>');
+                    wrap(element, '<div class="form-group"><div class="col-sm-3"></div></div>');
                 },
                 bootstrap3BasicFormWithSize: function(element) {
 
@@ -1228,7 +1228,7 @@ angular
 
                     var col = element.attr('aa-col') || "sm-3";
 
-                    element.wrap('<div class="form-group col-' + col + '"></div>');
+                    wrap(element, '<div class="form-group col-' + col + '"></div>');
                 }
             };
 
@@ -1460,14 +1460,43 @@ angular
             };
         });
 
+    function wrap(elms, wrapper) {
+        var wrapperDiv = document.createElement('div');
+        wrapperDiv.innerHTML = wrapper;
+
+        if (!elms.length) {
+            elms = [elms];
+        }
+
+        for (var i = elms.length - 1; i >= 0; i--) {
+            var el = elms[i];
+
+            var child = wrapperDiv.firstChild.cloneNode(true);
+            var appendNode = child;
+            while (appendNode.firstChild) {
+                appendNode = appendNode.firstChild;
+            }
+
+            var parent = el.parentNode;
+            var sibling = el.nextSibling;
+
+            appendNode.appendChild(el);
+
+            if (sibling) {
+                parent.insertBefore(child, sibling);
+            } else {
+                parent.appendChild(child);
+            }
+        }
+    }
+
     function stringFormat(format) {
         var args = Array.prototype.slice.call(arguments, 1);
         return format.replace(/{(\d+)}/g, function(match, number) {
             return typeof args[number] !== 'undefined' ? args[number] : match;
         });
     }
-})();
-;(function() {
+})();;(function() {
     'use strict';
 
     angular.module('aa.formExtensions')
@@ -1773,7 +1802,7 @@ angular
 
                             //if this isn't a promise it will resolve immediately
                             $q.when(scope.aaSubmitForm())
-                                .finally(function(result) {
+                                ["finally"](function(result) {
                                     eleSpinnerClickStrategy.after();
                                     return result;
                                 });
