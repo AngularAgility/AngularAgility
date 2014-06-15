@@ -5,15 +5,21 @@ module.exports = function (grunt) {
         'Copyright (c) 2014 - John Culviner\n' +
         'Licensed under the MIT license\n*/\n\n';
 
+    //appears repetitive but this gets the files in the correct orders
+    var sources = ['src/*.js', 'src/formExtensions/*.js', 'src/formExtensions/**/*.js'];
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+
+        src: sources,
+
         concat: {
             options: {
                 separator: ';',
                 banner: banner
             },
             dist: {
-                src: ['src/*.js', 'src/formExtensions/*.js', 'src/formExtensions/**/*.js'],
+                src: sources,
                 dest: 'dist/<%= pkg.name %>.js'
             }
         },
@@ -47,8 +53,8 @@ module.exports = function (grunt) {
             }
         },
         watch: {
-            files: ['<%= jshint.files %>'],
-            tasks: ['jshint']
+            files: sources,
+            tasks: ['build']
         },
 		ngdocs: {
 			options:{
@@ -81,6 +87,8 @@ module.exports = function (grunt) {
 	
     grunt.registerTask('test', ['jshint', 'karma:continuous']);
     grunt.registerTask('build', ['test', 'concat', 'uglify']);
+    grunt.registerTask('dev', ['build', 'watch']);
+
 
     grunt.registerTask('default', ['build', 'ngdocs']);
 };
