@@ -1,5 +1,5 @@
 /*
-angular-agility v0.8.4 @ 2014-06-15T15:45:25
+angular-agility v0.8.5 @ 2014-06-16T23:35:59
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -2334,11 +2334,14 @@ angular
 
                         if(notifyTargetName && (!form.$aaFormExtensions.$parentForm || customNotifyTarget)) {
 
-                            scope.$watch(function() {
-                                return angular.toJson([ //possible perf issue but what is the alternative?
-                                    form.$aaFormExtensions.$allValidationErrors,
-                                    form.$aaFormExtensions.$invalidAttempt
-                                ]);
+                            scope.$watchCollection(function() {
+                                var collection = [];
+                                angular.forEach(form.$aaFormExtensions.$allValidationErrors, function(val) {
+                                    collection.push(val);
+                                });
+                                collection.push(form.$aaFormExtensions.$invalidAttempt);
+                                return collection;
+
                             }, function() {
 
                                 //should validation errors be displayed?
