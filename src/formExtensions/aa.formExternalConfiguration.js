@@ -353,15 +353,15 @@
                         if(validationConfig) {
                             validationConfig.ignore = validationConfig.ignore || {};
                             _this.findFormElements(elem.children(), validationConfig);
-                            $compile(elem)(scope);
                         }
+                        $compile(elem)(scope);
                     };
                 },
                 findFormElements: function(elements, validationConfig) {
                     var _this = this;
                     angular.forEach(elements, function(element) {
                         var jqElm = angular.element(element);
-                        var modelAttr = jqElm.attr('ng-model') || jqElm.attr('data-ng-model') || jqElm.attr('ngModel');
+                        var modelAttr = jqElm.attr('ng-model') || jqElm.attr('data-ng-model') || jqElm.attr('ngModel') || jqElm.attr('aa-field') || jqElm.attr('aa-field-group') || jqElm.attr('data-aa-field') || jqElm.attr('data-aa-field-group');
                         if(modelAttr) {
                             if(validationConfig.ignore[jqElm[0].name]) {
                                 return;
