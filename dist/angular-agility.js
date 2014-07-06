@@ -1,5 +1,5 @@
 /*
-angular-agility v0.8.5 @ 2014-06-16T23:35:59
+angular-agility v0.8.5 @ 2014-07-06T18:13:42
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -883,15 +883,15 @@ angular
                         if(validationConfig) {
                             validationConfig.ignore = validationConfig.ignore || {};
                             _this.findFormElements(elem.children(), validationConfig);
-                            $compile(elem)(scope);
                         }
+                        $compile(elem)(scope);
                     };
                 },
                 findFormElements: function(elements, validationConfig) {
                     var _this = this;
                     angular.forEach(elements, function(element) {
                         var jqElm = angular.element(element);
-                        var modelAttr = jqElm.attr('ng-model') || jqElm.attr('data-ng-model') || jqElm.attr('ngModel');
+                        var modelAttr = jqElm.attr('ng-model') || jqElm.attr('data-ng-model') || jqElm.attr('ngModel') || jqElm.attr('aa-field') || jqElm.attr('aa-field-group') || jqElm.attr('data-aa-field') || jqElm.attr('data-aa-field-group');
                         if(modelAttr) {
                             if(validationConfig.ignore[jqElm[0].name]) {
                                 return;
@@ -1174,12 +1174,14 @@ angular
             this.labelStrategies = {
 
                 //create a bootstrap3 style label
-                bootstrap3InlineForm: function(ele, labelText, isRequired) {
+                bootstrap3InlineForm: function(element, labelText, isRequired) {
+
+                    var col = element.attr('aa-lbl-col') || "sm-2";
 
                     var label = angular.element('<label>')
-                        .attr('for', ele[0].id)
-                        .addClass('col-sm-2 control-label')
-                        .html(labelText + (isRequired ? ' *' : ''));
+                        .attr('for', element[0].id)
+                        .addClass('col-' + col + ' control-label')
+                        .html(labelText + (isRequired ? '&nbsp;*' : ''));
 
 
                     var unsupported = [
@@ -1187,11 +1189,11 @@ angular
                         'submit'
                     ];
 
-                    if(unsupported.indexOf(ele[0].type) !== -1) {
-                        throw new Error("Generating a label for and input type " + ele[0].type + " is unsupported.");
+                    if(unsupported.indexOf(element[0].type) !== -1) {
+                        throw new Error("Generating a label for and input type " + element[0].type + " is unsupported.");
                     }
 
-                    ele.parent().parent().prepend(label);
+                    element.parent().parent().prepend(label);
                 },
 
                 //create a no-frills label directly before the element
@@ -1199,7 +1201,7 @@ angular
                     ele[0].parentNode.insertBefore(
                         angular.element('<label>')
                             .attr('for', ele[0].id)
-                            .html(labelText + (isRequired ? ' *' : ''))[0],
+                            .html(labelText + (isRequired ? '&nbsp;*' : ''))[0],
                         ele[0]);
                 }
 
@@ -1217,7 +1219,9 @@ angular
                         element.addClass('form-control');
                     }
 
-                    wrap(element, '<div class="form-group"><div class="col-sm-3"></div></div>');
+                    var col = element.attr('aa-col') || "sm-3";
+
+                    wrap(element, '<div class="form-group"><div class="col-'+ col +'"></div></div>');
                 },
                 bootstrap3BasicFormWithSize: function(element) {
 

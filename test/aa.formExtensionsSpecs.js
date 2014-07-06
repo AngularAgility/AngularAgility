@@ -1,4 +1,4 @@
-describe('aa.formExtensinos.js >', function () {
+describe('aa.formExtensions.js >', function () {
     beforeEach(module('aa.formExtensions'));
 
     describe('aaField >', function () {

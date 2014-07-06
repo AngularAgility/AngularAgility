@@ -13,6 +13,22 @@ module.exports = function (grunt) {
 
         src: sources,
 
+        bump: {
+            options: {
+                files: ['package.json', 'bower.json'],
+                updateConfigs: [],
+                commit: true,
+                commitMessage: 'Release v%VERSION%',
+                commitFiles: ['package.json', 'bower.json'],
+                createTag: true,
+                tagName: 'v%VERSION%',
+                tagMessage: 'Version %VERSION%',
+                push: true,
+                pushTo: 'upstream',
+                gitDescribeOptions: '--tags --always --abbrev=1 --dirty=-d'
+            }
+        },
+
         concat: {
             options: {
                 separator: ';',
@@ -84,11 +100,11 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-karma');
 	grunt.loadNpmTasks('grunt-ngdocs');
+    grunt.loadNpmTasks('grunt-bump');
 	
     grunt.registerTask('test', ['jshint', 'karma:continuous']);
     grunt.registerTask('build', ['test', 'concat', 'uglify']);
     grunt.registerTask('dev', ['build', 'watch']);
-
 
     grunt.registerTask('default', ['build', 'ngdocs']);
 };

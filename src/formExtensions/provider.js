@@ -11,12 +11,14 @@
             this.labelStrategies = {
 
                 //create a bootstrap3 style label
-                bootstrap3InlineForm: function(ele, labelText, isRequired) {
+                bootstrap3InlineForm: function(element, labelText, isRequired) {
+
+                    var col = element.attr('aa-lbl-col') || "sm-2";
 
                     var label = angular.element('<label>')
-                        .attr('for', ele[0].id)
-                        .addClass('col-sm-2 control-label')
-                        .html(labelText + (isRequired ? ' *' : ''));
+                        .attr('for', element[0].id)
+                        .addClass('col-' + col + ' control-label')
+                        .html(labelText + (isRequired ? '&nbsp;*' : ''));
 
 
                     var unsupported = [
@@ -24,11 +26,11 @@
                         'submit'
                     ];
 
-                    if(unsupported.indexOf(ele[0].type) !== -1) {
-                        throw new Error("Generating a label for and input type " + ele[0].type + " is unsupported.");
+                    if(unsupported.indexOf(element[0].type) !== -1) {
+                        throw new Error("Generating a label for and input type " + element[0].type + " is unsupported.");
                     }
 
-                    ele.parent().parent().prepend(label);
+                    element.parent().parent().prepend(label);
                 },
 
                 //create a no-frills label directly before the element
@@ -36,7 +38,7 @@
                     ele[0].parentNode.insertBefore(
                         angular.element('<label>')
                             .attr('for', ele[0].id)
-                            .html(labelText + (isRequired ? ' *' : ''))[0],
+                            .html(labelText + (isRequired ? '&nbsp;*' : ''))[0],
                         ele[0]);
                 }
 
@@ -54,7 +56,9 @@
                         element.addClass('form-control');
                     }
 
-                    wrap(element, '<div class="form-group"><div class="col-sm-3"></div></div>');
+                    var col = element.attr('aa-col') || "sm-3";
+
+                    wrap(element, '<div class="form-group"><div class="col-'+ col +'"></div></div>');
                 },
                 bootstrap3BasicFormWithSize: function(element) {
 
