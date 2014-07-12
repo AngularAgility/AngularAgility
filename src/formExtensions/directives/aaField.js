@@ -1,53 +1,62 @@
-(function() {
-    'use strict';
+/*globals angular */
 
-    angular.module('aa.formExtensions')
-        .directive('aaField', ['$compile', 'aaUtils', function($compile, aaUtils) {
-            return {
-                restrict: 'A',
-                scope: false,
-                replace: true,
-                priority: 1000,
-                terminal: true,
-                compile: function(element, attrs) {
+/**
+ * @ngdoc directive
+ * @name aaField
+ *
+ * @description
+ * Description place holder.
+ **/
+(function () {
+  'use strict';
 
-                    //use the passed value for ng-model
-                    element.attr("ng-model", attrs.aaField);
+  angular.module('aa.formExtensions')
+    .directive('aaField', ['$compile', 'aaUtils', function ($compile, aaUtils) {
+      return {
+        restrict: 'A',
+        scope: false,
+        replace: true,
+        priority: 1000,
+        terminal: true,
+        compile: function (element, attrs) {
 
-                    var lastPartOfName = attrs.aaField.substring(attrs.aaField.lastIndexOf('.') + 1);
+          //use the passed value for ng-model
+          element.attr("ng-model", attrs.aaField);
 
-                    //if no name set calc one
-                    if(!attrs.name) {
-                        element.attr("name", lastPartOfName);
-                    }
+          var lastPartOfName = attrs.aaField.substring(attrs.aaField.lastIndexOf('.') + 1);
 
-                    //assume input type="text" (which a browser will do but many libraries ex. boostrap have styling that requires it)
-                    if(!attrs.type && element.prop('tagName').toUpperCase() === 'INPUT') {
-                        element.prop('type', 'text');
-                    }
+          //if no name set calc one
+          if (!attrs.name) {
+            element.attr("name", lastPartOfName);
+          }
 
-                    //if no label and "no-label" don't calc one
-                    if(!attrs.aaLabel && attrs.noLabel === undefined) {
+          //assume input type="text" (which a browser will do but many libraries ex. boostrap have styling that requires it)
+          if (!attrs.type && element.prop('tagName').toUpperCase() === 'INPUT') {
+            element.prop('type', 'text');
+          }
 
-                        //remove trailing "Id". Usually a label isn't "PersonId" it's Person
-                        if(lastPartOfName.lastIndexOf('Id') === lastPartOfName.length - 2) {
-                            lastPartOfName = lastPartOfName.substring(0, lastPartOfName.length - 2);
-                        }
+          //if no label and "no-label" don't calc one
+          if (!attrs.aaLabel && attrs.noLabel === undefined) {
 
-                        element.attr('aa-label', aaUtils.toTitleCase(aaUtils.splitCamelCase(lastPartOfName)));
-                    }
+            //remove trailing "Id". Usually a label isn't "PersonId" it's Person
+            if (lastPartOfName.lastIndexOf('Id') === lastPartOfName.length - 2) {
+              lastPartOfName = lastPartOfName.substring(0, lastPartOfName.length - 2);
+            }
 
-                    element.attr("aa-val-msg", "");
+            element.attr('aa-label', aaUtils.toTitleCase(aaUtils.splitCamelCase(lastPartOfName)));
+          }
 
-                    element.removeAttr('aa-field');
+          element.attr("aa-val-msg", "");
 
-                    element.replaceWith(aaUtils.outerHTML(element[0]));
+          element.removeAttr('aa-field');
 
-                    return function(scope, element) {
-                        $compile(element)(scope);
-                    };
-                }
-            };
-        }]);
+          element.replaceWith(aaUtils.outerHTML(element[0]));
+
+          return function (scope, element) {
+            $compile(element)(scope);
+          };
+        }
+      };
+    }]);
 
 })();

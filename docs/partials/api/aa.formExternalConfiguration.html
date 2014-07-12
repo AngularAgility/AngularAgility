@@ -1,0 +1,302 @@
+<h1><code ng:non-bindable=""></code>
+<div><span class="hint"></span>
+</div>
+</h1>
+<div><div class="aa-formexternalconfiguration-page"><p>This module contains the form extension directives that are used to easily generate
+angular form elements using an external configuration.</p>
+<p>Instead of defining all the validation specs directly in the markup, these specs
+can be passed to the aaConfiguredForm directive as a regular JavaScript object.</p>
+<p>This approach allows you to have the validation data to be retrieved from a server,
+for example.
+Also, when different kinds of form layouts/visualisations exist for the same data
+across an application, this approach might save a bunch of markup typing.</p>
+<p>The configuration object has an interface like this:
+var formconfig = {
+  validations:Object,
+  ignore?:Object,
+  globals?:Object,
+  resolve?:Object,
+  resolveFn?:Function
+}</p>
+<p>A simple configuration looks like this:</p>
+<p>   <pre class="prettyprint linenums">
+   &lt;script&gt;
+   var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
+   .controller('main', ['$scope', function(scope) {
+       scope.user = {
+           name:'Test1',
+       };
+       scope.formconfig = {
+           validations: {
+               user:{
+                   name: {
+                       'ng-minlength':8,
+                       required:true
+                   },
+               }
+           }
+       };
+    }]);
+   &lt;/script&gt;
+   &lt;div ng-controller="main"&gt;
+   &lt;div aa-configured-form validation-config="formconfig" ng-form="exampleForm"&gt;
+   &lt;input type="text" ng-model="user.name" /&gt;
+   &lt;/div&gt;
+   &lt;/div&gt;
+   </pre>
+<p>If there are validation specs you need to add to all applicable inputs, add a globals
+property:</p>
+<p>   <pre class="prettyprint linenums">
+   &lt;script&gt;
+   var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
+   .controller('main', ['$scope', function(scope) {
+       scope.user = {
+           name:'Test1',
+       };
+       scope.formconfig = {
+           globals: {
+               'aa-valid-icon':''
+           },
+           validations: {
+               user:{
+                   name: {
+                       'ng-minlength':8,
+                       required:true
+                   },
+               }
+           }
+       };
+    }]);
+   &lt;/script&gt;
+   &lt;div ng-controller="main"&gt;
+   &lt;div aa-configured-form validation-config="formconfig" ng-form="exampleForm"&gt;
+   &lt;input type="text" ng-model="user.name" /&gt;
+   &lt;/div&gt;
+   &lt;/div&gt;
+   </pre>
+<p>If the scope name doesn&#39;t match the validation name for some reason,
+add a resolve property to the config like this:</p>
+<p>   <pre class="prettyprint linenums">
+   &lt;script&gt;
+   var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
+   .controller('main', ['$scope', function(scope) {
+        scope.user = {
+           name:'Test1',
+        };
+        scope.formconfig = {
+           resolve: {
+               user:'UserType'
+           },
+           validations: {
+               'UserType':{
+                   name: {
+                       'ng-minlength':8,
+                       required:true
+                   },
+               }
+           }
+        };
+    }]);
+   &lt;/script&gt;
+   &lt;div ng-controller="main"&gt;
+   &lt;div aa-configured-form validation-config="formconfig" ng-form="exampleForm"&gt;
+   &lt;input type="text" ng-model="user.name" /&gt;
+   &lt;/div&gt;
+   &lt;/div&gt;
+   </pre>
+<p>If the resolving the scope name to the validation name is more complex,
+add a resolveFn property to the config:</p>
+<p>   <pre class="prettyprint linenums">
+   &lt;script&gt;
+   var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
+   .controller('main', ['$scope', function(scope) {
+        scope.user = {
+           name:'Test1',
+           __type:'UserType'
+        };
+        scope.formconfig = {
+           resolveFn: function(modelValue){
+               //modelValue === 'user.name'
+               if (modelValue.indexOf('.') &gt; -1) {
+                   parts = modelValue.split('.');
+               }
+               var modelName = parts[parts.length-2];
+               return scope[modelName]['__type'];
+           },
+           validations: {
+               'UserType':{
+                   name: {
+                       'ng-minlength':8,
+                       required:true
+                   },
+               }
+           }
+        };
+    }]);
+   &lt;/script&gt;
+   &lt;div ng-controller="main"&gt;
+   &lt;div aa-configured-form validation-config="formconfig" ng-form="exampleForm"&gt;
+   &lt;input type="text" ng-model="user.name" /&gt;
+   &lt;/div&gt;
+   &lt;/div&gt;
+   </pre>
+<p>Named input fields can be added to the &#39;ignore&#39; section of the configuration,
+that way they won&#39;t be processed (so also the globals won&#39;t be added):</p>
+<p>   <pre class="prettyprint linenums">
+   &lt;script&gt;
+   var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
+   .controller('main', ['$scope', function(scope) {
+	scope.user = {
+	   name:'Test1',
+	   lastname:'Test2'
+	};
+	scope.formconfig = {
+	   globals: {
+		   'aa-valid-icon':''
+	   },
+	   ignore: {
+		   'last-name':true
+	   },
+	   validations: {
+		   'user':{
+			   name: {
+				   'ng-minlength':8,
+				   required:true
+			   },
+		   }
+	   }
+	};
+	}]);
+   &lt;/script&gt;
+   &lt;div ng-controller="main"&gt;
+   &lt;div aa-configured-form validation-config="formconfig" ng-form="exampleForm"&gt;
+   &lt;input type="text" ng-model="user.name" /&gt;
+   &lt;input type="text" ng-model="user.lastname" name="last-name/&gt;
+   &lt;/div&gt;
+   &lt;/div&gt;
+   </pre>
+<p>For very large models that have lots of properties sharing a lot of common validations,
+it is also possible to let one property config inherit from another, like this:</p>
+<p>   <pre class="prettyprint linenums">
+   &lt;script&gt;
+   var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
+   .controller('main', ['$scope', function(scope) {
+        scope.user = {
+           name:'Test1',
+           lastname:'Test2'
+        };
+        scope.formconfig = {
+           validations: {
+               'user':{
+                   name: {
+                       'ng-minlength':4,
+                       'ng-maxlength':8,
+                       required:true,
+                       'aa-label':'Name'
+                   },
+                   property2: {
+                       'aa-inherit':'name',
+                       'aa-label':'Property 2'
+                   },
+                   property3: {
+                       'aa-inherit':'name',
+                       'aa-label':'Property 3'
+                   },
+                   property4: {
+                       'aa-inherit':'name',
+                       'aa-label':'Property 4'
+                   }
+               }
+           }
+        };
+}]);
+   &lt;/script&gt;
+   </pre>
+<p>It is even possible to inherit from a property belonging to another
+model validation:</p>
+<p>   <pre class="prettyprint linenums">
+   &lt;script&gt;
+   var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
+   .controller('main', ['$scope', function(scope) {
+    scope.user = {
+       name:'Test1',
+       lastname:'Test2'
+    };
+    scope.formconfig = {
+       validations: {
+           'person':{
+               name: {
+                   'ng-minlength':4,
+                   'ng-maxlength':8,
+                   required:true,
+                   'aa-label':'Name'
+               },
+           },
+           'user':{
+               name: {
+                   'aa-inherit':'person.name',
+                   'aa-label':'Name'
+               },
+               property2: {
+                   'aa-inherit':'name',
+                   'aa-label':'Property 2'
+               },
+               property3: {
+                   'aa-inherit':'name',
+                   'aa-label':'Property 3'
+               },
+               property4: {
+                   'aa-inherit':'name',
+                   'aa-label':'Property 4'
+               }
+           }
+       }
+    };
+}]);
+   &lt;/script&gt;
+   </pre>
+<p>The inheritance also supports overriding,
+simply add the override to the property config.</p>
+<p>   <pre class="prettyprint linenums">
+   &lt;script&gt;
+   var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
+   .controller('main', ['$scope', function(scope) {
+    scope.user = {
+       name:'Test1',
+       lastname:'Test2'
+    };
+    scope.formconfig = {
+       validations: {
+           'person':{
+               name: {
+                   'ng-minlength':4,
+                   'ng-maxlength':8,
+                   required:true,
+                   'aa-label':'Name'
+               },
+           },
+           'user':{
+               name: {
+                   'aa-inherit':'person.name',
+                   'ng-maxlength':12,
+                   'aa-label':'Name'
+               },
+               property2: {
+                   'aa-inherit':'person.name',
+                   'aa-label':'Property 2'
+               },
+               property3: {
+                   'aa-inherit':'person.name',
+                   'aa-label':'Property 3'
+               },
+               property4: {
+                   'aa-inherit':'person.name',
+                   'aa-label':'Property 4'
+               }
+           }
+       }
+    };
+}]);
+   &lt;/script&gt;
+   </pre>
+</div></div>

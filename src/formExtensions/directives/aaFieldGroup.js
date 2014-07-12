@@ -1,27 +1,34 @@
-(function() {
-    'use strict';
+/**
+ * @ngdoc directive
+ * @name aaFieldGroup
+ *
+ * @description
+ * Description place holder.
+ **/
+(function () {
+  'use strict';
 
-    angular.module('aa.formExtensions')
-        .directive('aaFieldGroup', ['$compile', 'aaFormExtensions', function($compile, aaFormExtensions) {
-            return {
-                restrict: 'A',
-                scope: false,
-                replace: true,
-                priority: 1100,
-                terminal: true,
-                compile: function(element, attrs) {
+  angular.module('aa.formExtensions')
+    .directive('aaFieldGroup', ['$compile', 'aaFormExtensions', function ($compile, aaFormExtensions) {
+      return {
+        restrict: 'A',
+        scope: false,
+        replace: true,
+        priority: 1100,
+        terminal: true,
+        compile: function (element, attrs) {
 
-                    element.removeAttr('aa-field-group');
-                    element.attr("aa-field", attrs.aaFieldGroup);
+          element.removeAttr('aa-field-group');
+          element.attr("aa-field", attrs.aaFieldGroup);
 
-                    var strat = aaFormExtensions.fieldGroupStrategies[attrs.aaFieldGroupStrategy || aaFormExtensions.defaultFieldGroupStrategy];
-                    strat(element);
+          var strat = aaFormExtensions.fieldGroupStrategies[attrs.aaFieldGroupStrategy || aaFormExtensions.defaultFieldGroupStrategy];
+          strat(element);
 
-                    return function(scope, element) {
-                        $compile(element)(scope);
-                    };
-                }
-            };
-        }]);
+          return function (scope, element) {
+            $compile(element)(scope);
+          };
+        }
+      };
+    }]);
 
 })();

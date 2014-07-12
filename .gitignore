@@ -1,4 +1,6 @@
 .idea
+AngularAgility.iml
+coverage
 node_modules
 /index.html
 /bower_components

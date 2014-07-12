@@ -282,9 +282,10 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
       GLOBALS = /^angular\.([^\.]+)$/,
       MODULE = /^([^\.]+)$/,
       MODULE_MOCK = /^angular\.mock\.([^\.]+)$/,
-      MODULE_DIRECTIVE = /^(.+)\.directive:([^\.]+)$/,
-      MODULE_DIRECTIVE_INPUT = /^(.+)\.directive:input\.([^\.]+)$/,
-      MODULE_FILTER = /^(.+)\.filter:([^\.]+)$/,
+      MODULE_CONTROLLER = /^(.+)\.controllers?:([^\.]+)$/,
+      MODULE_DIRECTIVE = /^(.+)\.directives?:([^\.]+)$/,
+      MODULE_DIRECTIVE_INPUT = /^(.+)\.directives?:input\.([^\.]+)$/,
+      MODULE_FILTER = /^(.+)\.filters?:([^\.]+)$/,
       MODULE_CUSTOM = /^(.+)\.([^\.]+):([^\.]+)$/,
       MODULE_SERVICE = /^(.+)\.([^\.]+?)(Provider)?$/,
       MODULE_TYPE = /^([^\.]+)\..+\.([A-Z][^\.]+)$/;
@@ -368,6 +369,9 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
         breadcrumb.push({ name: match[1] });
       } else if (match = partialId.match(MODULE_FILTER)) {
         match[1] = page.moduleName || match[1];
+        breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
+        breadcrumb.push({ name: match[2] });
+      } else if (match = partialId.match(MODULE_CONTROLLER)) {
         breadcrumb.push({ name: match[1], url: sectionPath + '/' + match[1] });
         breadcrumb.push({ name: match[2] });
       } else if (match = partialId.match(MODULE_DIRECTIVE)) {
@@ -456,13 +460,26 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
         module(page.moduleName || match[1], section);
       } else if (match = id.match(MODULE_FILTER)) {
         module(page.moduleName || match[1], section).filters.push(page);
+      } else if (match = id.match(MODULE_CONTROLLER) && page.type === 'controller') {
+        module(page.moduleName || match[1], section).controllers.push(page);
       } else if (match = id.match(MODULE_DIRECTIVE)) {
         module(page.moduleName || match[1], section).directives.push(page);
       } else if (match = id.match(MODULE_DIRECTIVE_INPUT)) {
         module(page.moduleName || match[1], section).directives.push(page);
       } else if (match = id.match(MODULE_CUSTOM)) {
-        module(page.moduleName || match[1], section).others.push(page);
-      } else if (match = id.match(MODULE_TYPE)) {
+        if (page.type === 'service') {
+          module(page.moduleName || match[1], section).service(match[3])[page.id.match(/^.+Provider$/) ? 'provider' : 'instance'] = page;
+        } else {
+          var m = module(page.moduleName || match[1], section),
+            listName = page.type + 's';
+
+          if (m[listName]) {
+            m[listName].push(page);
+          } else {
+            m.others.push(page);
+          }
+        }
+      } else if (match = id.match(MODULE_TYPE) && page.type === 'type') {
         module(page.moduleName || match[1], section).types.push(page);
       } else if (match = id.match(MODULE_SERVICE)) {
         if (page.type === 'overview') {
@@ -487,6 +504,7 @@ docsApp.controller.DocsController = function($scope, $location, $window, section
           name: name,
           url: (NG_DOCS.html5Mode ? '' : '#/') + section + '/' + name,
           globals: [],
+          controllers: [],
           directives: [],
           services: [],
           others: [],

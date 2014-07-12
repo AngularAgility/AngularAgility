@@ -1,43 +1,50 @@
-(function() {
-    'use strict';
+/**
+ * @ngdoc directive
+ * @name aaSubmitForm
+ *
+ * @description
+ * Description place holder.
+ **/
+(function () {
+  'use strict';
 
-    angular.module('aa.formExtensions')
-        .directive('aaSubmitForm', ['aaFormExtensions', '$q', function(aaFormExtensions, $q) {
-            return {
-                scope: {
-                    aaSubmitForm: '&'
-                },
-                restrict: 'A',
-                require: '^form',
-                link: function(scope, element, attrs, ngForm) {
+  angular.module('aa.formExtensions')
+    .directive('aaSubmitForm', ['aaFormExtensions', '$q', function (aaFormExtensions, $q) {
+      return {
+        scope: {
+          aaSubmitForm: '&'
+        },
+        restrict: 'A',
+        require: '^form',
+        link: function (scope, element, attrs, ngForm) {
 
-                    element.on('click', submit);
+          function submit() {
+            ngForm.$aaFormExtensions.$onSubmitAttempt();
 
-                    if(attrs.type === 'submit') {
-                        //this should be the form's default 'on enter' behavior for submission
-                        ngForm.$aaFormExtensions.$onEnterKey = submit;
-                    }
+            if (ngForm.$valid) {
 
-                    function submit() {
-                        ngForm.$aaFormExtensions.$onSubmitAttempt();
+              var spinnerClickStrategy = aaFormExtensions.spinnerClickStrategies[attrs.spinnerClickStrategy || aaFormExtensions.defaultSpinnerClickStrategy];
+              var eleSpinnerClickStrategy = spinnerClickStrategy(element);
+              eleSpinnerClickStrategy.before();
 
-                        if(ngForm.$valid) {
+              //if this isn't a promise it will resolve immediately
+              $q.when(scope.aaSubmitForm())
+                ["finally"](function (result) {
+                eleSpinnerClickStrategy.after();
+                return result;
+              });
+            }
 
-                            var spinnerClickStrategy = aaFormExtensions.spinnerClickStrategies[attrs.spinnerClickStrategy || aaFormExtensions.defaultSpinnerClickStrategy];
-                            var eleSpinnerClickStrategy = spinnerClickStrategy(element);
-                            eleSpinnerClickStrategy.before();
+            scope.$apply();
+          }
 
-                            //if this isn't a promise it will resolve immediately
-                            $q.when(scope.aaSubmitForm())
-                                ["finally"](function(result) {
-                                    eleSpinnerClickStrategy.after();
-                                    return result;
-                                });
-                        }
+          element.on('click', submit);
 
-                        scope.$apply();
-                    }
-                }
-            };
-        }]);
+          if (attrs.type === 'submit') {
+            //this should be the form's default 'on enter' behavior for submission
+            ngForm.$aaFormExtensions.$onEnterKey = submit;
+          }
+        }
+      };
+    }]);
 })();

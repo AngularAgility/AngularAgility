@@ -1,175 +1,175 @@
-/*
- * AngularAgility Form Extensions
+/*globals angular */
+
+/**
+ * @object
+ * @name aaNotifyConfigProvider
  *
- * http://www.johnculviner.com
- *
- * Copyright (c) 2014 - John Culviner
- *
- * Licensed under the MIT license:
- *   http://www.opensource.org/licenses/mit-license.php
- */
+ * @description
+ * This module contains the form extension directives that are used to easily generate
+ * angular form elements using an external configuration.
+ **/
 
-(function() {
-    'use strict';
+(function () {
+  'use strict';
 
-    angular.module('aa.formExtensions', ['aa.notify'])
-        .config(['aaNotifyConfigProvider', '$httpProvider', '$provide', function(aaNotifyConfigProvider, $httpProvider, $provide) {
+  angular.module('aa.formExtensions', ['aa.notify'])
+    .config(['aaNotifyConfigProvider', '$httpProvider', '$provide', function (aaNotifyConfigProvider, $httpProvider, $provide) {
 
-            //register a notifyConfig to be used by default for displaying validation errors in forms
-            //**if this doesn't work for you by all means register a new one with the same key!**
-            aaNotifyConfigProvider.addOrUpdateNotifyConfig('aaFormExtensionsValidationErrors', {
-                template: '<div class="alert alert-danger aa-form-extensions-validation-errors">' +
-                    '<div class="pull-right aa-notify-close" ng-click="close(notification)">' +
-                    '<span class="fa-stack fa-lg">' +
-                    '<i class="fa fa-circle fa-stack-2x"></i>' +
-                    '<i class="fa fa-times fa-stack-1x fa-inverse"></i>' +
-                    '</span>' +
-                    '</div>' +
-                    '<strong>There are some validation errors: </strong>' +
-                    '<ul>' +
-                    '<li ng-repeat="error in notification.validationErrorsToDisplay()">' +
-                    '{{ error.message }}&nbsp;' +
-                    '<a href="" title="Focus Field" ng-show="error.field" ng-click="notification.showField(error)"><i class="fa fa-search"></i></a>' +
-                    '</li>' +
-                    '</ul>' +
-                    '</div>',
-                options: {
-                    ttl: 0, //forever until manually removed by form extensions
-                    showField: function(error) {
-                        error.field.$element[0].focus();
-                    }
-                }
-            });
+      //register a notifyConfig to be used by default for displaying validation errors in forms
+      //**if this doesn't work for you by all means register a new one with the same key!**
+      aaNotifyConfigProvider.addOrUpdateNotifyConfig('aaFormExtensionsValidationErrors', {
+        template: '<div class="alert alert-danger aa-form-extensions-validation-errors">' +
+          '<div class="pull-right aa-notify-close" ng-click="close(notification)">' +
+          '<span class="fa-stack fa-lg">' +
+          '<i class="fa fa-circle fa-stack-2x"></i>' +
+          '<i class="fa fa-times fa-stack-1x fa-inverse"></i>' +
+          '</span>' +
+          '</div>' +
+          '<strong>There are some validation errors: </strong>' +
+          '<ul>' +
+          '<li ng-repeat="error in notification.validationErrorsToDisplay()">' +
+          '{{ error.message }}&nbsp;' +
+          '<a href="" title="Focus Field" ng-show="error.field" ng-click="notification.showField(error)"><i class="fa fa-search"></i></a>' +
+          '</li>' +
+          '</ul>' +
+          '</div>',
+        options: {
+          ttl: 0, //forever until manually removed by form extensions
+          showField: function (error) {
+            error.field.$element[0].focus();
+          }
+        }
+      });
 
 
-            //setup ajax watcher that tracks loading, this is useful by its self
-            //and is required for changed tracking
-            //NOTE: if you do non Angular AJAX you will need to call increment/decrement yourself
-            $provide.factory('aaLoadingWatcher', ['$rootScope', function($rootScope) {
-                var pendingRequests = 0;
+      //setup ajax watcher that tracks loading, this is useful by its self
+      //and is required for changed tracking
+      //NOTE: if you do non Angular AJAX you will need to call increment/decrement yourself
+      $provide.factory('aaLoadingWatcher', ['$rootScope', function ($rootScope) {
+        var pendingRequests = 0;
 
-                var watcher = {
-                    isLoading: false,
-                    increment: function() {
-                        pendingRequests++;
-                        loadingChanged();
-                    },
-                    decrement: function() {
-                        pendingRequests--;
-                        loadingChanged();
-                    }
-                    //perhaps add a 'runWhenDoneLoading' here
-                };
+        var watcher = {
+          isLoading: false,
+          increment: function () {
+            pendingRequests++;
+            loadingChanged();
+          },
+          decrement: function () {
+            pendingRequests--;
+            loadingChanged();
+          }
+          //perhaps add a 'runWhenDoneLoading' here
+        };
 
-                function loadingChanged() {
-                    $rootScope.aaIsLoading = watcher.isLoading = pendingRequests > 0;
+        function loadingChanged() {
+          $rootScope.aaIsLoading = watcher.isLoading = pendingRequests > 0;
 
-                    if(!$rootScope.$$phase) {
-                        $rootScope.$apply();
-                    }
-                }
+          if (!$rootScope.$$phase) {
+            $rootScope.$apply();
+          }
+        }
 
-                return watcher;
-            }]);
+        return watcher;
+      }]);
 
-            //tracks JUST ANGULAR http requests.
-            $provide.factory('aaAjaxInterceptor', ['aaLoadingWatcher', '$q', 'aaFormExtensions',
-                function(aaLoadingWatcher, $q, aaFormExtensions) {
-                    return {
-                        request: function(request) {
-                            aaLoadingWatcher.increment();
-                            return request;
-                        },
-                        response: function(response) {
-                            aaLoadingWatcher.decrement();
-                            return response;
-                        },
-                        responseError: function(response) {
-                            aaLoadingWatcher.decrement();
+      //tracks JUST ANGULAR http requests.
+      $provide.factory('aaAjaxInterceptor', ['aaLoadingWatcher', '$q', 'aaFormExtensions',
+        function (aaLoadingWatcher, $q, aaFormExtensions) {
+          return {
+            request: function (request) {
+              aaLoadingWatcher.increment();
+              return request;
+            },
+            response: function (response) {
+              aaLoadingWatcher.decrement();
+              return response;
+            },
+            responseError: function (response) {
+              aaLoadingWatcher.decrement();
 
-                            if(aaFormExtensions.ajaxValidationErrorMappingStrategy) {
-                                aaFormExtensions.ajaxValidationErrorMappingStrategy(
-                                    response, aaFormExtensions.availableForms
-                                );
-                            }
+              if (aaFormExtensions.ajaxValidationErrorMappingStrategy) {
+                aaFormExtensions.ajaxValidationErrorMappingStrategy(
+                  response, aaFormExtensions.availableForms
+                );
+              }
 
-                            return $q.reject(response);
-                        }
-                    };
-                }]);
-            $httpProvider.interceptors.push('aaAjaxInterceptor');
-
-
-            //allows for any controller to inject in $aaFormExtensions to *eventually* talk to any form that may show
-            //up in the DOM without coupling:
-            //
-            //broacast doesn't seem to be the best choice here because parent controllers are always created
-            //prior to their child forms.  the only other thing I could think of would be to use $timeout to allow
-            //the form(s) to init and then a broadcast to run but this would have the issue of REQUIRING
-            //this helper to have the controller scope passed in (don't want to broadcast these messages on rootscope
-            //because there very well could be other forms that we don't want to accidentally mess with)
-            //
-            //the below will run on the first child form (or targetFormName matching child form) that appears
-            $provide.decorator('$controller', ['$delegate', function($delegate) {
-                return function(expression, locals) {
-                    if(locals.$scope) {
-                        locals.$aaFormExtensions = {
-
-                            $addChangeDependency: function(expr, deepWatch, /*optional*/
-                                                           targetFormName /*optional*/) {
-                                addTodo({
-                                    type: '$addChangeDependency',
-                                    args: [expr, deepWatch],
-                                    targetFormName: targetFormName
-                                });
-                            },
-
-                            $resetChanged: function(runAfterFunc, /*optional*/
-                                                    targetFormName /*optional*/) {
-                                addTodo({
-                                    type: '$resetChanged',
-                                    args: [runAfterFunc],
-                                    targetFormName: targetFormName
-                                });
-                            },
-
-                            $reset: function(runAfterFunc, /*optional*/
-                                             targetFormName /*optional*/) {
-                                addTodo({
-                                    type: '$reset',
-                                    args: [runAfterFunc],
-                                    targetFormName: targetFormName
-                                });
-                            },
-
-                            $clearErrors: function(runAfterFunc, /*optional*/
-                                                   targetFormName /*optional*/) {
-                                addTodo({
-                                    type: '$clearErrors',
-                                    args: [runAfterFunc],
-                                    targetFormName: targetFormName
-                                });
-                            },
-
-                            $addValidationError: function(messageText, optionalFieldNamesOrFieldReferences, targetFormName /*optional*/) {
-                                addTodo({
-                                    type: '$addValidationError',
-                                    args: [messageText, optionalFieldNamesOrFieldReferences],
-                                    targetFormName: targetFormName
-                                });
-                            }
-                        };
-                    }
-
-                    function addTodo(todo) {
-                        if(!locals.$scope.$$aaFormExtensionsTodos) {
-                            locals.$scope.$$aaFormExtensionsTodos = [];
-                        }
-                        locals.$scope.$$aaFormExtensionsTodos.push(todo);
-                    }
-
-                    return $delegate(expression, locals);
-                };
-            }]);
+              return $q.reject(response);
+            }
+          };
         }]);
+      $httpProvider.interceptors.push('aaAjaxInterceptor');
+
+
+      //allows for any controller to inject in $aaFormExtensions to *eventually* talk to any form that may show
+      //up in the DOM without coupling:
+      //
+      //broacast doesn't seem to be the best choice here because parent controllers are always created
+      //prior to their child forms.  the only other thing I could think of would be to use $timeout to allow
+      //the form(s) to init and then a broadcast to run but this would have the issue of REQUIRING
+      //this helper to have the controller scope passed in (don't want to broadcast these messages on rootscope
+      //because there very well could be other forms that we don't want to accidentally mess with)
+      //
+      //the below will run on the first child form (or targetFormName matching child form) that appears
+      $provide.decorator('$controller', ['$delegate', function ($delegate) {
+        return function (expression, locals) {
+          if (locals.$scope) {
+            locals.$aaFormExtensions = {
+
+              $addChangeDependency: function (expr, deepWatch, /*optional*/
+                                              targetFormName /*optional*/) {
+                addTodo({
+                  type: '$addChangeDependency',
+                  args: [expr, deepWatch],
+                  targetFormName: targetFormName
+                });
+              },
+
+              $resetChanged: function (runAfterFunc, /*optional*/
+                                       targetFormName /*optional*/) {
+                addTodo({
+                  type: '$resetChanged',
+                  args: [runAfterFunc],
+                  targetFormName: targetFormName
+                });
+              },
+
+              $reset: function (runAfterFunc, /*optional*/
+                                targetFormName /*optional*/) {
+                addTodo({
+                  type: '$reset',
+                  args: [runAfterFunc],
+                  targetFormName: targetFormName
+                });
+              },
+
+              $clearErrors: function (runAfterFunc, /*optional*/
+                                      targetFormName /*optional*/) {
+                addTodo({
+                  type: '$clearErrors',
+                  args: [runAfterFunc],
+                  targetFormName: targetFormName
+                });
+              },
+
+              $addValidationError: function (messageText, optionalFieldNamesOrFieldReferences, targetFormName /*optional*/) {
+                addTodo({
+                  type: '$addValidationError',
+                  args: [messageText, optionalFieldNamesOrFieldReferences],
+                  targetFormName: targetFormName
+                });
+              }
+            };
+          }
+
+          function addTodo(todo) {
+            if (!locals.$scope.$$aaFormExtensionsTodos) {
+              locals.$scope.$$aaFormExtensionsTodos = [];
+            }
+            locals.$scope.$$aaFormExtensionsTodos.push(todo);
+          }
+
+          return $delegate(expression, locals);
+        };
+      }]);
+    }]);
 })();

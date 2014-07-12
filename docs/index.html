@@ -1,8 +1,8 @@
 <!doctype html>
-<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7 ng-app: docsApp;" lang="en" ng-controller="DocsController"> <![endif]-->
-<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8 ng-app: docsApp;" lang="en" ng-controller="DocsController"> <![endif]-->
-<!--[if IE 8]>    <html class="no-js lt-ie9 ng-app: docsApp;" lang="en" ng-controller="DocsController"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js ng-app: docsApp;" lang="en" ng-controller="DocsController"> <!--<![endif]-->
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7 ng-app: docsApp; " lang="en" ng-controller="DocsController"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8 ng-app: docsApp; " lang="en" ng-controller="DocsController"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9 ng-app: docsApp; " lang="en" ng-controller="DocsController"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js ng-app: docsApp; " lang="en" ng-controller="DocsController"> <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -11,14 +11,14 @@
                  Declarative templates with data-binding, MVC, dependency injection and great
                  testability story all implemented with pure client-side JavaScript!">
   <meta name="fragment" content="!">
-  <title ng-bind-template="Angular Agility - Form Extensions: {{partialTitle}}">Docs</title>
+  <title ng-bind-template="Angular Agility: {{partialTitle}}">Docs</title>
   <script type="text/javascript">
     // dynamically add base tag as well as css and javascript files.
     // we can't add css/js the usual way, because some browsers (FF) eagerly prefetch resources
     // before the base attribute is added, causing 404 and terribly slow loading of the docs app.
     (function() {
       var indexFile = (location.pathname.match(/\/(index[^\.]*\.html)/) || ['', ''])[1],
-          rUrl = /(#!\/|api|index[^\.]*\.html).*$/,
+          rUrl = /(#!\/|tutorial|api|index[^\.]*\.html).*$/,
           baseUrl = location.href.replace(rUrl, indexFile),
           headEl = document.getElementsByTagName('head')[0],
           sync = true;
@@ -36,20 +36,16 @@
       addTag('script', {src: 'js/marked.js'}, sync);
 
       
-        addTag('script', {src: 'grunt-scripts/angular.min.js'}, sync);
+        addTag('script', {src: 'js/angular.min.js'}, sync);
       
-        addTag('script', {src: 'grunt-scripts/aa.formExtensions.js'}, sync);
+        addTag('script', {src: 'grunt-scripts/angular-agility.min.js'}, sync);
       
-        addTag('script', {src: 'grunt-scripts/aa.notify.js'}, sync);
       
-        addTag('script', {src: 'grunt-scripts/aa.select2.js'}, sync);
-      
-
       addTag('script', {src: 'js/angular-bootstrap.js'}, sync);
       addTag('script', {src: 'js/angular-bootstrap-prettify.js'}, sync);
       addTag('script', {src: 'js/docs-setup.js'}, sync);
       addTag('script', {src: 'js/docs.js'}, sync);
-
+      
       function addTag(name, attributes, sync) {
         var el = document.createElement(name),
             attrName;
@@ -84,7 +80,7 @@
         <div class="container">
           
           
-            <a  class="brand">Angular Agility - Form Extensions</a>
+            <a  href="/api"  class="brand">Angular Agility</a>
           
           <ul class="nav">
             <li ng-repeat="(url, name) in sections" ng-class="{active: isActivePath(url)}">
@@ -125,8 +121,16 @@
       <div class="span3">
         <form class="form-search" ng-submit="submitForm()">
           
-          <input type="text" ng-model="search" placeholder="search the docs"
-                 tabindex="1" accesskey="s" class="search-query">
+          <div class="dropdown search"
+               ng-class="{open: focused && bestMatch.rank > 0 && bestMatch.page != currentPage}">
+            <input type="text" ng-model="search" placeholder="search the docs"
+                   tabindex="1" accesskey="s" class="search-query" focused="focused">
+            <ul class="dropdown-menu">
+              <li>
+                <a href="{{bestMatch.page.url}}">{{bestMatch.page.shortName}}</a>
+              </li>
+            </ul>
+          </div>
           
           <div class="spacer"></div>
 
@@ -150,6 +154,13 @@
               <a class="guide">directive</a>
             </li>
             <li ng-repeat="page in module.directives track by page.url" ng-class="navClass(page)" class="api-list-item expand">
+              <a href="{{page.url}}" tabindex="2">{{page.shortName}}</a>
+            </li>
+
+            <li class="nav-header section" ng-show="module.controllers">
+              <a class="guide">controller</a>
+            </li>
+            <li ng-repeat="page in module.controllers track by page.url" ng-class="navClass(page)" class="api-list-item expand">
               <a href="{{page.url}}" tabindex="2">{{page.shortName}}</a>
             </li>
 
