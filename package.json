@@ -34,6 +34,5 @@
   },
   "scripts": {
     "test": "grunt --verbose",
-    "postinstall": "./node_modules/bower/bin/bower install"
   }
 }
