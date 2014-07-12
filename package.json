@@ -33,6 +33,6 @@
     "url": "https://github.com/AngularAgility/AngularAgility.git"
   },
   "scripts": {
-    "test": "grunt --verbose",
+    "test": "grunt --verbose"
   }
 }
