@@ -117,7 +117,7 @@
 
                   for (var i = form.$aaFormExtensions.$allValidationErrors.length; i >= 0, i--;) {
                     valErrorField = form.$aaFormExtensions.$allValidationErrors[i];
-                    if (valErrorField.field.$ngModel === fieldToRemove) {
+                    if (!valErrorField.field || valErrorField.field.$ngModel === fieldToRemove) {
                       form.$aaFormExtensions.$allValidationErrors.splice(i, 1);
                     }
                   }
