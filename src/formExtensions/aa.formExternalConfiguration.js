@@ -364,7 +364,7 @@
         },
         processElement: function (jqElm, nameAttr, validationConfig) {
           if (!jqElm.attr('name')) {
-            jqElm.attr('name', nameAttr.split('.').join('-'));
+            jqElm.attr('name', nameAttr.substring(nameAttr.lastIndexOf('.') + 1));
           }
           this.addValidations(jqElm, nameAttr, validationConfig);
         },
