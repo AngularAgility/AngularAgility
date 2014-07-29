@@ -1,5 +1,5 @@
 /*
-angular-agility v0.8.6 @ 2014-07-12T13:25:06
+angular-agility v0.8.6 @ 2014-07-28T21:52:37
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1308,19 +1308,16 @@ angular
         //VERY basic. For the love of everything holy please do something better with UI Bootstrap modal or something!
         //requires >= v0.2.10!
         confirmUiRouterAndDom: function (rootFormScope, rootForm, $injector) {
+          var confirmationMessage  = 'You have unsaved changes are you sure you want to navigate away?';
 
           //ANGULAR UI ROUTER
-          var onDereg = rootFormScope.$on('$stateChangeStart', function (event, toState, toParams) {
+          rootFormScope.$on('$stateChangeStart', function (event) {
 
             if (rootForm.$aaFormExtensions.$changed) {
-              if (!toState.aaUnsavedPrompted) {
+              if (!window.confirm(confirmationMessage)) {
+                // stop ui-router's transitioning
+                // Per ui-router documentation, this will cause ui-router to reject the transition promise
                 event.preventDefault();
-                if (window.confirm('You have unsaved changes are you sure you want to navigate away?')) {
-                  //should be able to use options { notify: false } on UI Router
-                  //but that doesn't seem to work right (new state never loads!) so this is a workaround
-                  toState.aaUnsavedPrompted = true;
-                  $injector.get('$state').go(toState.name, toParams);
-                }
               }
             }
           });
@@ -1328,7 +1325,6 @@ angular
           //NATIVE DOM IE9+
           function beforeUnload(e) {
             if (rootForm.$aaFormExtensions.$changed) {
-              var confirmationMessage = 'You have unsaved changes are you sure you want to navigate away?';
               (e || window.event).returnValue = confirmationMessage;
               return confirmationMessage;
             }
@@ -1337,7 +1333,6 @@ angular
           window.addEventListener('beforeunload', beforeUnload);
 
           rootFormScope.$on('$destroy', function () {
-            onDereg();
             window.removeEventListener('beforeunload', beforeUnload);
           });
 
@@ -1486,7 +1481,8 @@ angular
       return typeof args[number] !== 'undefined' ? args[number] : match;
     });
   }
-})();;/*globals angular */
+})();
+;/*globals angular */
 /**
  * @object
  * @name aaUtils
@@ -2109,7 +2105,7 @@ angular
 
                   for (var i = form.$aaFormExtensions.$allValidationErrors.length; i >= 0, i--;) {
                     valErrorField = form.$aaFormExtensions.$allValidationErrors[i];
-                    if (valErrorField.field.$ngModel === fieldToRemove) {
+                    if (!valErrorField.field || valErrorField.field.$ngModel === fieldToRemove) {
                       form.$aaFormExtensions.$allValidationErrors.splice(i, 1);
                     }
                   }

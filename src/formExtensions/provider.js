@@ -172,10 +172,10 @@
           var confirmationMessage  = 'You have unsaved changes are you sure you want to navigate away?';
 
           //ANGULAR UI ROUTER
-          var onDereg = rootFormScope.$on('$stateChangeStart', function (event, toState, toParams) {
+          rootFormScope.$on('$stateChangeStart', function (event) {
 
             if (rootForm.$aaFormExtensions.$changed) {
-              if (!window.confirm(confirmationMessage  )) {
+              if (!window.confirm(confirmationMessage)) {
                 // stop ui-router's transitioning
                 // Per ui-router documentation, this will cause ui-router to reject the transition promise
                 event.preventDefault();
