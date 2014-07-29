@@ -169,19 +169,16 @@
         //VERY basic. For the love of everything holy please do something better with UI Bootstrap modal or something!
         //requires >= v0.2.10!
         confirmUiRouterAndDom: function (rootFormScope, rootForm, $injector) {
+          var confirmationMessage  = 'You have unsaved changes are you sure you want to navigate away?';
 
           //ANGULAR UI ROUTER
           var onDereg = rootFormScope.$on('$stateChangeStart', function (event, toState, toParams) {
 
             if (rootForm.$aaFormExtensions.$changed) {
-              if (!toState.aaUnsavedPrompted) {
+              if (!window.confirm(confirmationMessage  )) {
+                // stop ui-router's transitioning
+                // Per ui-router documentation, this will cause ui-router to reject the transition promise
                 event.preventDefault();
-                if (window.confirm('You have unsaved changes are you sure you want to navigate away?')) {
-                  //should be able to use options { notify: false } on UI Router
-                  //but that doesn't seem to work right (new state never loads!) so this is a workaround
-                  toState.aaUnsavedPrompted = true;
-                  $injector.get('$state').go(toState.name, toParams);
-                }
               }
             }
           });
@@ -189,7 +186,6 @@
           //NATIVE DOM IE9+
           function beforeUnload(e) {
             if (rootForm.$aaFormExtensions.$changed) {
-              var confirmationMessage = 'You have unsaved changes are you sure you want to navigate away?';
               (e || window.event).returnValue = confirmationMessage;
               return confirmationMessage;
             }
@@ -198,7 +194,6 @@
           window.addEventListener('beforeunload', beforeUnload);
 
           rootFormScope.$on('$destroy', function () {
-            onDereg();
             window.removeEventListener('beforeunload', beforeUnload);
           });
 
