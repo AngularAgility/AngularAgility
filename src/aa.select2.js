@@ -87,20 +87,30 @@ angular
           //run a query to get options (search)
           if (inAjaxMode) {
             derivedOpts.query = function (query) {
-              settings.options(query.term)
-                .success(function (data) {
-                  if (inThisMode) {
-                    var newData = [];
-                    angular.forEach(data, function (str) {
-                      newData.push({id: str, text: str});
-                    });
-                    data = newData;
-                  }
+              // TODO: Ought to handle the failure case, instead of spinning forever
+              var queryResult = settings.options(query.term);
+                // Assume if it's not a promise and is an array, it's data
+                if (!queryResult.then && !!queryResult.length) {
                   query.callback({
-                    results: data,
+                    results: queryResult,
                     text: settings.text
                   });
-                });
+                } else {
+                  queryResult
+                    .then(function (data) {
+                      if (inThisMode) {
+                        var newData = [];
+                          angular.forEach(data, function (str) {
+                            newData.push({id: str, text: str});
+                          });
+                          data = newData;
+                      }
+                      query.callback({
+                        results: data,
+                        text: settings.text
+                      });
+                    });
+                };
             };
 
             if (inIdMode) {
