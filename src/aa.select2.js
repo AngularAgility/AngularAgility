@@ -95,7 +95,7 @@ angular
                     results: queryResult,
                     text: settings.text
                   });
-                } else {
+                } else if (!!queryResult.then) {
                   queryResult
                     .then(function (data) {
                       if (inThisMode) {
@@ -110,7 +110,12 @@ angular
                         text: settings.text
                       });
                     });
-                };
+                } else {
+                  query.callback({
+                    results: [],
+                    text: settings.text
+                  }
+                }
             };
 
             if (inIdMode) {
