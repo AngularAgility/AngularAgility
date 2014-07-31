@@ -114,7 +114,7 @@ angular
                   query.callback({
                     results: [],
                     text: settings.text
-                  }
+                  });
                 }
             };
 
