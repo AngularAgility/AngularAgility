@@ -10,7 +10,7 @@
 
   angular.module('aa.formExtensions')
     //generate a label for an input generating an ID for it if it doesn't already exist
-    .directive('aaLabel', ['aaFormExtensions', 'aaUtils', function (aaFormExtensions, aaUtils) {
+    .directive('aaLabel', ['aaFormExtensions', 'aaUtils', '$compile', function (aaFormExtensions, aaUtils, $compile) {
       return {
         compile: function (element, attrs) {
 
@@ -58,7 +58,10 @@
               element[0].id = aaUtils.guid();
             }
 
-            strategy(element, attrs.aaLabel, isRequiredField);
+            var label = strategy(element, attrs.aaLabel, isRequiredField);
+            if (label) {
+                $compile(label)(scope);
+            }
           };
         }
       };
