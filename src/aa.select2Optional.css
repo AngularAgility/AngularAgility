@@ -2,7 +2,7 @@
 /*drop down mode*/
 .select2-container.ng-dirty.ng-invalid .select2-choice,
 .select2-container.ng-invalid.aa-invalid-attempt .select2-choice,
-.select2-container.ng-invalid.aa-had-focus .select2-choice
+.select2-container.ng-invalid.aa-had-focus .select2-choice,
 /*tags mode*/
 .select2-container.ng-dirty.ng-invalid .select2-choices,
 .select2-container.ng-invalid.aa-invalid-attempt .select2-choices,
