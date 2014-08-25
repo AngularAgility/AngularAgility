@@ -1,5 +1,5 @@
 /*
-angular-agility v0.8.6 @ 2014-07-28T21:52:37
+angular-agility v0.8.7 @ 2014-08-25T16:07:13
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1330,10 +1330,10 @@ angular
             }
           }
 
-          window.addEventListener('beforeunload', beforeUnload);
+          angular.element(window).on('beforeunload', beforeUnload);
 
           rootFormScope.$on('$destroy', function () {
-            window.removeEventListener('beforeunload', beforeUnload);
+			angular.element(window).off('beforeunload', beforeUnload);
           });
 
         },
@@ -1698,7 +1698,7 @@ angular
 
   angular.module('aa.formExtensions')
     //generate a label for an input generating an ID for it if it doesn't already exist
-    .directive('aaLabel', ['aaFormExtensions', 'aaUtils', function (aaFormExtensions, aaUtils) {
+    .directive('aaLabel', ['aaFormExtensions', 'aaUtils', '$compile', function (aaFormExtensions, aaUtils, $compile) {
       return {
         compile: function (element, attrs) {
 
@@ -1746,7 +1746,10 @@ angular
               element[0].id = aaUtils.guid();
             }
 
-            strategy(element, attrs.aaLabel, isRequiredField);
+            var label = strategy(element, attrs.aaLabel, isRequiredField);
+            if (label) {
+                $compile(label)(scope);
+            }
           };
         }
       };
