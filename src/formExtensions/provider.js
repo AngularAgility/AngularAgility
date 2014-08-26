@@ -191,10 +191,10 @@
             }
           }
 
-          window.addEventListener('beforeunload', beforeUnload);
+          angular.element(window).on('beforeunload', beforeUnload);
 
           rootFormScope.$on('$destroy', function () {
-            window.removeEventListener('beforeunload', beforeUnload);
+			angular.element(window).off('beforeunload', beforeUnload);
           });
 
         },
