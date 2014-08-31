@@ -130,7 +130,7 @@ var usStates = [
 ];
 app.get('/searchStates/:nameStartsWith', function (req, res) {
   'use strict';
-  return res.send(_.filter(usStates, function (state) {
+  return res.send(lowdash.filter(usStates, function (state) {
     return state.name.toUpperCase().indexOf(req.params.nameStartsWith.toUpperCase()) === 0;
   }));
 });
