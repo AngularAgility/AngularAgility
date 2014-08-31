@@ -5,7 +5,7 @@ module.exports = function (grunt) {
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
   var banner =
-    '/*\n<%= pkg.name %> v<%= pkg.version %> @ <%= grunt.template.today("isoDateTime") %>\n' +
+    '/*\n<%= pkg.name %> "version":"<%= pkg.version %>" @ <%= grunt.template.today("isoDateTime") %>\n' +
     'Copyright (c) 2014 - John Culviner\n' +
     'Licensed under the MIT license\n*/\n\n';
 
@@ -19,16 +19,16 @@ module.exports = function (grunt) {
 
     bump: {
       options: {
-        files: ['package.json', 'bower.json'],
-        updateConfigs: [],
+        files: ['package.json', 'bower.json', 'dist/angular-agility.js', 'dist/angular-agility.min.js'],
+        updateConfigs: ['pkg'],
         commit: true,
         commitMessage: 'Release v%VERSION%',
-        commitFiles: ['package.json', 'bower.json'],
+        commitFiles: ['-a'],
         createTag: true,
         tagName: 'v%VERSION%',
         tagMessage: 'Version %VERSION%',
         push: true,
-        pushTo: 'upstream',
+        pushTo: 'origin',
         gitDescribeOptions: '--tags --always --abbrev=1 --dirty=-d'
       }
     },
@@ -71,7 +71,8 @@ module.exports = function (grunt) {
         'src/**/*.js',
         'demo/**/*.js',
         '!demo/lib/**/*.js',
-        '!demo/docs/**/*.js' ],
+        '!demo/docs/**/*.js'
+      ],
       options: {
         jshintrc: true
       }
@@ -122,8 +123,10 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('test', ['jshint', 'karma:continuous', 'coverage']);
-  grunt.registerTask('build', ['test', 'ngdocs', 'concat', 'uglify']);
+  grunt.registerTask('build', ['test', 'concat', 'uglify']);
   grunt.registerTask('dev', ['build', 'watch']);
+
+  grunt.registerTask('release', ['build', 'bump']);
 
   grunt.registerTask('default', ['build']);
 };
