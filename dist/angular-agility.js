@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.8" @ 2014-08-31T17:52:20
+angular-agility "version":"0.8.8" @ 2014-09-11T09:40:50
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1179,10 +1179,11 @@ angular
         bootstrap3InlineForm: function (element, labelText, isRequired) {
 
           var col = element.attr('aa-lbl-col') || "sm-2";
+					var class_ = element.attr('aa-lbl-class') || '';
 
           var label = angular.element('<label>')
             .attr('for', element[0].id)
-            .addClass('col-' + col + ' control-label')
+            .addClass('col-' + col + ' control-label ' + class_)
             .html(labelText + (isRequired ? '&nbsp;*' : ''));
 
 
