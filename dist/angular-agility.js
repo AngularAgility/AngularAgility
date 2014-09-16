@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.10" @ 2014-09-11T09:40:50
+angular-agility "version":"0.8.11" @ 2014-09-16T00:16:15
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -895,7 +895,7 @@ angular
         },
         processElement: function (jqElm, nameAttr, validationConfig) {
           if (!jqElm.attr('name')) {
-            jqElm.attr('name', nameAttr.split('.').join('-'));
+            jqElm.attr('name', nameAttr.substring(nameAttr.lastIndexOf('.') + 1));
           }
           this.addValidations(jqElm, nameAttr, validationConfig);
         },
@@ -978,7 +978,8 @@ angular
         }
       };
     }]);
-})();;/*globals angular */
+})();
+;/*globals angular */
 
 /**
  * @object
@@ -1179,7 +1180,7 @@ angular
         bootstrap3InlineForm: function (element, labelText, isRequired) {
 
           var col = element.attr('aa-lbl-col') || "sm-2";
-					var class_ = element.attr('aa-lbl-class') || '';
+          var class_ = element.attr('aa-lbl-class') || '';
 
           var label = angular.element('<label>')
             .attr('for', element[0].id)
@@ -1325,7 +1326,7 @@ angular
         //VERY basic. For the love of everything holy please do something better with UI Bootstrap modal or something!
         //requires >= v0.2.10!
         confirmUiRouterAndDom: function (rootFormScope, rootForm, $injector) {
-          var confirmationMessage  = 'You have unsaved changes are you sure you want to navigate away?';
+          var confirmationMessage = 'You have unsaved changes are you sure you want to navigate away?';
 
           //ANGULAR UI ROUTER
           rootFormScope.$on('$stateChangeStart', function (event) {
@@ -1350,7 +1351,7 @@ angular
           angular.element(window).on('beforeunload', beforeUnload);
 
           rootFormScope.$on('$destroy', function () {
-			angular.element(window).off('beforeunload', beforeUnload);
+            angular.element(window).off('beforeunload', beforeUnload);
           });
 
         },
@@ -1368,7 +1369,7 @@ angular
         max: "{0} must be at most {1}.",
         pattern: "{0} is invalid.",
         url: "{0} must be a valid URL.",
-        number: "{0} must be number.",
+        number: "{0} must be a number.",
         unknown: "{0} is invalid."
       };
 
@@ -2284,6 +2285,13 @@ angular
                     err.field.$element.removeClass('aa-had-focus');
                     //this makes sense i think, maybe make configurable
                     err.field.$ngModel.$setPristine();
+                  }
+                });
+
+                var notifyTargetName = scope.$eval(attrs.notifyTarget) || aaFormExtensions.defaultNotifyTarget;
+                angular.forEach(scope.notifications, function (notification) {
+                  if (notification && notification.template && notification.template === "aaNotifyTemplate-aaFormExtensionsValidationErrors") {
+                    aaNotify.remove(notification.messageHandle, notifyTargetName);
                   }
                 });
 
