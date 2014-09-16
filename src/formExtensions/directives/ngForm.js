@@ -279,6 +279,13 @@
                   }
                 });
 
+                var notifyTargetName = scope.$eval(attrs.notifyTarget) || aaFormExtensions.defaultNotifyTarget;
+                angular.forEach(scope.notifications, function (notification) {
+                  if (notification && notification.template && notification.template === "aaNotifyTemplate-aaFormExtensionsValidationErrors") {
+                    aaNotify.remove(notification.messageHandle, notifyTargetName);
+                  }
+                });
+
                 if (angular.isFunction(runAfterFunc)) {
                   runAfterFunc();
                 }
