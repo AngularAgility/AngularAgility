@@ -213,7 +213,7 @@
         max: "{0} must be at most {1}.",
         pattern: "{0} is invalid.",
         url: "{0} must be a valid URL.",
-        number: "{0} must be number.",
+        number: "{0} must be a number.",
         unknown: "{0} is invalid."
       };
 
