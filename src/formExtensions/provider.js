@@ -24,10 +24,11 @@
         bootstrap3InlineForm: function (element, labelText, isRequired) {
 
           var col = element.attr('aa-lbl-col') || "sm-2";
+          var class_ = element.attr('aa-lbl-class') || '';
 
           var label = angular.element('<label>')
             .attr('for', element[0].id)
-            .addClass('col-' + col + ' control-label')
+            .addClass('col-' + col + ' control-label ' + class_)
             .html(labelText + (isRequired ? '&nbsp;*' : ''));
 
 
@@ -169,7 +170,7 @@
         //VERY basic. For the love of everything holy please do something better with UI Bootstrap modal or something!
         //requires >= v0.2.10!
         confirmUiRouterAndDom: function (rootFormScope, rootForm, $injector) {
-          var confirmationMessage  = 'You have unsaved changes are you sure you want to navigate away?';
+          var confirmationMessage = 'You have unsaved changes are you sure you want to navigate away?';
 
           //ANGULAR UI ROUTER
           rootFormScope.$on('$stateChangeStart', function (event) {
@@ -194,7 +195,7 @@
           angular.element(window).on('beforeunload', beforeUnload);
 
           rootFormScope.$on('$destroy', function () {
-			angular.element(window).off('beforeunload', beforeUnload);
+            angular.element(window).off('beforeunload', beforeUnload);
           });
 
         },
