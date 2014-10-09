@@ -26,11 +26,11 @@
           //TODO: if this is inside an isolate scope and the form is outside the isolate scope this doesn't work
           //could nest multiple forms so can't trust directive require and have to eval to handle edge cases...
           aaUtils.ensureaaFormExtensionsFieldExists(formObj, fieldInForm.$name);
-          var fieldInFormExtensions = $scope.$eval(fullFieldPath.replace('.', '.$aaFormExtensions.'));
+          $scope.fieldInFormExtensions = $scope.$eval(fullFieldPath.replace('.', '.$aaFormExtensions.'));
 
           $scope.$watchCollection(
             function () {
-              return fieldInFormExtensions.$errorMessages;
+              return $scope.fieldInFormExtensions.$errorMessages;
             },
             function (val) {
               $scope.errorMessages = val;
@@ -41,7 +41,7 @@
             function () {
               return [
                 formObj.$aaFormExtensions.$invalidAttempt,
-                fieldInFormExtensions.showErrorReasons
+                $scope.fieldInFormExtensions.showErrorReasons
               ];
             },
             function (watches) {
