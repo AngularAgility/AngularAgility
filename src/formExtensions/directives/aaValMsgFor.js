@@ -19,14 +19,23 @@
         scope: true,
         link: function ($scope, element, attrs) {
 
-          var fullFieldPath = attrs.aaValMsgFor,
-            fieldInForm = $scope.$eval(fullFieldPath),
-            formObj = $scope.$eval(fullFieldPath.substring(0, fullFieldPath.indexOf('.')));
+          var fullFieldPath = attrs.aaValMsgFor;
+          var  fieldInForm, formObj; 
+
+          var innerScope = $scope;
+          while((!fieldInForm || !formObj) && innerScope){
+            fieldInForm = innerScope.$eval(fullFieldPath);
+            formObj = innerScope.$eval(fullFieldPath.substring(0, fullFieldPath.indexOf('.')));
+            
+            if((!fieldInForm || !formObj)){
+              innerScope = innerScope.$parent;
+            }
+          }
 
           //TODO: if this is inside an isolate scope and the form is outside the isolate scope this doesn't work
           //could nest multiple forms so can't trust directive require and have to eval to handle edge cases...
           aaUtils.ensureaaFormExtensionsFieldExists(formObj, fieldInForm.$name);
-          var fieldInFormExtensions = $scope.$eval(fullFieldPath.replace('.', '.$aaFormExtensions.'));
+          var fieldInFormExtensions = innerScope.$eval(fullFieldPath.replace('.', '.$aaFormExtensions.'));
 
           $scope.$watchCollection(
             function () {
