@@ -6,6 +6,7 @@ install: npm install
 before_script: grunt build
 deploy:
   provider: heroku
+  strategy: git
   api_key:
     secure: HecXQb6uqi7fTIz9XnJnjfZoWIabkrBxSSjwMGlPvvFN/D/iaPAZwF1I1DJAfzMIy4oI0UGtUyQTNcsP4o2WRGTc8foJlVg1ChWeQahfjNwszviLt8L3x9zwdGFxAItR5H/jhL/LlHlH4hf14rzn8I3Ub3y9YUmP0LiEn0NStVo=
   app: angularagility
