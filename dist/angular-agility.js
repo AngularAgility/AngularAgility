@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.13" @ 2014-09-16T00:16:15
+angular-agility "version":"0.8.14" @ 2014-10-12T23:12:47
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -348,35 +348,20 @@ angular
           //run a query to get options (search)
           if (inAjaxMode) {
             derivedOpts.query = function (query) {
-              // TODO: Ought to handle the failure case, instead of spinning forever
-              var queryResult = settings.options(query.term);
-                // Assume if it's not a promise and is an array, it's data
-                if (!queryResult.then && !!queryResult.length) {
-                  query.callback({
-                    results: queryResult,
-                    text: settings.text
-                  });
-                } else if (!!queryResult.then) {
-                  queryResult
-                    .then(function (data) {
-                      if (inThisMode) {
-                        var newData = [];
-                          angular.forEach(data, function (str) {
-                            newData.push({id: str, text: str});
-                          });
-                          data = newData;
-                      }
-                      query.callback({
-                        results: data,
-                        text: settings.text
-                      });
+              settings.options(query.term)
+                .success(function (data) {
+                  if (inThisMode) {
+                    var newData = [];
+                    angular.forEach(data, function (str) {
+                      newData.push({id: str, text: str});
                     });
-                } else {
+                    data = newData;
+                  }
                   query.callback({
-                    results: [],
+                    results: data,
                     text: settings.text
                   });
-                }
+                });
             };
 
             if (inIdMode) {
@@ -528,8 +513,7 @@ angular
         });
       }
     };
-  }]);
-;/*globals angular */
+  }]);;/*globals angular */
 
 (function () {
   /**
@@ -1656,7 +1640,9 @@ angular
             element.attr('aa-label', aaUtils.toTitleCase(aaUtils.splitCamelCase(lastPartOfName)));
           }
 
-          element.attr("aa-val-msg", "");
+          if (attrs.aanovalmsg === undefined){ 
+            element.attr("aa-val-msg", "");
+          }
 
           element.removeAttr('aa-field');
 
@@ -1923,18 +1909,27 @@ angular
         scope: true,
         link: function ($scope, element, attrs) {
 
-          var fullFieldPath = attrs.aaValMsgFor,
-            fieldInForm = $scope.$eval(fullFieldPath),
-            formObj = $scope.$eval(fullFieldPath.substring(0, fullFieldPath.indexOf('.')));
+          var fullFieldPath = attrs.aaValMsgFor;
+          var  fieldInForm, formObj; 
+
+          var innerScope = $scope;
+          while((!fieldInForm || !formObj) && innerScope){
+            fieldInForm = innerScope.$eval(fullFieldPath);
+            formObj = innerScope.$eval(fullFieldPath.substring(0, fullFieldPath.indexOf('.')));
+            
+            if((!fieldInForm || !formObj)){
+              innerScope = innerScope.$parent;
+            }
+          }
 
           //TODO: if this is inside an isolate scope and the form is outside the isolate scope this doesn't work
           //could nest multiple forms so can't trust directive require and have to eval to handle edge cases...
           aaUtils.ensureaaFormExtensionsFieldExists(formObj, fieldInForm.$name);
-          var fieldInFormExtensions = $scope.$eval(fullFieldPath.replace('.', '.$aaFormExtensions.'));
+          $scope.fieldInFormExtensions = innerScope.$eval(fullFieldPath.replace('.', '.$aaFormExtensions.'));
 
           $scope.$watchCollection(
             function () {
-              return fieldInFormExtensions.$errorMessages;
+              return $scope.fieldInFormExtensions.$errorMessages;
             },
             function (val) {
               $scope.errorMessages = val;
@@ -1945,7 +1940,7 @@ angular
             function () {
               return [
                 formObj.$aaFormExtensions.$invalidAttempt,
-                fieldInFormExtensions.showErrorReasons
+                $scope.fieldInFormExtensions.showErrorReasons
               ];
             },
             function (watches) {
