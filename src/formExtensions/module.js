@@ -168,7 +168,7 @@
             locals.$scope.$$aaFormExtensionsTodos.push(todo);
           }
 
-          return $delegate(expression, locals);
+          return $delegate.apply(this, arguments);
         };
       }]);
     }]);
