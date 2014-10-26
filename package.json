@@ -1,6 +1,6 @@
 {
   "name": "angular-agility",
-  "version": "0.8.15",
+  "version": "0.8.16",
   "dependencies": {
     "express": "^3.10.2",
     "lodash": "^2.4.1"
