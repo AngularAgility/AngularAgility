@@ -5,7 +5,13 @@
  * @name aaFormExtensions
  *
  * @description
- * Description place holder.
+ * Anything in here can be customized by injecting in aaFormExtensionsProvider during config
+ *
+ * EXAMPLE
+ * angular.module('myApp', ['aa.formExtensions'])
+ *  .config(function(aaFormExtensionsProvider) {
+ *     aaFormExtensionsProvider.defaultLblCol = 'xs-3'
+ *  })
  **/
 
 (function () {
@@ -17,14 +23,16 @@
       var self = this;
 
       //LABEL STRATEGIES
-      this.defaultLabelStrategy = "bootstrap3InlineForm";
+      this.defaultLblCol = 'sm-2';
+      this.defaultLabelStrategy = 'bootstrap3InlineForm';
       this.labelStrategies = {
 
         //create a bootstrap3 style label
         bootstrap3InlineForm: function (element, labelText, isRequired) {
 
-          var col = element.attr('aa-lbl-col') || "sm-2";
-          var class_ = element.attr('aa-lbl-class') || '';
+          //this will resolve aa-lbl-... from the current element or the closest parent element
+          var col = findClosestEleWithAttr(element, 'aa-lbl-col') || self.defaultLblCol;
+          var class_ = findClosestEleWithAttr(element, 'aa-lbl-class') || '';
 
           var label = angular.element('<label>')
             .attr('for', element[0].id)
@@ -58,6 +66,7 @@
 
 
       //AUTO FIELD GROUP STRATEGIES
+      this.defaultCol = 'sm-3';
       this.defaultFieldGroupStrategy = "bootstrap3InlineForm";
       this.fieldGroupStrategies = {
         bootstrap3InlineForm: function (element) {
@@ -67,7 +76,7 @@
             element.addClass('form-control');
           }
 
-          var col = element.attr('aa-col') || "sm-3";
+          var col = findClosestEleWithAttr(element, 'aa-col') || self.defaultCol;
 
           wrap(element, '<div class="form-group"><div class="col-' + col + '"></div></div>');
         },
@@ -78,7 +87,7 @@
             element.addClass('form-control');
           }
 
-          var col = element.attr('aa-col') || "sm-3";
+          var col = findClosestEleWithAttr(element, 'aa-col') || self.defaultCol;
 
           wrap(element, '<div class="form-group col-' + col + '"></div>');
         }
@@ -306,6 +315,32 @@
         };
       };
     });
+
+  //recurse up document tree starting with the current element to try to find
+  //and element with a given attribute. if found return it.
+  function findClosestEleWithAttr(ele, attr) {
+
+    var attrVal;
+
+    attrVal = ele.attr(attr);
+    if(attrVal) {
+      return attrVal;
+    }
+
+    var parent = ele.parent();
+
+    if(!parent.length) {
+      return;
+    }
+
+    attrVal = parent.attr(attr);
+    if(attrVal) {
+      return attrVal;
+    }
+
+    return findClosestEleWithAttr(parent, attr);
+  }
+
 
   function wrap(elms, wrapper) {
     var wrapperDiv = document.createElement('div');

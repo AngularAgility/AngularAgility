@@ -34,6 +34,7 @@ body {
 
 .nav.navbar-nav li.active {
     font-weight: bold;
+    background-color: rgb(154, 255, 0);
 }
 
 .highlight-form {
