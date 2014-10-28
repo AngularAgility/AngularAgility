@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.16" @ 2014-10-25T22:34:28
+angular-agility "version":"0.8.16" @ 2014-10-28T09:01:01
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1077,7 +1077,7 @@ angular
       //the below will run on the first child form (or targetFormName matching child form) that appears
       $provide.decorator('$controller', ['$delegate', function ($delegate) {
         return function (expression, locals) {
-          if (locals.$scope) {
+          if (!locals.$aaFormExtensions /* <--unit testing only*/ && locals.$scope) {
             locals.$aaFormExtensions = {
 
               $addChangeDependency: function (expr, deepWatch, /*optional*/

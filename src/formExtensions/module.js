@@ -112,7 +112,7 @@
       //the below will run on the first child form (or targetFormName matching child form) that appears
       $provide.decorator('$controller', ['$delegate', function ($delegate) {
         return function (expression, locals) {
-          if (locals.$scope) {
+          if (!locals.$aaFormExtensions /* <--unit testing only*/ && locals.$scope) {
             locals.$aaFormExtensions = {
 
               $addChangeDependency: function (expr, deepWatch, /*optional*/
