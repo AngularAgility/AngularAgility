@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.17" @ 2014-10-28T09:01:01
+angular-agility "version":"0.8.18" @ 2014-11-09T18:26:01
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -2715,10 +2715,10 @@ angular
                     msg = aaUtils.stringFormat(attrs.maxMsg || aaFormExtensions.validationMessages.max, fieldName, attrs.max);
                   } else if (key === 'pattern') {
                     msg = aaUtils.stringFormat(attrs.ngPatternMsg || aaFormExtensions.validationMessages.pattern, fieldName);
-                  } else if (key === 'required' && element[0].type === 'number') {
+                  } else if (key === 'required' && element[0].type === 'number' && ngModel.$error.number) {
                     //angular doesn't correctly flag numbers as invalid rather as required when something wrong is filled in
-                    //hack around it
-                    msg = aaUtils.stringFormat(attrs.numberMsg || aaFormExtensions.validationMessages.number, fieldName);
+                    //this is fixed in 1.3 but this hack maintains backward/forward compatibility
+                    continue;
                   } else if (aaFormExtensions.validationMessages[key]) {
                     //globally registered custom message
                     msg = aaUtils.stringFormat(aaFormExtensions.validationMessages[key], fieldName);
