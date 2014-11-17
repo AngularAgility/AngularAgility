@@ -53,7 +53,7 @@ $rootScope.aaIsLoading = {{ aaIsLoading }}
             Then register your own custom strategy:
             <div syntax-highligher-for="javascript">
                 <script type="syntaxhighlighter"><![CDATA[
-                    aaFormExtensionsProvider.myCustomStrategy = function(rootFormScope, rootForm, $injector){/*...*/};
+                    aaFormExtensionsProvider.onNavigateAwayStrategies.myCustomStrategy = function(rootFormScope, rootForm, $injector){/*...*/};
 
                     aaFormExtensionsProvider.defaultOnNavigateAwayStrategy = 'myCustomStrategy';
                 ]]>
