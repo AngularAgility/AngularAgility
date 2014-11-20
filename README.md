@@ -35,16 +35,16 @@ angular.module('myModule', ['aa.formExtensions', 'aa.notify']);
 Angular.js form validation is likely one of the best takes on form validation out there. Unfortunately it can often be a little TOO flexible for many applications where you want basic error message display and generation
 without having to dive into the form object model and manually construct basic messages for each field.
 
-This is where Form Extensions comes in. It **works with built in Angular.js validation** to:
-* Drastically reduce the amount of boilerplate, repetitive, error-prone HTML required to produce forms, labels and validation messages.
+This is where Form Extensions comes in. It **works with built in Angular.js validation and TBS3 (by default)** to:
+* Drastically reduce the amount of boilerplate, repetitive, error-prone HTML required to produce forms, labels and validation messages. Comes with support for Twitter Bootstrap 3 baked in but free to do whatever you want (see last bullet).
 * Automatically generate Angular.js fields for use in form validation, their error messages AND labels.
 * On blur and on invalid submit attempt showing of validation messages.
 * Form extensions programatically extends forms at myForm.$aaFormExtensions = {...}
 * Code is cleaner and easier to read. Form Extensions is DSL that distills your HTML down to only what is required.
 * Feel free to use full blown markup whenever you want complete control.
 * Mix and match the directive components of Form Extensions to get exactly what you'd like for each situation.
-* It does exactly what you want: *EVERYTHING* is overridable on a global and per-instance basis through a rich provider model. AKA if you don't like how it looks right now you can change it, you don't need to use Twitter Bootstrap either
-    * Any of the [providers](https://github.com/AngularAgility/AngularAgility/blob/master/src/formExtensions/provider.js) can be readily customized doing something like this: 
+* It does exactly what you want: *EVERYTHING* is overridable on a global and per-instance basis through a rich provider model. AKA if you don't like how it looks right now you can change it. Heck you don't even need to use Twitter Bootstrap even.
+    * Any of the [strategies in provider.js](https://github.com/AngularAgility/AngularAgility/blob/master/src/formExtensions/provider.js) can be readily customized doing something like this: 
 ```
 myApp.config(function(aaFormExtensionsProvider) {
     aaFormExtensionsProvider.onNavigateAwayStrategies.myCustomStrategy = function(rootFormScope, rootForm, $injector){/*...*/};
