@@ -43,7 +43,15 @@ This is where Form Extensions comes in. It **works with built in Angular.js vali
 * Code is cleaner and easier to read. Form Extensions is DSL that distills your HTML down to only what is required.
 * Feel free to use full blown markup whenever you want complete control.
 * Mix and match the directive components of Form Extensions to get exactly what you'd like for each situation.
-* It does exactly what you want: Everything is overridable on a global and per-instance basis through a rich provider model.
+* It does exactly what you want: *EVERYTHING* is overridable on a global and per-instance basis through a rich provider model. AKA if you don't like how it looks right now you can change it, you don't need to use Twitter Bootstrap either
+    * Any of the [providers](https://github.com/AngularAgility/AngularAgility/blob/master/src/formExtensions/provider.js) can be readily customized doing something like this: 
+```
+myApp.config(function(aaFormExtensionsProvider) {
+    aaFormExtensionsProvider.onNavigateAwayStrategies.myCustomStrategy = function(rootFormScope, rootForm, $injector){/*...*/};
+    aaFormExtensionsProvider.defaultOnNavigateAwayStrategy = 'myCustomStrategy';
+    //etc, look at provider.js to see what is available
+})
+```
 
 ###Demo
 * [Live demo of this exact source](http://angularagility.herokuapp.com/)
