@@ -9,7 +9,7 @@
   'use strict';
 
   angular.module('aa.formExtensions')
-    .directive('aaSubmitForm', ['aaFormExtensions', '$q', function (aaFormExtensions, $q) {
+    .directive('aaSubmitForm', ['aaFormExtensions', '$q', '$injector', function (aaFormExtensions, $q, $injector) {
       return {
         scope: {
           aaSubmitForm: '&'
@@ -24,7 +24,7 @@
             if (ngForm.$valid) {
 
               var spinnerClickStrategy = aaFormExtensions.spinnerClickStrategies[attrs.spinnerClickStrategy || aaFormExtensions.defaultSpinnerClickStrategy];
-              var eleSpinnerClickStrategy = spinnerClickStrategy(element);
+              var eleSpinnerClickStrategy = spinnerClickStrategy(element, $injector);
               eleSpinnerClickStrategy.before();
 
               //if this isn't a promise it will resolve immediately

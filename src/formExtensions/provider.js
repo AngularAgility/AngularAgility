@@ -28,7 +28,7 @@
       this.labelStrategies = {
 
         //create a bootstrap3 style label
-        bootstrap3InlineForm: function (element, labelText, isRequired) {
+        bootstrap3InlineForm: function (element, labelText, isRequired, $injector) {
 
           //this will resolve aa-lbl-... from the current element or the closest parent element
           var col = findClosestEleWithAttr(element, 'aa-lbl-col') || self.defaultLblCol;
@@ -53,7 +53,7 @@
         },
 
         //create a no-frills label directly before the element
-        simple: function (ele, labelText, isRequired) {
+        simple: function (ele, labelText, isRequired, $injector) {
           ele[0].parentNode.insertBefore(
             angular.element('<label>')
               .attr('for', ele[0].id)
@@ -69,7 +69,7 @@
       this.defaultCol = 'sm-3';
       this.defaultFieldGroupStrategy = "bootstrap3InlineForm";
       this.fieldGroupStrategies = {
-        bootstrap3InlineForm: function (element) {
+        bootstrap3InlineForm: function (element, $injector) {
 
           //add form-control if it is missing
           if (!element.prop('class')) {
@@ -80,7 +80,7 @@
 
           wrap(element, '<div class="form-group"><div class="col-' + col + '"></div></div>');
         },
-        bootstrap3BasicFormWithSize: function (element) {
+        bootstrap3BasicFormWithSize: function (element, $injector) {
 
           //add form-control if it is missing
           if (!element.prop('class')) {
@@ -98,7 +98,7 @@
       this.defaultValMsgPlacementStrategy = 'below-field';
       this.valMsgPlacementStrategies = {
 
-        'below-field': function (formFieldElement, formName, formFieldName) {
+        'below-field': function (formFieldElement, formName, formFieldName, $injector) {
 
           var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}"></div>', formName, formFieldName));
           var fieldType = formFieldElement[0].type;
@@ -115,7 +115,7 @@
           return msgElement;
         },
 
-        'hover': function (formFieldElement, formName, formFieldName, scope) {
+        'hover': function (formFieldElement, formName, formFieldName, scope, $injector) {
           var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}" ng-show="showMessages && isHovered && errorMessages.length > 0"></div>', formName, formFieldName));
 
           formFieldElement.on('mouseenter', function () {
@@ -149,7 +149,7 @@
       //aaSpinnerClick strategies
       this.defaultSpinnerClickStrategy = "fontAwesomeInsideButton";
       this.spinnerClickStrategies = {
-        fontAwesomeInsideButton: function (buttonElement) {
+        fontAwesomeInsideButton: function (buttonElement, $injector) {
 
           var loading = angular.element('<i style="margin-left: 5px;" class="fa fa-spinner fa-spin"></i>');
 

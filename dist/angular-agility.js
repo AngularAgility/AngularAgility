@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.18" @ 2014-11-09T18:26:01
+angular-agility "version":"0.8.19" @ 2014-12-28T14:44:40
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1168,7 +1168,7 @@ angular
       this.labelStrategies = {
 
         //create a bootstrap3 style label
-        bootstrap3InlineForm: function (element, labelText, isRequired) {
+        bootstrap3InlineForm: function (element, labelText, isRequired, $injector) {
 
           //this will resolve aa-lbl-... from the current element or the closest parent element
           var col = findClosestEleWithAttr(element, 'aa-lbl-col') || self.defaultLblCol;
@@ -1193,7 +1193,7 @@ angular
         },
 
         //create a no-frills label directly before the element
-        simple: function (ele, labelText, isRequired) {
+        simple: function (ele, labelText, isRequired, $injector) {
           ele[0].parentNode.insertBefore(
             angular.element('<label>')
               .attr('for', ele[0].id)
@@ -1209,7 +1209,7 @@ angular
       this.defaultCol = 'sm-3';
       this.defaultFieldGroupStrategy = "bootstrap3InlineForm";
       this.fieldGroupStrategies = {
-        bootstrap3InlineForm: function (element) {
+        bootstrap3InlineForm: function (element, $injector) {
 
           //add form-control if it is missing
           if (!element.prop('class')) {
@@ -1220,7 +1220,7 @@ angular
 
           wrap(element, '<div class="form-group"><div class="col-' + col + '"></div></div>');
         },
-        bootstrap3BasicFormWithSize: function (element) {
+        bootstrap3BasicFormWithSize: function (element, $injector) {
 
           //add form-control if it is missing
           if (!element.prop('class')) {
@@ -1238,7 +1238,7 @@ angular
       this.defaultValMsgPlacementStrategy = 'below-field';
       this.valMsgPlacementStrategies = {
 
-        'below-field': function (formFieldElement, formName, formFieldName) {
+        'below-field': function (formFieldElement, formName, formFieldName, $injector) {
 
           var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}"></div>', formName, formFieldName));
           var fieldType = formFieldElement[0].type;
@@ -1255,7 +1255,7 @@ angular
           return msgElement;
         },
 
-        'hover': function (formFieldElement, formName, formFieldName, scope) {
+        'hover': function (formFieldElement, formName, formFieldName, scope, $injector) {
           var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}" ng-show="showMessages && isHovered && errorMessages.length > 0"></div>', formName, formFieldName));
 
           formFieldElement.on('mouseenter', function () {
@@ -1289,7 +1289,7 @@ angular
       //aaSpinnerClick strategies
       this.defaultSpinnerClickStrategy = "fontAwesomeInsideButton";
       this.spinnerClickStrategies = {
-        fontAwesomeInsideButton: function (buttonElement) {
+        fontAwesomeInsideButton: function (buttonElement, $injector) {
 
           var loading = angular.element('<i style="margin-left: 5px;" class="fa fa-spinner fa-spin"></i>');
 
@@ -1702,7 +1702,7 @@ angular
   'use strict';
 
   angular.module('aa.formExtensions')
-    .directive('aaFieldGroup', ['$compile', 'aaFormExtensions', function ($compile, aaFormExtensions) {
+    .directive('aaFieldGroup', ['$compile', 'aaFormExtensions', '$injector', function ($compile, aaFormExtensions, $injector) {
       return {
         restrict: 'A',
         scope: false,
@@ -1715,7 +1715,7 @@ angular
           element.attr("aa-field", attrs.aaFieldGroup);
 
           var strat = aaFormExtensions.fieldGroupStrategies[attrs.aaFieldGroupStrategy || aaFormExtensions.defaultFieldGroupStrategy];
-          strat(element);
+          strat(element, $injector);
 
           return function (scope, element) {
             $compile(element)(scope);
@@ -1737,7 +1737,7 @@ angular
 
   angular.module('aa.formExtensions')
     //generate a label for an input generating an ID for it if it doesn't already exist
-    .directive('aaLabel', ['aaFormExtensions', 'aaUtils', '$compile', function (aaFormExtensions, aaUtils, $compile) {
+    .directive('aaLabel', ['aaFormExtensions', 'aaUtils', '$compile', '$injector', function (aaFormExtensions, aaUtils, $compile, $injector) {
       return {
         compile: function (element, attrs) {
 
@@ -1785,7 +1785,7 @@ angular
               element[0].id = aaUtils.guid();
             }
 
-            var label = strategy(element, attrs.aaLabel, isRequiredField);
+            var label = strategy(element, attrs.aaLabel, isRequiredField, $injector);
             if (label) {
                 $compile(label)(scope);
             }
@@ -1808,7 +1808,7 @@ angular
     //perform an ng-click that watches for a $q promise
     //showing a loading indicator using the default spinnerClickStrategy
     //or a specified (inline on the directive) spinner-click-strategy="myStrategy"
-    .directive('aaSpinnerClick', ['$q', 'aaFormExtensions', function ($q, aaFormExtensions) {
+    .directive('aaSpinnerClick', ['$q', 'aaFormExtensions', '$injector', function ($q, aaFormExtensions, $injector) {
       return {
         link: function (scope, element, attrs) {
 
@@ -1821,7 +1821,7 @@ angular
           element.on('click', function () {
             scope.$apply(function () {
 
-              var elementStrategy = strategy(element);
+              var elementStrategy = strategy(element, $injector);
 
               elementStrategy.before();
 
@@ -1848,7 +1848,7 @@ angular
   'use strict';
 
   angular.module('aa.formExtensions')
-    .directive('aaSubmitForm', ['aaFormExtensions', '$q', function (aaFormExtensions, $q) {
+    .directive('aaSubmitForm', ['aaFormExtensions', '$q', '$injector', function (aaFormExtensions, $q, $injector) {
       return {
         scope: {
           aaSubmitForm: '&'
@@ -1863,7 +1863,7 @@ angular
             if (ngForm.$valid) {
 
               var spinnerClickStrategy = aaFormExtensions.spinnerClickStrategies[attrs.spinnerClickStrategy || aaFormExtensions.defaultSpinnerClickStrategy];
-              var eleSpinnerClickStrategy = spinnerClickStrategy(element);
+              var eleSpinnerClickStrategy = spinnerClickStrategy(element, $injector);
               eleSpinnerClickStrategy.before();
 
               //if this isn't a promise it will resolve immediately
@@ -1900,7 +1900,7 @@ angular
   angular.module('aa.formExtensions')
     //place on an element with ngModel to generate validation messages for it
     //will use the default configured validation message placement strategy unless a custom strategy is passed in
-    .directive('aaValMsg', ['$compile', 'aaFormExtensions', function ($compile, aaFormExtensions) {
+    .directive('aaValMsg', ['$compile', 'aaFormExtensions', '$injector', function ($compile, aaFormExtensions, $injector) {
       return {
         require: ['ngModel', '^form'],
         link: function (scope, element, attrs, ctrls) {
@@ -1915,7 +1915,7 @@ angular
           var newScope = scope.$new(); //allow strategy to muck with scope in an isolated manner
 
           var msgElement = aaFormExtensions.valMsgPlacementStrategies[attrs.aaValMsg || aaFormExtensions.defaultValMsgPlacementStrategy](
-            element, form.$name, attrs.name, newScope
+            element, form.$name, attrs.name, newScope, $injector
           );
 
           $compile(msgElement)(newScope);
