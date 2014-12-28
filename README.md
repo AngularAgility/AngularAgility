@@ -53,6 +53,8 @@ myApp.config(function(aaFormExtensionsProvider) {
 })
 ```
 
+Note all of the strategies include a $injector as the last argument so that you can bring in your own Angular dependencies (or perhaps even do a $compile if you wanted inside)
+
 ###Demo
 * [Live demo of this exact source](http://angularagility.herokuapp.com/)
 * Local demo: Download the source code, go to the demo folder and run "npm install" then "node server.js".
@@ -181,7 +183,7 @@ Use to ignore on a per form basis (if you registered a global default):
 <!-- probably use a CSS class IRL but you get the point-->
 <div aa-notify style="position: fixed; bottom: 25px; right: 25px;"></div>
 ```
-
+p
 ###2. Call it from your code!
 ```javascript
 angular.module('myApp')
