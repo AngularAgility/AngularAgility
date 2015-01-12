@@ -108,6 +108,9 @@
             //radios tend to be wrapped, go up a few levels (of course you can customize this with your own strategy)
             formFieldElement.parent().parent().append(msgElement);
 
+          } else if (formFieldElement.parents(".input-group").length > 0) {
+            //if we have element inside input-group, then messages should be placed bellow it
+            formFieldElement.parent().after(msgElement);
           } else {
             formFieldElement.after(msgElement);
           }
