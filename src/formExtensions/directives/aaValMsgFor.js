@@ -40,7 +40,7 @@
           //TODO: if this is inside an isolate scope and the form is outside the isolate scope this doesn't work
           //could nest multiple forms so can't trust directive require and have to eval to handle edge cases...
           aaUtils.ensureaaFormExtensionsFieldExists(formObj, fieldInForm.$name);
-          $scope.fieldInFormExtensions = innerScope.$eval(fullFieldPath.replace('.', '.$aaFormExtensions.'));
+          $scope.fieldInFormExtensions = innerScope.$eval(formName + ".$aaFormExtensions" + fieldPath);
 
           $scope.$watchCollection(
             function () {
