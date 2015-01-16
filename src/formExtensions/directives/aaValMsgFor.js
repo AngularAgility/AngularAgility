@@ -23,9 +23,14 @@
           var  fieldInForm, formObj; 
 
           var innerScope = $scope;
-          while((!fieldInForm || !formObj) && innerScope){
-            fieldInForm = innerScope.$eval(fullFieldPath);
-            formObj = innerScope.$eval(fullFieldPath.substring(0, fullFieldPath.indexOf('.')));
+          var parts = fullFieldPath.split(".");
+          var formName = parts.shift();
+          var fieldPath = "['" + parts.join(".") + "']"; // filed path without form name, as array accessor
+          var fieldFormPath = formName + fieldPath;
+
+          while ((!fieldInForm || !formObj) && innerScope) {
+            fieldInForm = innerScope.$eval(fieldFormPath);
+            formObj = innerScope.$eval(formName);
             
             if((!fieldInForm || !formObj)){
               innerScope = innerScope.$parent;
