@@ -46,7 +46,7 @@
             element.attr('aa-label', aaUtils.toTitleCase(aaUtils.splitCamelCase(lastPartOfName)));
           }
 
-          if (attrs.aanovalmsg === undefined){ 
+          if (attrs.aaNoValMsg === undefined){
             element.attr("aa-val-msg", "");
           }
 
