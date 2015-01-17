@@ -13,14 +13,14 @@ Note all JavaScript/CSS that you might want to use is located in /src/*.*
 or
 
 ```
-bower install angular-agility
+bower install angular-agility -S
 ```
 
 ## Installation
 
 AngularJS is the only dependency.
 
-Add the AngularAgility dependencies to your Angular module definition:
+For example for FormExtensions add the following dependencies to your Angular module definition. (aaNotify is baked in and allows for notifications. Disableable, see provider.js)
 
 ```javascript
 angular.module('myModule', ['aa.formExtensions', 'aa.notify']);
