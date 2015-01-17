@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.19" @ 2014-12-28T14:44:40
+angular-agility "version":"0.8.20" @ 2015-01-17T16:35:07
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1248,6 +1248,9 @@ angular
             //radios tend to be wrapped, go up a few levels (of course you can customize this with your own strategy)
             formFieldElement.parent().parent().append(msgElement);
 
+          } else if (formFieldElement.parent().hasClass("input-group")) {
+            //if we have element inside input-group, then messages should be placed bellow it
+            formFieldElement.parent().after(msgElement);
           } else {
             formFieldElement.after(msgElement);
           }
@@ -1675,7 +1678,7 @@ angular
             element.attr('aa-label', aaUtils.toTitleCase(aaUtils.splitCamelCase(lastPartOfName)));
           }
 
-          if (attrs.aanovalmsg === undefined){ 
+          if (attrs.aaNoValMsg === undefined){
             element.attr("aa-val-msg", "");
           }
 
@@ -2055,6 +2058,10 @@ angular
         return {
           pre: function (scope, element, attrs, thisForm) {
 
+            function nullFormRenameControl(control, name) {
+              control.$name = name;
+            }
+
             function setAttemptRecursively(form, isInvalid) {
               form.$aaFormExtensions.$invalidAttempt = isInvalid;
 
@@ -2063,8 +2070,34 @@ angular
               });
             }
 
-            //have to manually find parent forms '?^form' doesn't appear to work in this case (as it is very funky)
-            var parentForm = element.parent().controller('form');
+            var parentForm;
+
+            if(attrs.isolatedForm === undefined) {
+              //have to manually find parent forms '?^form' doesn't appear to work in this case (as it is very funky)
+              parentForm = element.parent().controller('form');
+            } else {
+              thisForm.$$parentForm.$removeControl(thisForm);
+
+              var nullFormCtrl = {
+                $addControl: angular.noop,
+                $$renameControl: nullFormRenameControl,
+                $removeControl: angular.noop,
+                $setValidity: angular.noop,
+                $setDirty: angular.noop,
+                $setPristine: angular.noop,
+                $setSubmitted: angular.noop
+              };
+
+              var parentFormController = element.parent().controller('form');
+              var currentSetValidity = thisForm.$setValidity;
+              thisForm.$$parentForm = nullFormCtrl;
+
+              thisForm.$setValidity = function ( validationToken, isValid, control ) {
+                currentSetValidity( validationToken, isValid, control );
+                parentFormController.$setValidity( validationToken, true, thisForm );
+              };
+            }
+
 
             thisForm.$aaFormExtensions = {
               $onSubmitAttempt: function () {
