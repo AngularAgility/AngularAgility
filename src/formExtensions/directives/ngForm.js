@@ -16,6 +16,10 @@
         return {
           pre: function (scope, element, attrs, thisForm) {
 
+            function nullFormRenameControl(control, name) {
+              control.$name = name;
+            }
+
             function setAttemptRecursively(form, isInvalid) {
               form.$aaFormExtensions.$invalidAttempt = isInvalid;
 
@@ -24,8 +28,34 @@
               });
             }
 
-            //have to manually find parent forms '?^form' doesn't appear to work in this case (as it is very funky)
-            var parentForm = element.parent().controller('form');
+            var parentForm;
+
+            if(attrs.isolatedForm === undefined) {
+              //have to manually find parent forms '?^form' doesn't appear to work in this case (as it is very funky)
+              parentForm = element.parent().controller('form');
+            } else {
+              thisForm.$$parentForm.$removeControl(thisForm);
+
+              var nullFormCtrl = {
+                $addControl: angular.noop,
+                $$renameControl: nullFormRenameControl,
+                $removeControl: angular.noop,
+                $setValidity: angular.noop,
+                $setDirty: angular.noop,
+                $setPristine: angular.noop,
+                $setSubmitted: angular.noop
+              };
+
+              var parentFormController = element.parent().controller('form');
+              var currentSetValidity = thisForm.$setValidity;
+              thisForm.$$parentForm = nullFormCtrl;
+
+              thisForm.$setValidity = function ( validationToken, isValid, control ) {
+                currentSetValidity( validationToken, isValid, control );
+                parentFormController.$setValidity( validationToken, true, thisForm );
+              };
+            }
+
 
             thisForm.$aaFormExtensions = {
               $onSubmitAttempt: function () {
