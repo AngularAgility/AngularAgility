@@ -13,28 +13,6 @@
     .directive('aaLabel', ['aaFormExtensions', 'aaUtils', '$compile', '$injector', function (aaFormExtensions, aaUtils, $compile, $injector) {
       return {
         compile: function (element, attrs) {
-
-          //add default option if specified
-          //if this is a select with a default-option attribute add a default option (per ng spec)
-          if (element.prop('tagName').toUpperCase() === 'SELECT' && attrs.defaultOption !== undefined) {
-
-            var msg = attrs.defaultOption;
-
-            if (msg === null || msg === "") {
-
-              //gen one
-              msg = 'Select';
-
-              if (attrs.aaLabel) {
-                msg += ' a ' + attrs.aaLabel;
-              }
-
-              msg += '...';
-            }
-
-            element.append(angular.element('<option value=""></option>').html(msg));
-          }
-
           return function (scope, element, attrs) {
             var strategy = aaFormExtensions.labelStrategies[attrs.aaLabelStrategy];
 
