@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.20" @ 2015-01-17T16:35:07
+angular-agility "version":"0.8.21" @ 2015-01-22T21:20:01
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1355,6 +1355,9 @@ angular
       };
 
 
+      this.defaultFieldName = "This field";
+
+
       //VALIDATION MESSAGES
       this.validationMessages = {
         required: "{0} is required.",
@@ -1433,6 +1436,8 @@ angular
 
           validIconStrategy: self.validIconStrategy,
           validationMessages: self.validationMessages,
+
+          defaultFieldName: self.defaultFieldName,
 
           valMsgForTemplate: self.valMsgForTemplate,
 
@@ -1743,28 +1748,6 @@ angular
     .directive('aaLabel', ['aaFormExtensions', 'aaUtils', '$compile', '$injector', function (aaFormExtensions, aaUtils, $compile, $injector) {
       return {
         compile: function (element, attrs) {
-
-          //add default option if specified
-          //if this is a select with a default-option attribute add a default option (per ng spec)
-          if (element.prop('tagName').toUpperCase() === 'SELECT' && attrs.defaultOption !== undefined) {
-
-            var msg = attrs.defaultOption;
-
-            if (msg === null || msg === "") {
-
-              //gen one
-              msg = 'Select';
-
-              if (attrs.aaLabel) {
-                msg += ' a ' + attrs.aaLabel;
-              }
-
-              msg += '...';
-            }
-
-            element.append(angular.element('<option value=""></option>').html(msg));
-          }
-
           return function (scope, element, attrs) {
             var strategy = aaFormExtensions.labelStrategies[attrs.aaLabelStrategy];
 
@@ -1951,9 +1934,14 @@ angular
           var  fieldInForm, formObj; 
 
           var innerScope = $scope;
-          while((!fieldInForm || !formObj) && innerScope){
-            fieldInForm = innerScope.$eval(fullFieldPath);
-            formObj = innerScope.$eval(fullFieldPath.substring(0, fullFieldPath.indexOf('.')));
+          var parts = fullFieldPath.split(".");
+          var formName = parts.shift();
+          var fieldPath = "['" + parts.join(".") + "']"; // filed path without form name, as array accessor
+          var fieldFormPath = formName + fieldPath;
+
+          while ((!fieldInForm || !formObj) && innerScope) {
+            fieldInForm = innerScope.$eval(fieldFormPath);
+            formObj = innerScope.$eval(formName);
             
             if((!fieldInForm || !formObj)){
               innerScope = innerScope.$parent;
@@ -1963,7 +1951,7 @@ angular
           //TODO: if this is inside an isolate scope and the form is outside the isolate scope this doesn't work
           //could nest multiple forms so can't trust directive require and have to eval to handle edge cases...
           aaUtils.ensureaaFormExtensionsFieldExists(formObj, fieldInForm.$name);
-          $scope.fieldInFormExtensions = innerScope.$eval(fullFieldPath.replace('.', '.$aaFormExtensions.'));
+          $scope.fieldInFormExtensions = innerScope.$eval(formName + ".$aaFormExtensions" + fieldPath);
 
           $scope.$watchCollection(
             function () {
@@ -2041,6 +2029,51 @@ angular
     }]);
 })();
 ;/**
+ * @ngdoc directive
+ * @name defaultOption
+ *
+ * @description
+ * Directive allowing to place a default option on select elements.
+ **/
+(function () {
+  'use strict';
+
+  angular.module('aa.formExtensions')
+    //generate a label for an input generating an ID for it if it doesn't already exist
+    .directive('defaultOption', ['aaFormExtensions', 'aaUtils', '$compile', '$injector', function (aaFormExtensions, aaUtils, $compile, $injector) {
+      return {
+          priority: -1000,
+        link: function (scope, element, attrs) {
+          //add default option if specified
+          //if this is a select with a default-option attribute add a default option (per ng spec)
+          if (element.prop('tagName').toUpperCase() === 'SELECT' && attrs.defaultOption !== undefined) {
+
+            var msg = attrs.defaultOption;
+
+            if (msg === null || msg === "") {
+
+              //gen one
+              msg = 'Select';
+
+              if (attrs.aaLabel) {
+                msg += ' a ' + attrs.aaLabel;
+              }
+
+              msg += '...';
+            }
+              
+              var options = element.children('option[value=""]');
+              
+              if(!options.length) {
+                element.append(angular.element('<option value=""></option>').html(msg));
+              
+              element.removeAttr('default-option');
+              }
+          }
+        }
+      };
+    }]);
+})();;/**
  * @ngdoc directive
  * @name ngForm
  *
@@ -2576,7 +2609,7 @@ angular
           link: function (scope, element, attrs, controllers) {
             var ngModel = controllers[0],
               ngForm = controllers[1],
-              fieldName = "This field";
+              fieldName = aaFormExtensions.defaultFieldName;
 
             if (!ngForm || !ngModel.$name) {
               //only for validation with forms
