@@ -23,9 +23,14 @@
           var  fieldInForm, formObj; 
 
           var innerScope = $scope;
-          while((!fieldInForm || !formObj) && innerScope){
-            fieldInForm = innerScope.$eval(fullFieldPath);
-            formObj = innerScope.$eval(fullFieldPath.substring(0, fullFieldPath.indexOf('.')));
+          var parts = fullFieldPath.split(".");
+          var formName = parts.shift();
+          var fieldPath = "['" + parts.join(".") + "']"; // filed path without form name, as array accessor
+          var fieldFormPath = formName + fieldPath;
+
+          while ((!fieldInForm || !formObj) && innerScope) {
+            fieldInForm = innerScope.$eval(fieldFormPath);
+            formObj = innerScope.$eval(formName);
             
             if((!fieldInForm || !formObj)){
               innerScope = innerScope.$parent;
@@ -35,7 +40,7 @@
           //TODO: if this is inside an isolate scope and the form is outside the isolate scope this doesn't work
           //could nest multiple forms so can't trust directive require and have to eval to handle edge cases...
           aaUtils.ensureaaFormExtensionsFieldExists(formObj, fieldInForm.$name);
-          $scope.fieldInFormExtensions = innerScope.$eval(fullFieldPath.replace('.', '.$aaFormExtensions.'));
+          $scope.fieldInFormExtensions = innerScope.$eval(formName + ".$aaFormExtensions" + fieldPath);
 
           $scope.$watchCollection(
             function () {
