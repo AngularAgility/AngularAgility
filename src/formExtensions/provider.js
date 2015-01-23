@@ -215,6 +215,9 @@
       };
 
 
+      this.defaultFieldName = "This field";
+
+
       //VALIDATION MESSAGES
       this.validationMessages = {
         required: "{0} is required.",
@@ -293,6 +296,8 @@
 
           validIconStrategy: self.validIconStrategy,
           validationMessages: self.validationMessages,
+
+          defaultFieldName: self.defaultFieldName,
 
           valMsgForTemplate: self.valMsgForTemplate,
 

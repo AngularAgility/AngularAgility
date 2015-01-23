@@ -20,7 +20,7 @@
           link: function (scope, element, attrs, controllers) {
             var ngModel = controllers[0],
               ngForm = controllers[1],
-              fieldName = "This field";
+              fieldName = aaFormExtensions.defaultFieldName;
 
             if (!ngForm || !ngModel.$name) {
               //only for validation with forms
