@@ -98,7 +98,7 @@
       this.defaultValMsgPlacementStrategy = 'below-field';
       this.valMsgPlacementStrategies = {
 
-        'below-field': function (formFieldElement, formName, formFieldName, $injector) {
+        'below-field': function (formFieldElement, formName, formFieldName, scope, $injector) {
 
           var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}"></div>', formName, formFieldName));
           var fieldType = formFieldElement[0].type;
