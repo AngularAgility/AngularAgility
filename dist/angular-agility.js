@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.21" @ 2015-01-22T21:20:01
+angular-agility "version":"0.8.22" @ 2015-03-09T16:19:10
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1163,6 +1163,7 @@ angular
       var self = this;
 
       //LABEL STRATEGIES
+      this.requiredLabelClass = 'label-required';
       this.defaultLblCol = 'sm-2';
       this.defaultLabelStrategy = 'bootstrap3InlineForm';
       this.labelStrategies = {
@@ -1177,6 +1178,7 @@ angular
           var label = angular.element('<label>')
             .attr('for', element[0].id)
             .addClass('col-' + col + ' control-label ' + class_)
+            .addClass(isRequired ? self.requiredLabelClass : '')
             .html(labelText + (isRequired ? '&nbsp;*' : ''));
 
 
@@ -1197,6 +1199,7 @@ angular
           ele[0].parentNode.insertBefore(
             angular.element('<label>')
               .attr('for', ele[0].id)
+              .addClass(isRequired ? self.requiredLabelClass : '')
               .html(labelText + (isRequired ? '&nbsp;*' : ''))[0],
             ele[0]);
         }
@@ -1238,7 +1241,7 @@ angular
       this.defaultValMsgPlacementStrategy = 'below-field';
       this.valMsgPlacementStrategies = {
 
-        'below-field': function (formFieldElement, formName, formFieldName, $injector) {
+        'below-field': function (formFieldElement, formName, formFieldName, scope, $injector) {
 
           var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}"></div>', formName, formFieldName));
           var fieldType = formFieldElement[0].type;
@@ -2042,35 +2045,40 @@ angular
     //generate a label for an input generating an ID for it if it doesn't already exist
     .directive('defaultOption', ['aaFormExtensions', 'aaUtils', '$compile', '$injector', function (aaFormExtensions, aaUtils, $compile, $injector) {
       return {
-          priority: -1000,
-        link: function (scope, element, attrs) {
-          //add default option if specified
-          //if this is a select with a default-option attribute add a default option (per ng spec)
-          if (element.prop('tagName').toUpperCase() === 'SELECT' && attrs.defaultOption !== undefined) {
+          priority: 1,
+          compile: function (element, attrs) {
+            return {
+                pre: function (scope, element, attrs) {
+                    //add default option if specified
+                  //if this is a select with a default-option attribute add a default option (per ng spec)
+                  if (element.prop('tagName').toUpperCase() === 'SELECT' && attrs.defaultOption !== undefined) {
 
-            var msg = attrs.defaultOption;
+                    var msg = attrs.defaultOption;
 
-            if (msg === null || msg === "") {
+                    if (msg === null || msg === "") {
 
-              //gen one
-              msg = 'Select';
+                      //gen one
+                      msg = 'Select';
 
-              if (attrs.aaLabel) {
-                msg += ' a ' + attrs.aaLabel;
-              }
+                      if (attrs.aaLabel) {
+                        msg += ' a ' + attrs.aaLabel;
+                      }
 
-              msg += '...';
-            }
-              
-              var options = element.children('option[value=""]');
-              
-              if(!options.length) {
-                element.append(angular.element('<option value=""></option>').html(msg));
-              
-              element.removeAttr('default-option');
-              }
+                      msg += '...';
+                    }
+
+                      var options = element.children('option[value=""]');
+
+                      if(!options.length) {
+                        element.append(angular.element('<option value=""></option>').html(msg));
+
+                      element.removeAttr('default-option');
+                      }
+                  }
+                }
+            };
           }
-        }
+          
       };
     }]);
 })();;/**

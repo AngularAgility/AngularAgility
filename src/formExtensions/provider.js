@@ -23,6 +23,7 @@
       var self = this;
 
       //LABEL STRATEGIES
+      this.requiredLabelClass = 'label-required';
       this.defaultLblCol = 'sm-2';
       this.defaultLabelStrategy = 'bootstrap3InlineForm';
       this.labelStrategies = {
@@ -37,6 +38,7 @@
           var label = angular.element('<label>')
             .attr('for', element[0].id)
             .addClass('col-' + col + ' control-label ' + class_)
+            .addClass(isRequired ? self.requiredLabelClass : '')
             .html(labelText + (isRequired ? '&nbsp;*' : ''));
 
 
@@ -57,6 +59,7 @@
           ele[0].parentNode.insertBefore(
             angular.element('<label>')
               .attr('for', ele[0].id)
+              .addClass(isRequired ? self.requiredLabelClass : '')
               .html(labelText + (isRequired ? '&nbsp;*' : ''))[0],
             ele[0]);
         }
