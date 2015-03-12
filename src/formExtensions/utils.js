@@ -49,6 +49,14 @@
         },
 
         ensureaaFormExtensionsFieldExists: function (form, fieldName) {
+          if(!form) {
+            throw new Error('Form was ' + form);
+          }
+
+          if(!fieldName) {
+            throw new Error('Form was ' + fieldName);
+          }
+
           if (!form.$aaFormExtensions[fieldName]) {
             form.$aaFormExtensions[fieldName] = {
               showErrorReasons: [],

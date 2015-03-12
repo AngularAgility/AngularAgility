@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.22" @ 2015-03-09T16:19:10
+angular-agility "version":"0.8.22" @ 2015-03-12T10:29:01
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1581,6 +1581,14 @@ angular
         },
 
         ensureaaFormExtensionsFieldExists: function (form, fieldName) {
+          if(!form) {
+            throw new Error('Form was ' + form);
+          }
+
+          if(!fieldName) {
+            throw new Error('Form was ' + fieldName);
+          }
+
           if (!form.$aaFormExtensions[fieldName]) {
             form.$aaFormExtensions[fieldName] = {
               showErrorReasons: [],
@@ -1919,67 +1927,70 @@ angular
  * @description
  * Description place holder.
  **/
-(function () {
+(function() {
   'use strict';
 
   angular.module('aa.formExtensions')
     //if used directly rather than passively with aaValMsg allows for direct placement of validation messages
     //for a given form field. ex. pass "myForm.myFieldName"
-    .directive('aaValMsgFor', ['aaFormExtensions', 'aaUtils', function (aaFormExtensions, aaUtils) {
+    .directive('aaValMsgFor', ['aaFormExtensions', 'aaUtils', '$timeout', function(aaFormExtensions, aaUtils, $timeout) {
       //generate the validation message for a particular form field here
       return {
         require: ['^form'],
         priority: 1,
         scope: true,
-        link: function ($scope, element, attrs) {
+        link: function($scope, element, attrs) {
 
-          var fullFieldPath = attrs.aaValMsgFor;
-          var  fieldInForm, formObj; 
+          $timeout(function() { //if referring to fields created in other directives give them time to render before trying to look for them. ex ng-repeat
 
-          var innerScope = $scope;
-          var parts = fullFieldPath.split(".");
-          var formName = parts.shift();
-          var fieldPath = "['" + parts.join(".") + "']"; // filed path without form name, as array accessor
-          var fieldFormPath = formName + fieldPath;
+            var fullFieldPath = attrs.aaValMsgFor;
+            var fieldInForm, formObj;
 
-          while ((!fieldInForm || !formObj) && innerScope) {
-            fieldInForm = innerScope.$eval(fieldFormPath);
-            formObj = innerScope.$eval(formName);
-            
-            if((!fieldInForm || !formObj)){
-              innerScope = innerScope.$parent;
+            var innerScope = $scope;
+            var parts = fullFieldPath.split(".");
+            var formName = parts.shift();
+            var fieldPath = "['" + parts.join(".") + "']"; // filed path without form name, as array accessor
+            var fieldFormPath = formName + fieldPath;
+
+            while ((!fieldInForm || !formObj) && innerScope) {
+              fieldInForm = innerScope.$eval(fieldFormPath);
+              formObj = innerScope.$eval(formName);
+
+              if ((!fieldInForm || !formObj)) {
+                innerScope = innerScope.$parent;
+              }
             }
-          }
 
-          //TODO: if this is inside an isolate scope and the form is outside the isolate scope this doesn't work
-          //could nest multiple forms so can't trust directive require and have to eval to handle edge cases...
-          aaUtils.ensureaaFormExtensionsFieldExists(formObj, fieldInForm.$name);
-          $scope.fieldInFormExtensions = innerScope.$eval(formName + ".$aaFormExtensions" + fieldPath);
+            //TODO: if this is inside an isolate scope and the form is outside the isolate scope this doesn't work
+            //could nest multiple forms so can't trust directive require and have to eval to handle edge cases...
+            aaUtils.ensureaaFormExtensionsFieldExists(formObj, fieldInForm.$name);
+            $scope.fieldInFormExtensions = innerScope.$eval(formName + ".$aaFormExtensions" + fieldPath);
 
-          $scope.$watchCollection(
-            function () {
-              return $scope.fieldInFormExtensions.$errorMessages;
-            },
-            function (val) {
-              $scope.errorMessages = val;
-            }
-          );
+            $scope.$watchCollection(
+              function() {
+                return $scope.fieldInFormExtensions.$errorMessages;
+              },
+              function(val) {
+                $scope.errorMessages = val;
+              }
+            );
 
-          $scope.$watch(
-            function () {
-              return [
-                formObj.$aaFormExtensions.$invalidAttempt,
-                $scope.fieldInFormExtensions.showErrorReasons
-              ];
-            },
-            function (watches) {
-              var invalidAttempt = watches[0],
-                showErrorReasons = watches[1];
+            $scope.$watch(
+              function() {
+                return [
+                  formObj.$aaFormExtensions.$invalidAttempt,
+                  $scope.fieldInFormExtensions.showErrorReasons
+                ];
+              },
+              function(watches) {
+                var invalidAttempt = watches[0],
+                  showErrorReasons = watches[1];
 
-              $scope.showMessages = invalidAttempt || showErrorReasons.length;
-            },
-            true
-          );
+                $scope.showMessages = invalidAttempt || showErrorReasons.length;
+              },
+              true
+            );
+          });
         },
         template: aaFormExtensions.valMsgForTemplate,
         replace: true
