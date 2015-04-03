@@ -50,8 +50,12 @@
             }
 
 
-            element.on('blur', function () {
-              field.showErrorReasons.push('hadFocus');
+            element.on('blur', function () {			
+              var blurReason = 'hadFocus';
+
+              if (field.showErrorReasons.indexOf(blurReason) === -1) {
+                  field.showErrorReasons.push(blurReason);
+              }
               element.addClass('aa-had-focus');
 
               //want to call $apply after current stack clears
