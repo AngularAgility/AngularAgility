@@ -58,7 +58,8 @@
 
             var currentSetPristine = thisForm.$setPristine;
             thisForm.$setPristine = function () {
-                $clearErrors(currentSetPristine.bind(thisForm));
+                $clearErrors();
+				currentSetPristine();
             };
 
             thisForm.$aaFormExtensions = {
