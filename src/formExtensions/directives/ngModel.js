@@ -50,13 +50,14 @@
             }
 
 
-            element.on('blur', function () {			
-              var blurReason = 'hadFocus';
+            element.on('blur', function () {
+              var blurReason = 'hadFocus',
+                    hadFocus = 'aa-had-focus';
 
-              if (field.showErrorReasons.indexOf(blurReason) === -1) {
+              if(!element.hasClass(hadFocus)){
                   field.showErrorReasons.push(blurReason);
+                  element.addClass(hadFocus);
               }
-              element.addClass('aa-had-focus');
 
               //want to call $apply after current stack clears
               //if clicking on another element. better way?
