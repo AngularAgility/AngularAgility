@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.23" @ 2015-03-12T10:29:01
+angular-agility "version":"0.8.24" @ 2015-04-24T13:30:15
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1010,8 +1010,11 @@ angular
       //setup ajax watcher that tracks loading, this is useful by its self
       //and is required for changed tracking
       //NOTE: if you do non Angular AJAX you will need to call increment/decrement yourself
-      $provide.factory('aaLoadingWatcher', ['$rootScope', function ($rootScope) {
+      $provide.factory('aaLoadingWatcher', ['$rootScope', 'aaFormExtensions', 'aaUtils', function ($rootScope, aaFormExtensions, aaUtils) {
         var pendingRequests = 0;
+
+        var debouncedLoadingChanged = aaFormExtensions.aaIsLoadingDoneDebounceMS ?
+          aaUtils.debounce(loadingChanged, aaFormExtensions.aaIsLoadingDoneDebounceMS) : loadingChanged;
 
         var watcher = {
           isLoading: false,
@@ -1021,13 +1024,15 @@ angular
           },
           decrement: function () {
             pendingRequests--;
-            loadingChanged();
+            debouncedLoadingChanged();
           }
           //perhaps add a 'runWhenDoneLoading' here
         };
 
+
         function loadingChanged() {
           $rootScope.aaIsLoading = watcher.isLoading = pendingRequests > 0;
+          $rootScope.$broadcast('aaIsLoading', watcher.isLoading);
 
           if (!$rootScope.$$phase) {
             $rootScope.$apply();
@@ -1040,17 +1045,28 @@ angular
       //tracks JUST ANGULAR http requests.
       $provide.factory('aaAjaxInterceptor', ['aaLoadingWatcher', '$q', 'aaFormExtensions',
         function (aaLoadingWatcher, $q, aaFormExtensions) {
+
+          function shouldIgnore(config) {
+            return config.aaIsLoadingIgnore === true;
+          }
+
           return {
             request: function (request) {
-              aaLoadingWatcher.increment();
+              if(!shouldIgnore(request)) {
+                aaLoadingWatcher.increment();
+              }
               return request;
             },
             response: function (response) {
-              aaLoadingWatcher.decrement();
+              if(!shouldIgnore(response.config)) {
+                aaLoadingWatcher.decrement();
+              }
               return response;
             },
             responseError: function (response) {
-              aaLoadingWatcher.decrement();
+              if(!shouldIgnore(response.config)) {
+                aaLoadingWatcher.decrement();
+              }
 
               if (aaFormExtensions.ajaxValidationErrorMappingStrategy) {
                 aaFormExtensions.ajaxValidationErrorMappingStrategy(
@@ -1428,6 +1444,8 @@ angular
         messageOnBlur: true
       };
 
+      this.aaIsLoadingDoneDebounceMS = 500; //wait Xms before considered done loading to avoid avoid flickering
+
       this.$get = function () {
         return {
 
@@ -1462,7 +1480,9 @@ angular
           availableForms: [], //all available ngForms in the application that could have errors *right now*
 
           //todo wire up
-          globalSettings: self.globalSettings
+          globalSettings: self.globalSettings,
+
+          aaIsLoadingDoneDebounceMS: self.aaIsLoadingDoneDebounceMS
         };
       };
     });
@@ -1642,6 +1662,127 @@ angular
           });
 
           form.$aaFormExtensions.$changed = hasAnyChangedField;
+        },
+
+        //https://github.com/lodash/lodash/blob/3.7.0/lodash.src.js#L7841
+        debounce: function (func, wait, options) {
+          /* jshint ignore:start */
+          var args,
+            maxTimeoutId,
+            result,
+            stamp,
+            thisArg,
+            timeoutId,
+            trailingCall,
+            lastCalled = 0,
+            maxWait = false,
+            trailing = true;
+
+          function now() {
+            return new Date().getTime();
+          }
+
+          if (typeof func != 'function') {
+            throw new TypeError(FUNC_ERROR_TEXT);
+          }
+          wait = wait < 0 ? 0 : (+wait || 0);
+          if (options === true) {
+            var leading = true;
+            trailing = false;
+          } else if (angular.isObject(options)) {
+            leading = options.leading;
+            maxWait = 'maxWait' in options && nativeMax(+options.maxWait || 0, wait);
+            trailing = 'trailing' in options ? options.trailing : trailing;
+          }
+
+          function cancel() {
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+            }
+            if (maxTimeoutId) {
+              clearTimeout(maxTimeoutId);
+            }
+            maxTimeoutId = timeoutId = trailingCall = undefined;
+          }
+
+          function delayed() {
+            var remaining = wait - (now() - stamp);
+            if (remaining <= 0 || remaining > wait) {
+              if (maxTimeoutId) {
+                clearTimeout(maxTimeoutId);
+              }
+              var isCalled = trailingCall;
+              maxTimeoutId = timeoutId = trailingCall = undefined;
+              if (isCalled) {
+                lastCalled = now();
+                result = func.apply(thisArg, args);
+                if (!timeoutId && !maxTimeoutId) {
+                  args = thisArg = null;
+                }
+              }
+            } else {
+              timeoutId = setTimeout(delayed, remaining);
+            }
+          }
+
+          function maxDelayed() {
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+            }
+            maxTimeoutId = timeoutId = trailingCall = undefined;
+            if (trailing || (maxWait !== wait)) {
+              lastCalled = now();
+              result = func.apply(thisArg, args);
+              if (!timeoutId && !maxTimeoutId) {
+                args = thisArg = null;
+              }
+            }
+          }
+
+          function debounced() {
+            args = arguments;
+            stamp = now();
+            thisArg = this;
+            trailingCall = trailing && (timeoutId || !leading);
+
+            if (maxWait === false) {
+              var leadingCall = leading && !timeoutId;
+            } else {
+              if (!maxTimeoutId && !leading) {
+                lastCalled = stamp;
+              }
+              var remaining = maxWait - (stamp - lastCalled),
+                isCalled = remaining <= 0 || remaining > maxWait;
+
+              if (isCalled) {
+                if (maxTimeoutId) {
+                  maxTimeoutId = clearTimeout(maxTimeoutId);
+                }
+                lastCalled = stamp;
+                result = func.apply(thisArg, args);
+              }
+              else if (!maxTimeoutId) {
+                maxTimeoutId = setTimeout(maxDelayed, remaining);
+              }
+            }
+            if (isCalled && timeoutId) {
+              timeoutId = clearTimeout(timeoutId);
+            }
+            else if (!timeoutId && wait !== maxWait) {
+              timeoutId = setTimeout(delayed, wait);
+            }
+            if (leadingCall) {
+              isCalled = true;
+              result = func.apply(thisArg, args);
+            }
+            if (isCalled && !timeoutId && !maxTimeoutId) {
+              args = thisArg = null;
+            }
+            return result;
+          }
+          debounced.cancel = cancel;
+          return debounced;
+          /* jshint ignore:end */
         }
       };
     });

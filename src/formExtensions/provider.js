@@ -288,6 +288,8 @@
         messageOnBlur: true
       };
 
+      this.aaIsLoadingDoneDebounceMS = 500; //wait Xms before considered done loading to avoid avoid flickering
+
       this.$get = function () {
         return {
 
@@ -322,7 +324,9 @@
           availableForms: [], //all available ngForms in the application that could have errors *right now*
 
           //todo wire up
-          globalSettings: self.globalSettings
+          globalSettings: self.globalSettings,
+
+          aaIsLoadingDoneDebounceMS: self.aaIsLoadingDoneDebounceMS
         };
       };
     });

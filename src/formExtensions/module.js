@@ -45,8 +45,11 @@
       //setup ajax watcher that tracks loading, this is useful by its self
       //and is required for changed tracking
       //NOTE: if you do non Angular AJAX you will need to call increment/decrement yourself
-      $provide.factory('aaLoadingWatcher', ['$rootScope', function ($rootScope) {
+      $provide.factory('aaLoadingWatcher', ['$rootScope', 'aaFormExtensions', 'aaUtils', function ($rootScope, aaFormExtensions, aaUtils) {
         var pendingRequests = 0;
+
+        var debouncedLoadingChanged = aaFormExtensions.aaIsLoadingDoneDebounceMS ?
+          aaUtils.debounce(loadingChanged, aaFormExtensions.aaIsLoadingDoneDebounceMS) : loadingChanged;
 
         var watcher = {
           isLoading: false,
@@ -56,13 +59,15 @@
           },
           decrement: function () {
             pendingRequests--;
-            loadingChanged();
+            debouncedLoadingChanged();
           }
           //perhaps add a 'runWhenDoneLoading' here
         };
 
+
         function loadingChanged() {
           $rootScope.aaIsLoading = watcher.isLoading = pendingRequests > 0;
+          $rootScope.$broadcast('aaIsLoading', watcher.isLoading);
 
           if (!$rootScope.$$phase) {
             $rootScope.$apply();
@@ -75,17 +80,28 @@
       //tracks JUST ANGULAR http requests.
       $provide.factory('aaAjaxInterceptor', ['aaLoadingWatcher', '$q', 'aaFormExtensions',
         function (aaLoadingWatcher, $q, aaFormExtensions) {
+
+          function shouldIgnore(config) {
+            return config.aaIsLoadingIgnore === true;
+          }
+
           return {
             request: function (request) {
-              aaLoadingWatcher.increment();
+              if(!shouldIgnore(request)) {
+                aaLoadingWatcher.increment();
+              }
               return request;
             },
             response: function (response) {
-              aaLoadingWatcher.decrement();
+              if(!shouldIgnore(response.config)) {
+                aaLoadingWatcher.decrement();
+              }
               return response;
             },
             responseError: function (response) {
-              aaLoadingWatcher.decrement();
+              if(!shouldIgnore(response.config)) {
+                aaLoadingWatcher.decrement();
+              }
 
               if (aaFormExtensions.ajaxValidationErrorMappingStrategy) {
                 aaFormExtensions.ajaxValidationErrorMappingStrategy(
