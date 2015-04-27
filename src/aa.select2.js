@@ -90,7 +90,7 @@ angular
               // TODO: Ought to handle the failure case, instead of spinning forever
               var queryResult = settings.options(query.term);
               // Assume if it's not a promise and is an array, it's data
-              if (!queryResult.then && !!queryResult.length) {
+              if (!queryResult.then && queryResult.hasOwnProperty["length"]) {
                 query.callback({
                   results: queryResult,
                   text: settings.text
