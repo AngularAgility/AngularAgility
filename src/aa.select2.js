@@ -244,6 +244,13 @@ angular
             }
             ngModel.$setViewValue(ngValue);
           });
+
+          // If user has requested notification, call function
+          if (typeof settings.select2.onChange === "function") {
+            // Copy the passed in arguments
+            var args = Array.prototype.slice.call(arguments);
+            settings.select2.onChange.apply(element, args);
+          }
         });
 
         //other stuff
