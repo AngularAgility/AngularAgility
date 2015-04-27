@@ -246,7 +246,7 @@ angular
           });
 
           // If user has requested notification, call function
-          if (typeof settings.select2.onChange === "function") {
+          if (!!settings.select2 && typeof settings.select2.onChange === "function") {
             // Copy the passed in arguments
             var args = Array.prototype.slice.call(arguments);
             settings.select2.onChange.apply(element, args);
@@ -257,6 +257,11 @@ angular
         element.bind("$destroy", function () {
           element.select2("destroy");
         });
+
+        // Expose the select2 element, for further customization
+        if (typeof settings.onInitialized == "function") {
+          settings.onInitialized.call(this, [element]);
+        }
       }
     };
   }]);
