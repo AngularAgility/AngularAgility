@@ -90,7 +90,7 @@ angular
               // TODO: Ought to handle the failure case, instead of spinning forever
               var queryResult = settings.options(query.term);
               // Assume if it's not a promise and is an array, it's data
-              if (!queryResult.then && queryResult.hasOwnProperty["length"]) {
+              if (!queryResult.then && queryResult.hasOwnProperty("length")) {
                 query.callback({
                   results: queryResult,
                   text: settings.text
@@ -268,7 +268,7 @@ angular
         });
 
         // Expose the select2 element, for further customization
-        if (typeof settings.onInitialized == "function") {
+        if (typeof settings.onInitialized === "function") {
           settings.onInitialized.call(this, [element]);
         }
       }
