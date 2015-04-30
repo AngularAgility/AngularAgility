@@ -142,6 +142,8 @@ Sets the state of the form back to it's original state†:
 ```javascript
 personForm.$aaFormExtensions.$reset(/*optional runAfterFunc(){ }*/);
 ```
+*NOTE: if you want to do something AFTER a $reset you must use runAfterFunc since $reset runs async for now unfotunately*
+
 †AFTER AJAX. All native Angular AJAX requests are counted by aaLoadingWatcher and a form isn't considered loaded until pending AJAX requests have completed. If you have other types of loading to account for simply use aaLoadingWatcher.increment()/.decrement() API to count them.
 
 ###Reset initial form state
@@ -150,6 +152,7 @@ The current state of the form will be considered it's initial state (any changes
 ```javascript
 personForm.$aaFormExtensions.$resetChanged(/*optional runAfterFunc(){ }*/);
 ```
+*NOTE: if you want to do something AFTER a $resetChanged (like a $state.go or something) you must use runAfterFunc since $resetChanged runs async for now unfotunately*
 
 ###Loading indicators
 isLoading boolean is available from aaLoadingWatcher.isLoading factory or:
