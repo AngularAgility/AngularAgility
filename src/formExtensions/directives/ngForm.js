@@ -56,6 +56,11 @@
               };
             }
 
+            var currentSetPristine = thisForm.$setPristine;
+            thisForm.$setPristine = function () {
+                $clearErrors();
+                currentSetPristine();
+            };
 
             thisForm.$aaFormExtensions = {
               $onSubmitAttempt: function () {
@@ -305,7 +310,14 @@
                     err.field.showErrorReasons.length = 0;
                     err.field.$element.removeClass('aa-had-focus');
                     //this makes sense i think, maybe make configurable
-                    err.field.$ngModel.$setPristine();
+                    // Explanation:
+                    //It would be better if $clearErrors() function clears only aa.formExtensions's state.
+                    //aa.form is extension for ngForm, so it should extend ngForm.$setPristine() to clear its state.
+                    //HOW it looks from consumers's side: when developer calls hisForm.$setPristine(),
+                    //he expects that all ngForm's extensions must clear their errors as well.
+                    //And he should not call (and even know) method hisForm.$aaFormExtensions.$clearErrors().
+                    //Especially because $clearErrors() method is not well documented.
+                    //err.field.$ngModel.$setPristine();
                   }
                 });
 
