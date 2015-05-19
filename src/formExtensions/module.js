@@ -140,29 +140,27 @@
                 });
               },
 
-              $resetChanged: function (runAfterFunc, /*optional*/
-                                       targetFormName /*optional*/) {
+              $resetChanged: function (targetFormName /*optional*/) {
                 addTodo({
                   type: '$resetChanged',
-                  args: [runAfterFunc],
+                  args: [],
                   targetFormName: targetFormName
                 });
               },
 
-              $reset: function (runAfterFunc, /*optional*/
+              $reset: function (shouldNotConfirmReset, /*optional*/
                                 targetFormName /*optional*/) {
                 addTodo({
                   type: '$reset',
-                  args: [runAfterFunc],
+                  args: [shouldNotConfirmReset],
                   targetFormName: targetFormName
                 });
               },
 
-              $clearErrors: function (runAfterFunc, /*optional*/
-                                      targetFormName /*optional*/) {
+              $clearErrors: function (targetFormName /*optional*/) {
                 addTodo({
                   type: '$clearErrors',
-                  args: [runAfterFunc],
+                  args: [],
                   targetFormName: targetFormName
                 });
               },

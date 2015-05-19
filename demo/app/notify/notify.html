@@ -84,7 +84,25 @@
         <button type="button" class="btn btn-danger" ng-click="tryDanger()">Try Danger!</button>
     </div>
 
-    <h1>Advanced Mode Demo coming soon!</h1>
+    <h1>Advanced Mode</h1>
+
+    <p class="lead">1. Put a notification directive anywhere you want in the DOM with a custom name</p>
+
+    <div syntax-highligher-for="html">
+        <script type="syntaxhighlighter"><![CDATA[
+            <!-- probably use a CSS class IRL but you get the point-->
+            <div aa-notify container-name="my-custom-container"></div>
+        ]]>
+            </script>
+    </div>
+
+    <p class="lead">2. Send messages to JUST that container</p>
+
+    <div syntax-highligher-for="javascript">
+        <script type="syntaxhighlighter"><![CDATA[
+           aaNotify.success('Sending a message to ONLY my-custom-container', {containerName: 'my-custom-container'});
+        ]]></script>
+    </div>
 
     <div aa-notify style="position: fixed; bottom: 25px; right: 25px;"></div>
 </div>

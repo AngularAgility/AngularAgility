@@ -60,11 +60,15 @@
                   $scope.fieldInFormExtensions.showErrorReasons
                 ];
               },
-              function(watches) {
-                var invalidAttempt = watches[0],
-                  showErrorReasons = watches[1];
+              function() {
+                var invalidAttempt = formObj.$aaFormExtensions.$invalidAttempt,
+                  showErrorReasons = $scope.fieldInFormExtensions.showErrorReasons;
 
-                $scope.showMessages = invalidAttempt || showErrorReasons.length;
+                if(invalidAttempt === undefined || showErrorReasons === undefined) {
+                  return;
+                }
+
+                $scope.showMessages = invalidAttempt || showErrorReasons.length > 0;
               },
               true
             );

@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.25" @ 2015-05-03T19:48:02
+angular-agility "version":"0.8.26" @ 2015-05-18T23:59:11
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1129,29 +1129,27 @@ angular
                 });
               },
 
-              $resetChanged: function (runAfterFunc, /*optional*/
-                                       targetFormName /*optional*/) {
+              $resetChanged: function (targetFormName /*optional*/) {
                 addTodo({
                   type: '$resetChanged',
-                  args: [runAfterFunc],
+                  args: [],
                   targetFormName: targetFormName
                 });
               },
 
-              $reset: function (runAfterFunc, /*optional*/
+              $reset: function (shouldNotConfirmReset, /*optional*/
                                 targetFormName /*optional*/) {
                 addTodo({
                   type: '$reset',
-                  args: [runAfterFunc],
+                  args: [shouldNotConfirmReset],
                   targetFormName: targetFormName
                 });
               },
 
-              $clearErrors: function (runAfterFunc, /*optional*/
-                                      targetFormName /*optional*/) {
+              $clearErrors: function (targetFormName /*optional*/) {
                 addTodo({
                   type: '$clearErrors',
-                  args: [runAfterFunc],
+                  args: [],
                   targetFormName: targetFormName
                 });
               },
@@ -2147,11 +2145,15 @@ angular
                   $scope.fieldInFormExtensions.showErrorReasons
                 ];
               },
-              function(watches) {
-                var invalidAttempt = watches[0],
-                  showErrorReasons = watches[1];
+              function() {
+                var invalidAttempt = formObj.$aaFormExtensions.$invalidAttempt,
+                  showErrorReasons = $scope.fieldInFormExtensions.showErrorReasons;
 
-                $scope.showMessages = invalidAttempt || showErrorReasons.length;
+                if(invalidAttempt === undefined || showErrorReasons === undefined) {
+                  return;
+                }
+
+                $scope.showMessages = invalidAttempt || showErrorReasons.length > 0;
               },
               true
             );
@@ -2493,7 +2495,12 @@ angular
               });
             }
 
-            function $reset(runAfterFunc) {
+            function $reset(shouldNotConfirmReset) {
+
+              if(!angular.isFunction(shouldNotConfirmReset) && shouldNotConfirmReset){
+                reset();
+                return;
+              }
 
               return $q.when(aaFormExtensions.confirmResetStrategy())
                 .then(function (resp) {
@@ -2505,10 +2512,18 @@ angular
                 });
 
               function reset() {
+                if(!scope.$$phase){
+                  scope.$apply(reset);
+                  return;
+                }
+
                 angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function (dep) {
                   if (dep.field && dep.field.$ngModel.$modelValue !== dep.initialValue) {
                     dep.field.$ngModel.$setViewValue(dep.initialValue);
                     dep.field.$ngModel.$render();
+                    dep.field.showErrorReasons.length = 0;
+                    dep.field.$ngModel.$setPristine();
+                    dep.field.$ngModel.$setUntouched();
                   }
 
                   if (dep.expr) {
@@ -2525,58 +2540,61 @@ angular
                   }
                 });
 
-                $clearErrors(runAfterFunc);
+                $clearErrors();
+
+                //breaking API change, make it hidden, for now
+                if(angular.isFunction(shouldNotConfirmReset)) {
+                  shouldNotConfirmReset();
+                }
               }
             }
 
-            function $resetChanged(runAfterFunc) {
-              //schedule reset to run AFTER any ng-model binds may occur (after current stack frame)
-              $timeout(function () {
-                angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function (dep) {
-                  dep.isChanged = false;
+            function $resetChanged() {
+              if(!scope.$$phase){
+                scope.$apply($resetChanged);
+                return;
+              }
 
-                  if (dep.field) {
-                    dep.initialValue = dep.field.$ngModel.$modelValue;
-                    aaUtils.checkAndSetFormChanged(dep.field.$form);
-                  }
+              angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function (dep) {
+                dep.isChanged = false;
 
-                  if (dep.expr) {
-                    dep.initialValue = angular.copy(scope.$eval(dep.expr));
-                    aaUtils.checkAndSetFormChanged(dep.$form);
-                  }
-                });
+                if (dep.field) {
+                  dep.initialValue = dep.field.$ngModel.$modelValue;
+                  aaUtils.checkAndSetFormChanged(dep.field.$form);
+                }
 
-                aaUtils.checkAndSetFormChanged(thisForm);
-
-                if (angular.isFunction(runAfterFunc)) {
-                  runAfterFunc();
+                if (dep.expr) {
+                  dep.initialValue = angular.copy(scope.$eval(dep.expr));
+                  aaUtils.checkAndSetFormChanged(dep.$form);
                 }
               });
+
+              aaUtils.checkAndSetFormChanged(thisForm);
             }
 
-            function $clearErrors(runAfterFunc) {
-              //this should be able to use $evalAsync, figure it out...
-              $timeout(function () {
-                setAttemptRecursively(thisForm, false);
+            function $clearErrors() {
+              if(!scope.$$phase){
+                scope.$apply($clearErrors);
+                return;
+              }
 
-                angular.forEach(thisForm.$aaFormExtensions.$allValidationErrors, function (err) {
-                  if (err.field) {
-                    err.field.showErrorReasons.length = 0;
-                    err.field.$element.removeClass('aa-had-focus');
-                    //this makes sense i think, maybe make configurable
-                    err.field.$ngModel.$setPristine();
-                  }
-                });
+              setAttemptRecursively(thisForm, false);
+              thisForm.$setPristine();
+              thisForm.$setUntouched();
 
-                var notifyTargetName = scope.$eval(attrs.notifyTarget) || aaFormExtensions.defaultNotifyTarget;
-                angular.forEach(scope.notifications, function (notification) {
-                  if (notification && notification.template && notification.template === "aaNotifyTemplate-aaFormExtensionsValidationErrors") {
-                    aaNotify.remove(notification.messageHandle, notifyTargetName);
-                  }
-                });
+              angular.forEach(thisForm.$aaFormExtensions.$allValidationErrors, function (err) {
+                if (err.field) {
+                  err.field.showErrorReasons.length = 0;
+                  err.field.$element.removeClass('aa-had-focus');
+                  err.field.$ngModel.$setPristine();
+                  err.field.$ngModel.$setUntouched();
+                }
+              });
 
-                if (angular.isFunction(runAfterFunc)) {
-                  runAfterFunc();
+              var notifyTargetName = scope.$eval(attrs.notifyTarget) || aaFormExtensions.defaultNotifyTarget;
+              angular.forEach(scope.notifications, function (notification) {
+                if (notification && notification.template && notification.template === "aaNotifyTemplate-aaFormExtensionsValidationErrors") {
+                  aaNotify.remove(notification.messageHandle, notifyTargetName);
                 }
               });
             }
