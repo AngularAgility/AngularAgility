@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.26" @ 2015-05-18T23:59:11
+angular-agility "version":"0.8.27" @ 2015-05-27T19:40:15
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -2512,7 +2512,7 @@ angular
                 });
 
               function reset() {
-                if(!scope.$$phase){
+                if(!scope.$$phase && !scope.$root.$$phase){
                   scope.$apply(reset);
                   return;
                 }
@@ -2523,7 +2523,7 @@ angular
                     dep.field.$ngModel.$render();
                     dep.field.showErrorReasons.length = 0;
                     dep.field.$ngModel.$setPristine();
-                    dep.field.$ngModel.$setUntouched();
+                    (dep.field.$ngModel.$setUntouched || angular.noop)();
                   }
 
                   if (dep.expr) {
@@ -2550,7 +2550,7 @@ angular
             }
 
             function $resetChanged() {
-              if(!scope.$$phase){
+              if(!scope.$$phase && !scope.$root.$$phase){
                 scope.$apply($resetChanged);
                 return;
               }
@@ -2573,21 +2573,21 @@ angular
             }
 
             function $clearErrors() {
-              if(!scope.$$phase){
+              if(!scope.$$phase && !scope.$root.$$phase){
                 scope.$apply($clearErrors);
                 return;
               }
 
               setAttemptRecursively(thisForm, false);
               thisForm.$setPristine();
-              thisForm.$setUntouched();
+              (thisForm.$setUntouched || angular.noop)();
 
               angular.forEach(thisForm.$aaFormExtensions.$allValidationErrors, function (err) {
                 if (err.field) {
                   err.field.showErrorReasons.length = 0;
                   err.field.$element.removeClass('aa-had-focus');
                   err.field.$ngModel.$setPristine();
-                  err.field.$ngModel.$setUntouched();
+                  (err.field.$ngModel.$setUntouched || angular.noop)();
                 }
               });
 
