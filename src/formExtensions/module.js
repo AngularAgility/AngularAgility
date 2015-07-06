@@ -82,7 +82,7 @@
         function (aaLoadingWatcher, $q, aaFormExtensions) {
 
           function shouldIgnore(config) {
-            return config.aaIsLoadingIgnore === true;
+            return config.aaIsLoadingIgnore === true || config.cached;
           }
 
           return {

@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.27" @ 2015-05-27T19:40:15
+angular-agility "version":"0.8.28" @ 2015-07-06T15:31:48
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1071,7 +1071,7 @@ angular
         function (aaLoadingWatcher, $q, aaFormExtensions) {
 
           function shouldIgnore(config) {
-            return config.aaIsLoadingIgnore === true;
+            return config.aaIsLoadingIgnore === true || config.cached;
           }
 
           return {
