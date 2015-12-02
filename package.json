@@ -2,10 +2,11 @@
   "name": "angular-agility",
   "version": "0.8.28",
   "dependencies": {
-    "express": "^3.10.2",
-    "lodash": "^2.4.1"
+    "angular": ">=1.2.0"
   },
   "devDependencies": {
+    "express": "^3.10.2",
+    "lodash": "^2.4.1",
     "body-parser": "^1.3.0",
     "bower": "*",
     "grunt": "*",
@@ -30,9 +31,33 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/AngularAgility/AngularAgility.git"
+    "url": "git+https://github.com/AngularAgility/AngularAgility.git"
   },
   "scripts": {
-    "test": "grunt --verbose"
-  }
+    "test": "grunt test"
+  },
+  "description": "[![Build Status][2]][1] [1]: https://travis-ci.org/AngularAgility/AngularAgility [2]: https://travis-ci.org/AngularAgility/AngularAgility.png (Build Status)",
+  "bugs": {
+    "url": "https://github.com/AngularAgility/AngularAgility/issues"
+  },
+  "homepage": "https://github.com/AngularAgility/AngularAgility#readme",
+  "main": "Gruntfile.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "keywords": [
+    "angular",
+    "forms",
+    "validation",
+    "dsl",
+    "bootstrap",
+    "dirty",
+    "changed",
+    "select2",
+    "notificaiton",
+    "growl"
+  ],
+  "author": "John Culviner",
+  "license": "MIT"
 }
