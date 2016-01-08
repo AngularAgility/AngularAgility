@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.29" @ 2015-07-06T15:31:48
+angular-agility "version":"0.8.29" @ 2016-01-08T01:19:31
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1419,6 +1419,10 @@ angular
         '<div class="notch"></div>' +
         '</div>';
 
+      //hook for localization, if needed
+      this.fieldNameCustomizer = function(fieldName, $injector) {
+        return fieldName;
+      };
 
       this.confirmResetStrategy = function () {
         //this can be a promise or immediate like below
@@ -1479,6 +1483,7 @@ angular
 
           validIconStrategy: self.validIconStrategy,
           validationMessages: self.validationMessages,
+          fieldNameCustomizer: self.fieldNameCustomizer,
 
           defaultFieldName: self.defaultFieldName,
 
@@ -2803,8 +2808,8 @@ angular
     //constructs myForm.$aaFormExtensions.myFieldName object
     //including validation messages for all ngModels at form.$aaFormExtensions.
     //messages can be used there manually or emitted automatically with aaValMsg
-    .directive('ngModel', ['aaFormExtensions', '$document', 'aaLoadingWatcher', '$timeout', 'aaUtils',
-      function (aaFormExtensions, $document, aaLoadingWatcher, $timeout, aaUtils) {
+    .directive('ngModel', ['aaFormExtensions', '$document', 'aaLoadingWatcher', '$timeout', 'aaUtils', '$injector',
+      function (aaFormExtensions, $document, aaLoadingWatcher, $timeout, aaUtils, $injector) {
         return {
           require: ['ngModel', '?^form'],
           priority: 1,
@@ -2829,7 +2834,8 @@ angular
 
             if (attrs.aaLabel || attrs.aaFieldName) {
               //use default label
-              fieldName = attrs.aaLabel || attrs.aaFieldName;
+              fieldName = aaFormExtensions.fieldNameCustomizer(attrs.aaLabel || attrs.aaFieldName, $injector);
+
 
             } else if (element[0].id) {
               //is there a label for this field?
