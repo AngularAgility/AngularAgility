@@ -241,6 +241,10 @@
         '<div class="notch"></div>' +
         '</div>';
 
+      //hook for localization, if needed
+      this.fieldNameCustomizer = function(fieldName, $injector) {
+        return fieldName;
+      };
 
       this.confirmResetStrategy = function () {
         //this can be a promise or immediate like below
@@ -301,6 +305,7 @@
 
           validIconStrategy: self.validIconStrategy,
           validationMessages: self.validationMessages,
+          fieldNameCustomizer: self.fieldNameCustomizer,
 
           defaultFieldName: self.defaultFieldName,
 

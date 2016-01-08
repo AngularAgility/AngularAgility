@@ -12,8 +12,8 @@
     //constructs myForm.$aaFormExtensions.myFieldName object
     //including validation messages for all ngModels at form.$aaFormExtensions.
     //messages can be used there manually or emitted automatically with aaValMsg
-    .directive('ngModel', ['aaFormExtensions', '$document', 'aaLoadingWatcher', '$timeout', 'aaUtils',
-      function (aaFormExtensions, $document, aaLoadingWatcher, $timeout, aaUtils) {
+    .directive('ngModel', ['aaFormExtensions', '$document', 'aaLoadingWatcher', '$timeout', 'aaUtils', '$injector',
+      function (aaFormExtensions, $document, aaLoadingWatcher, $timeout, aaUtils, $injector) {
         return {
           require: ['ngModel', '?^form'],
           priority: 1,
@@ -38,7 +38,8 @@
 
             if (attrs.aaLabel || attrs.aaFieldName) {
               //use default label
-              fieldName = attrs.aaLabel || attrs.aaFieldName;
+              fieldName = aaFormExtensions.fieldNameCustomizer(attrs.aaLabel || attrs.aaFieldName, $injector);
+
 
             } else if (element[0].id) {
               //is there a label for this field?
