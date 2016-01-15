@@ -28,9 +28,9 @@
               eleSpinnerClickStrategy.before();
 
               //if this isn't a promise it will resolve immediately
-              $q.when(scope.aaSubmitForm())
-                ["finally"](function (result) {
+              $q.when(scope.aaSubmitForm()).then(function(){
                 ngForm.$setSubmitted();
+              })["finally"](function (result) {
                 eleSpinnerClickStrategy.after();
                 return result;
               });
