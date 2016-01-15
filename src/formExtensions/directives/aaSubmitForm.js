@@ -30,6 +30,7 @@
               //if this isn't a promise it will resolve immediately
               $q.when(scope.aaSubmitForm())
                 ["finally"](function (result) {
+                ngForm.$setSubmitted();
                 eleSpinnerClickStrategy.after();
                 return result;
               });
