@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.30" @ 2016-01-08T01:19:31
+angular-agility "version":"0.8.31" @ 2016-01-18T20:18:12
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -2032,8 +2032,9 @@ angular
               eleSpinnerClickStrategy.before();
 
               //if this isn't a promise it will resolve immediately
-              $q.when(scope.aaSubmitForm())
-                ["finally"](function (result) {
+              $q.when(scope.aaSubmitForm()).then(function(){
+                ngForm.$setSubmitted();
+              })["finally"](function (result) {
                 eleSpinnerClickStrategy.after();
                 return result;
               });
