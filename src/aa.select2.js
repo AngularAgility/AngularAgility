@@ -90,15 +90,16 @@ angular
                 // TODO: Ought to handle the failure case, instead of spinning forever
                 var queryResult = settings.options(query.term);
                 // Assume if it's not a promise and is an array, it's data
-                if (!queryResult.then && Array.prototype.isArray(queryResult)) {
+                if (!queryResult.then && !queryResult.$promise && Array.isArray(queryResult)) {
                   query.callback({
                     results: queryResult,
                     text: settings.text
                   });
                 } else {
-                  queryResult.then(function (response) {
+                  var queryPromise = queryResult.then ? queryResult: queryResult.$promise;
+                  queryPromise.then(function (response) {
                     // $http responses put the data in .data
-                    var data = response.data;
+                    var data = queryResult.then ? response.data: response;
                     if (inThisMode) {
                       var newData = [];
                       angular.forEach(data, function (str) {
