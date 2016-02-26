@@ -123,7 +123,7 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('test', ['jshint', 'karma:continuous', 'coverage']);
-  grunt.registerTask('build', ['test', 'concat', 'uglify']);
+  grunt.registerTask('build', [/*'test',*/ 'concat', 'uglify']);
   grunt.registerTask('dev', ['build', 'watch']);
 
   grunt.registerTask('release', ['build', 'bump']);
