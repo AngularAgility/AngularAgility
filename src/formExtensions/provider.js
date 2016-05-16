@@ -293,6 +293,7 @@
       };
 
       this.aaIsLoadingDoneDebounceMS = 500; //wait Xms before considered done loading to avoid avoid flickering
+      this.aaIsLoadingIgnoreTemplate = false; //should a template load trigger an aa loading
 
       this.$get = function () {
         return {
@@ -331,7 +332,9 @@
           //todo wire up
           globalSettings: self.globalSettings,
 
-          aaIsLoadingDoneDebounceMS: self.aaIsLoadingDoneDebounceMS
+          aaIsLoadingDoneDebounceMS: self.aaIsLoadingDoneDebounceMS,
+          aaIsLoadingIgnoreTemplate: self.aaIsLoadingIgnoreTemplate
+
         };
       };
     });
