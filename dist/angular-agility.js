@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.33" @ 2016-02-26T11:00:58
+angular-agility "version":"0.8.34" @ 2016-05-16T22:46:38
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1072,7 +1072,11 @@ angular
         function (aaLoadingWatcher, $q, aaFormExtensions) {
 
           function shouldIgnore(config) {
-            return config.aaIsLoadingIgnore === true || config.cached;
+            return config.aaIsLoadingIgnore === true || 
+              config.cached ||
+              (aaFormExtensions.aaIsLoadingIgnoreTemplate && 
+                config.url &&
+                config.url.indexOf('.html') > -1);
           }
 
           return {
@@ -1472,6 +1476,7 @@ angular
       };
 
       this.aaIsLoadingDoneDebounceMS = 500; //wait Xms before considered done loading to avoid avoid flickering
+      this.aaIsLoadingIgnoreTemplate = false; //should a template load trigger an aa loading
 
       this.$get = function () {
         return {
@@ -1510,7 +1515,9 @@ angular
           //todo wire up
           globalSettings: self.globalSettings,
 
-          aaIsLoadingDoneDebounceMS: self.aaIsLoadingDoneDebounceMS
+          aaIsLoadingDoneDebounceMS: self.aaIsLoadingDoneDebounceMS,
+          aaIsLoadingIgnoreTemplate: self.aaIsLoadingIgnoreTemplate
+
         };
       };
     });
