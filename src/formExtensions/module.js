@@ -25,7 +25,7 @@
           '<i class="fa fa-times fa-stack-1x fa-inverse"></i>' +
           '</span>' +
           '</div>' +
-          '<strong>There are some validation errors: </strong>' +
+          '<strong>{{notification.getValidationTitle()}}: </strong>' +
           '<ul>' +
           '<li ng-repeat="error in notification.validationErrorsToDisplay()">' +
           '{{ error.message }}&nbsp;' +

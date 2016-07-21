@@ -11,5 +11,6 @@ var formExtensionTranslations = {
     pattern: "{0} 填写错误",
     url: "{0} 必须是合法的 URL 地址",
     number: "{0} 必须是数字",
-    unknown: "{0} 填写错误"
+    unknown: "{0} 填写错误",
+    validationTitle: 'There are some validation errors'
 };

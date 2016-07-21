@@ -11,5 +11,6 @@ var formExtensionTranslations = {
     pattern: "{0} is ongeldig.",
     url: "{0} moet een geldige URL zijn.",
     number: "{0} moet een getal zijn.",
-    thisFieldLabel:'Dit veld'
+    thisFieldLabel:'Dit veld',
+    validationTitle: 'There are some validation errors'
 };
