@@ -12,4 +12,5 @@ var formExtensionTranslations = {
     url: "{0} moet een geldige URL zijn.",
     number: "{0} moet een getal zijn.",
     thisFieldLabel:'Dit veld'
+    validationTitle: 'There are some validation errors'
 };
