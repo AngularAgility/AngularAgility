@@ -232,7 +232,8 @@
         pattern: "{0} is invalid.",
         url: "{0} must be a valid URL.",
         number: "{0} must be a number.",
-        unknown: "{0} is invalid."
+        unknown: "{0} is invalid.",
+        validationTitle: 'There are some validation errors'
       };
 
       this.valMsgForTemplate = '<div class="validation-errors">' +

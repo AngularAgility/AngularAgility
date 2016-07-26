@@ -477,6 +477,9 @@
                 if (!notifyHandle && shouldDisplay) {
                   notifyHandle = aaNotify.add({
                     validationErrorsToDisplay: validationErrorsToDisplay,
+                    getValidationTitle: function () {
+                      return aaFormExtensions.validationMessages.validationTitle;
+                    },
                     onClose: function () {
                       notifyHandle = null; //it'll come back on next error!
                     }
