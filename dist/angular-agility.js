@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.35" @ 2016-05-16T22:46:38
+angular-agility "version":"0.8.36" @ 2016-07-25T23:20:46
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1015,7 +1015,7 @@ angular
           '<i class="fa fa-times fa-stack-1x fa-inverse"></i>' +
           '</span>' +
           '</div>' +
-          '<strong>There are some validation errors: </strong>' +
+          '<strong>{{notification.getValidationTitle()}}: </strong>' +
           '<ul>' +
           '<li ng-repeat="error in notification.validationErrorsToDisplay()">' +
           '{{ error.message }}&nbsp;' +
@@ -1415,7 +1415,8 @@ angular
         pattern: "{0} is invalid.",
         url: "{0} must be a valid URL.",
         number: "{0} must be a number.",
-        unknown: "{0} is invalid."
+        unknown: "{0} is invalid.",
+        validationTitle: 'There are some validation errors'
       };
 
       this.valMsgForTemplate = '<div class="validation-errors">' +
@@ -2752,6 +2753,9 @@ angular
                 if (!notifyHandle && shouldDisplay) {
                   notifyHandle = aaNotify.add({
                     validationErrorsToDisplay: validationErrorsToDisplay,
+                    getValidationTitle: function () {
+                      return aaFormExtensions.validationMessages.validationTitle;
+                    },
                     onClose: function () {
                       notifyHandle = null; //it'll come back on next error!
                     }
