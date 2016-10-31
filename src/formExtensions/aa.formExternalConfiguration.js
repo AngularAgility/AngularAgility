@@ -352,7 +352,7 @@
           var _this = this;
           angular.forEach(elements, function (element) {
             var jqElm = angular.element(element);
-            var modelAttr = jqElm.attr('aa-config-model') ||  jqElm.attr('ng-model') || jqElm.attr('data-ng-model') || jqElm.attr('ngModel') || jqElm.attr('aa-field') || jqElm.attr('aa-field-group') || jqElm.attr('data-aa-field') || jqElm.attr('data-aa-field-group');
+            var modelAttr = jqElm.attr('ng-model') || jqElm.attr('data-ng-model') || jqElm.attr('ngModel') || jqElm.attr('aa-field') || jqElm.attr('aa-field-group') || jqElm.attr('data-aa-field') || jqElm.attr('data-aa-field-group');
             if (modelAttr) {
               if (validationConfig.ignore[jqElm[0].name]) {
                 return;
