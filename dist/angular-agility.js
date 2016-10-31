@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.36" @ 2016-07-25T23:20:46
+angular-agility "version":"0.8.37" @ 2016-10-31T15:45:32
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -1264,7 +1264,7 @@ angular
 
           var col = findClosestEleWithAttr(element, 'aa-col') || self.defaultCol;
 
-          wrap(element, '<div class="form-group"><div class="col-' + col + '"></div></div>');
+          wrap(element, '<div class="form-group aaFieldGroup"><div class="col-' + col + '"></div></div>');
         },
         bootstrap3BasicFormWithSize: function (element, $injector) {
 
@@ -1275,7 +1275,7 @@ angular
 
           var col = findClosestEleWithAttr(element, 'aa-col') || self.defaultCol;
 
-          wrap(element, '<div class="form-group col-' + col + '"></div>');
+          wrap(element, '<div class="form-group aaFieldGroup col-' + col + '"></div>');
         }
       };
 
@@ -2933,6 +2933,9 @@ angular
 
             //start watching for changed efficiently
             function setupChanged() {
+              if(attrs.aaIgnoreChanges === '' || attrs.aaIgnoreChanges === 'true') {
+                return;
+              }
 
               fieldChangeDependency.initialValue = ngModel.$modelValue;
 

@@ -124,6 +124,9 @@
 
             //start watching for changed efficiently
             function setupChanged() {
+              if(attrs.aaIgnoreChanges === '' || attrs.aaIgnoreChanges === 'true') {
+                return;
+              }
 
               fieldChangeDependency.initialValue = ngModel.$modelValue;
 

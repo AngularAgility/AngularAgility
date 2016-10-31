@@ -1,6 +1,6 @@
 {
   "name": "angular-agility",
-  "version": "0.8.36",
+  "version": "0.8.37",
   "dependencies": {
     "angular": ">=1.2.0"
   },
