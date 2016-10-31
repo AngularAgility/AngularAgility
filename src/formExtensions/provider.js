@@ -81,7 +81,7 @@
 
           var col = findClosestEleWithAttr(element, 'aa-col') || self.defaultCol;
 
-          wrap(element, '<div class="form-group"><div class="col-' + col + '"></div></div>');
+          wrap(element, '<div class="form-group aaFieldGroup"><div class="col-' + col + '"></div></div>');
         },
         bootstrap3BasicFormWithSize: function (element, $injector) {
 
@@ -92,7 +92,7 @@
 
           var col = findClosestEleWithAttr(element, 'aa-col') || self.defaultCol;
 
-          wrap(element, '<div class="form-group col-' + col + '"></div>');
+          wrap(element, '<div class="form-group aaFieldGroup col-' + col + '"></div>');
         }
       };
 
