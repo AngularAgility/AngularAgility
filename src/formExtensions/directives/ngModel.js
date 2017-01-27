@@ -172,6 +172,7 @@
 
             function calcErrorMessages() {
               var fieldErrorMessages = field.$errorMessages,
+                newFieldErrorMessages = {},
                 msg;
 
               //clear out the validation messages that exist on *just the field*
@@ -210,8 +211,12 @@
                     msg = aaUtils.stringFormat(aaFormExtensions.validationMessages.unknown, fieldName);
                   }
 
-                  fieldErrorMessages.push(msg);
+                  newFieldErrorMessages[msg] = true;
                 }
+              }
+
+              for (var k in newFieldErrorMessages) {
+                fieldErrorMessages.push(k);
               }
 
               clearAndUpdateValidationMessages(ngForm, fieldErrorMessages);
