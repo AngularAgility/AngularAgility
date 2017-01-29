@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.37" @ 2016-10-31T15:45:32
+angular-agility "version":"0.8.37" @ 2017-01-28T19:13:24
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -2981,6 +2981,7 @@ angular
 
             function calcErrorMessages() {
               var fieldErrorMessages = field.$errorMessages,
+                newFieldErrorMessages = {},
                 msg;
 
               //clear out the validation messages that exist on *just the field*
@@ -3019,8 +3020,12 @@ angular
                     msg = aaUtils.stringFormat(aaFormExtensions.validationMessages.unknown, fieldName);
                   }
 
-                  fieldErrorMessages.push(msg);
+                  newFieldErrorMessages[msg] = true;
                 }
+              }
+
+              for (var k in newFieldErrorMessages) {
+                fieldErrorMessages.push(k);
               }
 
               clearAndUpdateValidationMessages(ngForm, fieldErrorMessages);
