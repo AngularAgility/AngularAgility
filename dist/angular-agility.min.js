@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.37" @ 2017-01-28T19:13:24
+angular-agility "version":"0.8.38" @ 2017-01-28T19:13:24
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
