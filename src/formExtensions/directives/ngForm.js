@@ -262,7 +262,9 @@
                     dep.field.$ngModel.$render();
                     dep.field.showErrorReasons.length = 0;
                     dep.field.$ngModel.$setPristine();
-                    (dep.field.$ngModel.$setUntouched || angular.noop)();
+                    if(dep.field.$ngModel.$setUntouched) {
+                      dep.field.$ngModel.$setUntouched();
+                    }
                   }
 
                   if (dep.expr) {
@@ -319,14 +321,18 @@
 
               setAttemptRecursively(thisForm, false);
               thisForm.$setPristine();
-              (thisForm.$setUntouched || angular.noop)();
+              if(thisForm.$setUntouched) {
+                thisForm.$setUntouched();
+              }
 
               angular.forEach(thisForm.$aaFormExtensions.$allValidationErrors, function (err) {
                 if (err.field) {
                   err.field.showErrorReasons.length = 0;
                   err.field.$element.removeClass('aa-had-focus');
                   err.field.$ngModel.$setPristine();
-                  (err.field.$ngModel.$setUntouched || angular.noop)();
+                  if(err.field.$ngModel.$setUntouched) {
+                    err.field.$ngModel.$setUntouched();
+                  }
                 }
               });
 
