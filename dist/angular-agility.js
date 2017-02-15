@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.38" @ 2017-01-28T19:13:24
+angular-agility "version":"0.8.39" @ 2017-02-15T15:19:59
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -2538,7 +2538,9 @@ angular
                     dep.field.$ngModel.$render();
                     dep.field.showErrorReasons.length = 0;
                     dep.field.$ngModel.$setPristine();
-                    (dep.field.$ngModel.$setUntouched || angular.noop)();
+                    if(dep.field.$ngModel.$setUntouched) {
+                      dep.field.$ngModel.$setUntouched();
+                    }
                   }
 
                   if (dep.expr) {
@@ -2595,14 +2597,18 @@ angular
 
               setAttemptRecursively(thisForm, false);
               thisForm.$setPristine();
-              (thisForm.$setUntouched || angular.noop)();
+              if(thisForm.$setUntouched) {
+                thisForm.$setUntouched();
+              }
 
               angular.forEach(thisForm.$aaFormExtensions.$allValidationErrors, function (err) {
                 if (err.field) {
                   err.field.showErrorReasons.length = 0;
                   err.field.$element.removeClass('aa-had-focus');
                   err.field.$ngModel.$setPristine();
-                  (err.field.$ngModel.$setUntouched || angular.noop)();
+                  if(err.field.$ngModel.$setUntouched) {
+                    err.field.$ngModel.$setUntouched();
+                  }
                 }
               });
 
