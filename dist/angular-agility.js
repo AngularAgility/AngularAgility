@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.39" @ 2017-02-15T15:19:59
+angular-agility "version":"0.8.40" @ 2017-02-22T23:25:41
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -2043,7 +2043,11 @@ angular
               //if this isn't a promise it will resolve immediately
               $q.when(scope.aaSubmitForm()).then(function(){
                 ngForm.$setSubmitted();
-              })["finally"](function (result) {
+              })
+              .catch(function(result){
+                  // If the promise is rejected, just catch the error to solve the unhandled rejection error in angular >=1.59
+              })
+              .finally(function (result) {
                 eleSpinnerClickStrategy.after();
                 return result;
               });
