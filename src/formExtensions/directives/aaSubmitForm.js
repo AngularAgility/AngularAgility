@@ -30,7 +30,11 @@
               //if this isn't a promise it will resolve immediately
               $q.when(scope.aaSubmitForm()).then(function(){
                 ngForm.$setSubmitted();
-              })["finally"](function (result) {
+              })
+              .catch(function(result){
+                  // If the promise is rejected, just catch the error to solve the unhandled rejection error in angular >=1.59
+              })
+              .finally(function (result) {
                 eleSpinnerClickStrategy.after();
                 return result;
               });
