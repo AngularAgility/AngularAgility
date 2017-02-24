@@ -44,11 +44,6 @@
           }
 
           element.on('click', submit);
-
-          if (attrs.type === 'submit') {
-            //this should be the form's default 'on enter' behavior for submission
-            ngForm.$aaFormExtensions.$onEnterKey = submit;
-          }
         }
       };
     }]);
