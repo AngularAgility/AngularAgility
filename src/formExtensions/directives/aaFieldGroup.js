@@ -9,7 +9,7 @@
   'use strict';
 
   angular.module('aa.formExtensions')
-    .directive('aaFieldGroup', ['$compile', 'aaFormExtensions', function ($compile, aaFormExtensions) {
+    .directive('aaFieldGroup', ['$compile', 'aaFormExtensions', '$injector', function ($compile, aaFormExtensions, $injector) {
       return {
         restrict: 'A',
         scope: false,
@@ -22,7 +22,7 @@
           element.attr("aa-field", attrs.aaFieldGroup);
 
           var strat = aaFormExtensions.fieldGroupStrategies[attrs.aaFieldGroupStrategy || aaFormExtensions.defaultFieldGroupStrategy];
-          strat(element);
+          strat(element, $injector);
 
           return function (scope, element) {
             $compile(element)(scope);

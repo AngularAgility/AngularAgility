@@ -34,10 +34,15 @@ body {
 
 .nav.navbar-nav li.active {
     font-weight: bold;
+    background-color: rgb(154, 255, 0);
 }
 
 .highlight-form {
     border: 2px dotted red;
     margin: 5px;
     padding: 5px;
+}
+
+.blue{
+	color:blue;
 }

@@ -25,7 +25,7 @@
           '<i class="fa fa-times fa-stack-1x fa-inverse"></i>' +
           '</span>' +
           '</div>' +
-          '<strong>There are some validation errors: </strong>' +
+          '<strong>{{notification.getValidationTitle()}}: </strong>' +
           '<ul>' +
           '<li ng-repeat="error in notification.validationErrorsToDisplay()">' +
           '{{ error.message }}&nbsp;' +
@@ -45,8 +45,11 @@
       //setup ajax watcher that tracks loading, this is useful by its self
       //and is required for changed tracking
       //NOTE: if you do non Angular AJAX you will need to call increment/decrement yourself
-      $provide.factory('aaLoadingWatcher', ['$rootScope', function ($rootScope) {
+      $provide.factory('aaLoadingWatcher', ['$rootScope', 'aaFormExtensions', 'aaUtils', function ($rootScope, aaFormExtensions, aaUtils) {
         var pendingRequests = 0;
+
+        var debouncedLoadingChanged = aaFormExtensions.aaIsLoadingDoneDebounceMS ?
+          aaUtils.debounce(loadingChanged, aaFormExtensions.aaIsLoadingDoneDebounceMS) : loadingChanged;
 
         var watcher = {
           isLoading: false,
@@ -56,13 +59,15 @@
           },
           decrement: function () {
             pendingRequests--;
-            loadingChanged();
+            debouncedLoadingChanged();
           }
           //perhaps add a 'runWhenDoneLoading' here
         };
 
+
         function loadingChanged() {
           $rootScope.aaIsLoading = watcher.isLoading = pendingRequests > 0;
+          $rootScope.$broadcast('aaIsLoading', watcher.isLoading);
 
           if (!$rootScope.$$phase) {
             $rootScope.$apply();
@@ -75,17 +80,32 @@
       //tracks JUST ANGULAR http requests.
       $provide.factory('aaAjaxInterceptor', ['aaLoadingWatcher', '$q', 'aaFormExtensions',
         function (aaLoadingWatcher, $q, aaFormExtensions) {
+
+          function shouldIgnore(config) {
+            return config.aaIsLoadingIgnore === true || 
+              config.cached ||
+              (aaFormExtensions.aaIsLoadingIgnoreTemplate && 
+                config.url &&
+                config.url.indexOf('.html') > -1);
+          }
+
           return {
             request: function (request) {
-              aaLoadingWatcher.increment();
+              if(!shouldIgnore(request)) {
+                aaLoadingWatcher.increment();
+              }
               return request;
             },
             response: function (response) {
-              aaLoadingWatcher.decrement();
+              if(!shouldIgnore(response.config)) {
+                aaLoadingWatcher.decrement();
+              }
               return response;
             },
             responseError: function (response) {
-              aaLoadingWatcher.decrement();
+              if(!shouldIgnore(response.config)) {
+                aaLoadingWatcher.decrement();
+              }
 
               if (aaFormExtensions.ajaxValidationErrorMappingStrategy) {
                 aaFormExtensions.ajaxValidationErrorMappingStrategy(
@@ -112,7 +132,7 @@
       //the below will run on the first child form (or targetFormName matching child form) that appears
       $provide.decorator('$controller', ['$delegate', function ($delegate) {
         return function (expression, locals) {
-          if (locals.$scope) {
+          if (!locals.$aaFormExtensions /* <--unit testing only*/ && locals.$scope) {
             locals.$aaFormExtensions = {
 
               $addChangeDependency: function (expr, deepWatch, /*optional*/
@@ -124,29 +144,27 @@
                 });
               },
 
-              $resetChanged: function (runAfterFunc, /*optional*/
-                                       targetFormName /*optional*/) {
+              $resetChanged: function (targetFormName /*optional*/) {
                 addTodo({
                   type: '$resetChanged',
-                  args: [runAfterFunc],
+                  args: [],
                   targetFormName: targetFormName
                 });
               },
 
-              $reset: function (runAfterFunc, /*optional*/
+              $reset: function (shouldNotConfirmReset, /*optional*/
                                 targetFormName /*optional*/) {
                 addTodo({
                   type: '$reset',
-                  args: [runAfterFunc],
+                  args: [shouldNotConfirmReset],
                   targetFormName: targetFormName
                 });
               },
 
-              $clearErrors: function (runAfterFunc, /*optional*/
-                                      targetFormName /*optional*/) {
+              $clearErrors: function (targetFormName /*optional*/) {
                 addTodo({
                   type: '$clearErrors',
-                  args: [runAfterFunc],
+                  args: [],
                   targetFormName: targetFormName
                 });
               },
@@ -168,7 +186,7 @@
             locals.$scope.$$aaFormExtensionsTodos.push(todo);
           }
 
-          return $delegate(expression, locals);
+          return $delegate.apply(this, arguments);
         };
       }]);
     }]);

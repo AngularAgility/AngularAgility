@@ -11,7 +11,7 @@
   angular.module('aa.formExtensions')
     //place on an element with ngModel to generate validation messages for it
     //will use the default configured validation message placement strategy unless a custom strategy is passed in
-    .directive('aaValMsg', ['$compile', 'aaFormExtensions', function ($compile, aaFormExtensions) {
+    .directive('aaValMsg', ['$compile', 'aaFormExtensions', '$injector', function ($compile, aaFormExtensions, $injector) {
       return {
         require: ['ngModel', '^form'],
         link: function (scope, element, attrs, ctrls) {
@@ -26,7 +26,7 @@
           var newScope = scope.$new(); //allow strategy to muck with scope in an isolated manner
 
           var msgElement = aaFormExtensions.valMsgPlacementStrategies[attrs.aaValMsg || aaFormExtensions.defaultValMsgPlacementStrategy](
-            element, form.$name, attrs.name, newScope
+            element, form.$name, attrs.name, newScope, $injector
           );
 
           $compile(msgElement)(newScope);

@@ -1,5 +1,5 @@
 /*
-angular-agility "version":"0.8.8" @ 2014-08-31T17:52:20
+angular-agility "version":"0.8.40" @ 2017-02-22T23:25:41
 Copyright (c) 2014 - John Culviner
 Licensed under the MIT license
 */
@@ -268,267 +268,276 @@ Licensed under the MIT license
  **/
 
 angular
-  .module('aa.select2', [])
-  .directive('aaSelect2', ['$q', function ($q) {
-    'use strict';
-    return {
-      require: 'ngModel',
-      template: '<input type="text" />',
-      replace: true,
-      link: function (scope, element, attrs, ngModel) {
+    .module('aa.select2', [])
+    .directive('aaSelect2', ['$q', function ($q) {
+      'use strict';
+      return {
+        require: 'ngModel',
+        template: '<input type="text" />',
+        replace: true,
+        link: function (scope, element, attrs, ngModel) {
 
-        //util
-        //assumes object is defined
-        function isEmptyObject(obj) {
-          if (!Object.keys) {  //<=IE 8
-            return JSON.stringify(obj) === "{}";
+          //util
+          //assumes object is defined
+          function isEmptyObject(obj) {
+            if (!Object.keys) {  //<=IE 8
+              return JSON.stringify(obj) === "{}";
+            }
+
+            return Object.keys(obj).length === 0;
           }
 
-          return Object.keys(obj).length === 0;
-        }
+          //native select2 options directly from the user. always takes precedence
+          //copy the object before we muck with it in case multiple select2s are sharing settings
+          var settings = angular.copy(scope.$eval(attrs.aaSelect2));
 
-        //native select2 options directly from the user. always takes precedence
-        //copy the object before we muck with it in case multiple select2s are sharing settings
-        var settings = angular.copy(scope.$eval(attrs.aaSelect2));
-
-        if (!angular.isObject(settings) || isEmptyObject(settings)) {
-          throw 'aa-select2 options must be specified. Ex: <div aa-select2="*options here*"...\r\n';
-        }
-
-        //possible select2 options derived from user selections on settings
-        var derivedOpts = {},
-
-        //directive settings (aka nice wrapper for select2)
-          inAjaxMode = settings ? angular.isFunction(settings.options) : false,
-          inLocalArrayMode = settings ? angular.isArray(settings.options) : false,
-          inIdMode = settings && settings.mode ? settings.mode.indexOf('id') !== -1 : false,
-          inObjectMode = settings && settings.mode ? settings.mode.indexOf('object') !== -1 : false,
-          inTagsMode = settings && settings.mode ? settings.mode.indexOf('tags') !== -1 : false,
-          inThisMode = settings && settings.id === "@this" && settings.text === "@this";
-
-        //need a placeholder for allow clear to work
-        //fix bug?/weird api odditiy
-        if (settings.select2 && settings.select2.allowClear) {
-          derivedOpts.placeholder = "Select...";
-        }
-
-        if (attrs.placeholder) {
-          derivedOpts.placeholder = attrs.placeholder;
-        }
-
-        //configure select2's options per passed settings
-        if (settings) {
-
-
-          if (inThisMode) {
-            settings.id = 'id';
-            settings.text = 'text';
-          } else {
-            settings.id = settings.id || 'id';
-            settings.text = settings.text || 'text';
+          if (!angular.isObject(settings) || isEmptyObject(settings)) {
+            throw 'aa-select2 options must be specified. Ex: <div aa-select2="*options here*"...\r\n';
           }
 
-          //have 'options' client side in an array
-          if (inLocalArrayMode) {
-            derivedOpts.data = derivedOpts.data || {};
-            derivedOpts.data.text = settings.text;
+          //possible select2 options derived from user selections on settings
+          var derivedOpts = {},
+
+          //directive settings (aka nice wrapper for select2)
+              inAjaxMode = settings ? angular.isFunction(settings.options) : false,
+              inLocalArrayMode = settings ? angular.isArray(settings.options) : false,
+              inIdMode = settings && settings.mode ? settings.mode.indexOf('id') !== -1 : false,
+              inObjectMode = settings && settings.mode ? settings.mode.indexOf('object') !== -1 : false,
+              inTagsMode = settings && settings.mode ? settings.mode.indexOf('tags') !== -1 : false,
+              inThisMode = settings && settings.id === "@this" && settings.text === "@this";
+
+          //need a placeholder for allow clear to work
+          //fix bug?/weird api odditiy
+          if (settings.select2 && settings.select2.allowClear) {
+            derivedOpts.placeholder = "Select...";
+          }
+
+          if (attrs.placeholder) {
+            derivedOpts.placeholder = attrs.placeholder;
+          }
+
+          //configure select2's options per passed settings
+          if (settings) {
+
 
             if (inThisMode) {
-              var newData = [];
-              angular.forEach(settings.options, function (obj) {
-                newData.push({id: obj, text: obj});
-              });
-              derivedOpts.data.results = newData;
+              settings.id = 'id';
+              settings.text = 'text';
             } else {
-              derivedOpts.data.results = settings.options;
+              settings.id = settings.id || 'id';
+              settings.text = settings.text || 'text';
             }
-          }
 
-          //AJAX MODE
-          //run a query to get options (search)
-          if (inAjaxMode) {
-            derivedOpts.query = function (query) {
-              // TODO: Ought to handle the failure case, instead of spinning forever
-              var queryResult = settings.options(query.term);
+            //have 'options' client side in an array
+            if (inLocalArrayMode) {
+              derivedOpts.data = derivedOpts.data || {};
+              derivedOpts.data.text = settings.text;
+
+              if (inThisMode) {
+                var newData = [];
+                angular.forEach(settings.options, function (obj) {
+                  newData.push({id: obj, text: obj});
+                });
+                derivedOpts.data.results = newData;
+              } else {
+                derivedOpts.data.results = settings.options;
+              }
+            }
+
+            //AJAX MODE
+            //run a query to get options (search)
+            if (inAjaxMode) {
+              derivedOpts.query = function (query) {
+                // TODO: Ought to handle the failure case, instead of spinning forever
+                var queryResult = settings.options(query.term);
                 // Assume if it's not a promise and is an array, it's data
-                if (!queryResult.then && !!queryResult.length) {
+                if (!queryResult.then && !queryResult.$promise && Array.isArray(queryResult)) {
                   query.callback({
                     results: queryResult,
                     text: settings.text
                   });
-                } else if (!!queryResult.then) {
-                  queryResult
-                    .then(function (data) {
-                      if (inThisMode) {
-                        var newData = [];
-                          angular.forEach(data, function (str) {
-                            newData.push({id: str, text: str});
-                          });
-                          data = newData;
-                      }
-                      query.callback({
-                        results: data,
-                        text: settings.text
+                } else {
+                  var queryPromise = queryResult.then ? queryResult: queryResult.$promise;
+                  queryPromise.then(function (response) {
+                    // $http responses put the data in .data
+                    var data = queryResult.then ? response.data: response;
+                    if (inThisMode) {
+                      var newData = [];
+                      angular.forEach(data, function (str) {
+                        newData.push({id: str, text: str});
                       });
+                      data = newData;
+                    }
+                    query.callback({
+                      results: data,
+                      text: settings.text
                     });
-                } else {
-                  query.callback({
-                    results: [],
-                    text: settings.text
                   });
                 }
-            };
-
-            if (inIdMode) {
-              derivedOpts.initSelection = function (e, callback) {
-
-                if (!ngModel.$modelValue) {
-                  return;
-                }
-
-                if (inThisMode && inTagsMode) {
-                  var newData = [];
-                  angular.forEach(ngModel.$modelValue, function (str) {
-                    newData.push({id: str, text: str});
-                  });
-                  callback(newData);
-                  return;
-
-                }
-
-                if (inThisMode) {
-                  callback({id: ngModel.$modelValue, text: ngModel.$modelValue});
-                  return;
-                }
-
-                //allow for multiple lookups in tags mode (or just one in other modes)
-                var modelValueIsArray = angular.isArray(ngModel.$modelValue),
-                  lookups = [];
-
-                if (modelValueIsArray) {
-                  angular.forEach(ngModel.$modelValue, function (val) {
-                    lookups.push(settings.textLookup(val));
-                  });
-                } else {
-                  lookups.push(settings.textLookup(ngModel.$modelValue));
-                }
-
-                //resolves promises and resolved values alike
-                $q.all(lookups)
-                  .then(function (results) {
-                    function resultMapper(data) {
-                      var result;
-                      if (angular.isUndefined(data.data)) {
-                        result = data;
-                      } else {
-                        result = data.data;
-                      }
-
-                      if (!angular.isObject(result)) {
-                        //passed back just the text. resolve:
-                        var newResult = {};
-                        newResult[settings.id] = ngModel.$modelValue;
-                        newResult[settings.text] = result;
-                        result = newResult;
-                      }
-                      return result;
-                    }
-
-                    if (modelValueIsArray) {
-                      var mappedResults = [];
-
-                      angular.forEach(results, function (result) {
-                        mappedResults.push(resultMapper(result));
-                      });
-
-                      callback(mappedResults);
-                    } else {
-                      callback(resultMapper(results[0]));
-                    }
-
-                  });
               };
-            }
-          }
 
-          derivedOpts.id = settings.id;
+              if (inIdMode) {
+                derivedOpts.initSelection = function (e, callback) {
 
-          derivedOpts.formatSelection = function (obj) {
-            return obj[settings.text];
-          };
-          derivedOpts.formatResult = function (obj) {
-            return obj[settings.text];
-          };
+                  if (!ngModel.$modelValue) {
+                    return;
+                  }
 
-          if (inTagsMode) {
-            derivedOpts.tags = ngModel.$modelValue || [];
-          }
+                  if (inThisMode && inTagsMode) {
+                    var newData = [];
+                    angular.forEach(ngModel.$modelValue, function (str) {
+                      newData.push({id: str, text: str});
+                    });
+                    callback(newData);
+                    return;
 
-        }
+                  }
 
-        var staticOpts = {
-          width: 'resolve'
-        };
+                  if (inThisMode) {
+                    callback({id: ngModel.$modelValue, text: ngModel.$modelValue});
+                    return;
+                  }
 
-        //order of prescedence for passing into select2 native api:
-        //static opts loses first
-        //then derivedOpts (the facade for select2 API that was created above aka what makes this plugin easy)
-        //finally any explicit user opts passed into settings as 'select2' will always win
-        var opts = angular.extend(staticOpts, derivedOpts, settings.select2);
+                  //allow for multiple lookups in tags mode (or just one in other modes)
+                  var modelValueIsArray = angular.isArray(ngModel.$modelValue),
+                      lookups = [];
 
-        //setup select2 with options
-        element.select2(opts);
+                  if (modelValueIsArray) {
+                    angular.forEach(ngModel.$modelValue, function (val) {
+                      lookups.push(settings.textLookup(val));
+                    });
+                  } else {
+                    lookups.push(settings.textLookup(ngModel.$modelValue));
+                  }
 
-        //programmatic changes to the model
-        ngModel.$render = function () {
+                  //resolves promises and resolved values alike
+                  $q.all(lookups)
+                      .then(function (results) {
+                        function resultMapper(data) {
+                          var result;
+                          if (angular.isUndefined(data.data)) {
+                            result = data;
+                          } else {
+                            result = data.data;
+                          }
 
-          if (!ngModel.$modelValue) {
-            element.select2('val', "");
-            return;
-          }
+                          if (!angular.isObject(result)) {
+                            //passed back just the text. resolve:
+                            var newResult = {};
+                            newResult[settings.id] = ngModel.$modelValue;
+                            newResult[settings.text] = result;
+                            result = newResult;
+                          }
+                          return result;
+                        }
 
-          if (inIdMode) {
-            element.select2('val', ngModel.$modelValue);
-          } else if (inObjectMode) {
-            element.select2('data', ngModel.$modelValue);
-          }
-        };
+                        if (modelValueIsArray) {
+                          var mappedResults = [];
 
-        //when select2 changes
-        element.bind("change", function () {
-          scope.$apply(function () {
-            var select2Data = element.select2('data');
+                          angular.forEach(results, function (result) {
+                            mappedResults.push(resultMapper(result));
+                          });
 
-            var ngValue = null;
+                          callback(mappedResults);
+                        } else {
+                          callback(resultMapper(results[0]));
+                        }
 
-            if (!select2Data) {
-              ngValue = null;
-            } else if (inObjectMode) {
-              ngValue = select2Data;
-            } else if (inIdMode) {
-
-              if (angular.isArray(select2Data)) {
-
-                ngValue = [];
-                angular.forEach(select2Data, function (obj) {
-                  ngValue.push(obj[settings.id]);
-                });
-
-              } else {
-                ngValue = select2Data[settings.id];
+                      });
+                };
               }
             }
-            ngModel.$setViewValue(ngValue);
-          });
-        });
 
-        //other stuff
-        element.bind("$destroy", function () {
-          element.select2("destroy");
-        });
-      }
-    };
-  }]);
+            derivedOpts.id = settings.id;
+
+            derivedOpts.formatSelection = function (obj) {
+              return obj[settings.text];
+            };
+            derivedOpts.formatResult = function (obj) {
+              return obj[settings.text];
+            };
+
+            if (inTagsMode) {
+              derivedOpts.tags = ngModel.$modelValue || [];
+            }
+
+          }
+
+          var staticOpts = {
+            width: 'resolve'
+          };
+
+          //order of prescedence for passing into select2 native api:
+          //static opts loses first
+          //then derivedOpts (the facade for select2 API that was created above aka what makes this plugin easy)
+          //finally any explicit user opts passed into settings as 'select2' will always win
+          var opts = angular.extend(staticOpts, derivedOpts, settings.select2);
+
+          //setup select2 with options
+          element.select2(opts);
+
+          //programmatic changes to the model
+          ngModel.$render = function () {
+
+            if (!ngModel.$modelValue) {
+              element.select2('val', "");
+              return;
+            }
+
+            if (inIdMode) {
+              element.select2('val', ngModel.$modelValue);
+            } else if (inObjectMode) {
+              element.select2('data', ngModel.$modelValue);
+            }
+          };
+
+          //when select2 changes
+          element.bind("change", function () {
+            // Copy the passed in arguments
+            var args = Array.prototype.slice.call(arguments);
+            scope.$apply(function () {
+              var select2Data = element.select2('data');
+
+              var ngValue = null;
+
+              if (!select2Data) {
+                ngValue = null;
+              } else if (inObjectMode) {
+                ngValue = select2Data;
+              } else if (inIdMode) {
+
+                if (angular.isArray(select2Data)) {
+
+                  ngValue = [];
+                  angular.forEach(select2Data, function (obj) {
+                    ngValue.push(obj[settings.id]);
+                  });
+
+                } else {
+                  ngValue = select2Data[settings.id];
+                }
+              }
+              ngModel.$setViewValue(ngValue);
+              // If user has requested notification, call function
+              if (typeof settings.onChange === "function") {
+                args.unshift(element);
+                settings.onChange.apply(element, args);
+              }
+            });
+          });
+
+          //other stuff
+          element.bind("$destroy", function () {
+            element.select2("destroy");
+          });
+
+          // Expose the select2 element, for further customization
+          if (typeof settings.onInitialized === "function") {
+            settings.onInitialized.call(this, [element]);
+          }
+        }
+      };
+    }]);
 ;/*globals angular */
 
 (function () {
@@ -895,7 +904,7 @@ angular
         },
         processElement: function (jqElm, nameAttr, validationConfig) {
           if (!jqElm.attr('name')) {
-            jqElm.attr('name', nameAttr.split('.').join('-'));
+            jqElm.attr('name', nameAttr.substring(nameAttr.lastIndexOf('.') + 1));
           }
           this.addValidations(jqElm, nameAttr, validationConfig);
         },
@@ -978,7 +987,8 @@ angular
         }
       };
     }]);
-})();;/*globals angular */
+})();
+;/*globals angular */
 
 /**
  * @object
@@ -1005,7 +1015,7 @@ angular
           '<i class="fa fa-times fa-stack-1x fa-inverse"></i>' +
           '</span>' +
           '</div>' +
-          '<strong>There are some validation errors: </strong>' +
+          '<strong>{{notification.getValidationTitle()}}: </strong>' +
           '<ul>' +
           '<li ng-repeat="error in notification.validationErrorsToDisplay()">' +
           '{{ error.message }}&nbsp;' +
@@ -1025,8 +1035,11 @@ angular
       //setup ajax watcher that tracks loading, this is useful by its self
       //and is required for changed tracking
       //NOTE: if you do non Angular AJAX you will need to call increment/decrement yourself
-      $provide.factory('aaLoadingWatcher', ['$rootScope', function ($rootScope) {
+      $provide.factory('aaLoadingWatcher', ['$rootScope', 'aaFormExtensions', 'aaUtils', function ($rootScope, aaFormExtensions, aaUtils) {
         var pendingRequests = 0;
+
+        var debouncedLoadingChanged = aaFormExtensions.aaIsLoadingDoneDebounceMS ?
+          aaUtils.debounce(loadingChanged, aaFormExtensions.aaIsLoadingDoneDebounceMS) : loadingChanged;
 
         var watcher = {
           isLoading: false,
@@ -1036,13 +1049,15 @@ angular
           },
           decrement: function () {
             pendingRequests--;
-            loadingChanged();
+            debouncedLoadingChanged();
           }
           //perhaps add a 'runWhenDoneLoading' here
         };
 
+
         function loadingChanged() {
           $rootScope.aaIsLoading = watcher.isLoading = pendingRequests > 0;
+          $rootScope.$broadcast('aaIsLoading', watcher.isLoading);
 
           if (!$rootScope.$$phase) {
             $rootScope.$apply();
@@ -1055,17 +1070,32 @@ angular
       //tracks JUST ANGULAR http requests.
       $provide.factory('aaAjaxInterceptor', ['aaLoadingWatcher', '$q', 'aaFormExtensions',
         function (aaLoadingWatcher, $q, aaFormExtensions) {
+
+          function shouldIgnore(config) {
+            return config.aaIsLoadingIgnore === true || 
+              config.cached ||
+              (aaFormExtensions.aaIsLoadingIgnoreTemplate && 
+                config.url &&
+                config.url.indexOf('.html') > -1);
+          }
+
           return {
             request: function (request) {
-              aaLoadingWatcher.increment();
+              if(!shouldIgnore(request)) {
+                aaLoadingWatcher.increment();
+              }
               return request;
             },
             response: function (response) {
-              aaLoadingWatcher.decrement();
+              if(!shouldIgnore(response.config)) {
+                aaLoadingWatcher.decrement();
+              }
               return response;
             },
             responseError: function (response) {
-              aaLoadingWatcher.decrement();
+              if(!shouldIgnore(response.config)) {
+                aaLoadingWatcher.decrement();
+              }
 
               if (aaFormExtensions.ajaxValidationErrorMappingStrategy) {
                 aaFormExtensions.ajaxValidationErrorMappingStrategy(
@@ -1092,7 +1122,7 @@ angular
       //the below will run on the first child form (or targetFormName matching child form) that appears
       $provide.decorator('$controller', ['$delegate', function ($delegate) {
         return function (expression, locals) {
-          if (locals.$scope) {
+          if (!locals.$aaFormExtensions /* <--unit testing only*/ && locals.$scope) {
             locals.$aaFormExtensions = {
 
               $addChangeDependency: function (expr, deepWatch, /*optional*/
@@ -1104,29 +1134,27 @@ angular
                 });
               },
 
-              $resetChanged: function (runAfterFunc, /*optional*/
-                                       targetFormName /*optional*/) {
+              $resetChanged: function (targetFormName /*optional*/) {
                 addTodo({
                   type: '$resetChanged',
-                  args: [runAfterFunc],
+                  args: [],
                   targetFormName: targetFormName
                 });
               },
 
-              $reset: function (runAfterFunc, /*optional*/
+              $reset: function (shouldNotConfirmReset, /*optional*/
                                 targetFormName /*optional*/) {
                 addTodo({
                   type: '$reset',
-                  args: [runAfterFunc],
+                  args: [shouldNotConfirmReset],
                   targetFormName: targetFormName
                 });
               },
 
-              $clearErrors: function (runAfterFunc, /*optional*/
-                                      targetFormName /*optional*/) {
+              $clearErrors: function (targetFormName /*optional*/) {
                 addTodo({
                   type: '$clearErrors',
-                  args: [runAfterFunc],
+                  args: [],
                   targetFormName: targetFormName
                 });
               },
@@ -1148,7 +1176,7 @@ angular
             locals.$scope.$$aaFormExtensionsTodos.push(todo);
           }
 
-          return $delegate(expression, locals);
+          return $delegate.apply(this, arguments);
         };
       }]);
     }]);
@@ -1160,7 +1188,13 @@ angular
  * @name aaFormExtensions
  *
  * @description
- * Description place holder.
+ * Anything in here can be customized by injecting in aaFormExtensionsProvider during config
+ *
+ * EXAMPLE
+ * angular.module('myApp', ['aa.formExtensions'])
+ *  .config(function(aaFormExtensionsProvider) {
+ *     aaFormExtensionsProvider.defaultLblCol = 'xs-3'
+ *  })
  **/
 
 (function () {
@@ -1172,17 +1206,22 @@ angular
       var self = this;
 
       //LABEL STRATEGIES
-      this.defaultLabelStrategy = "bootstrap3InlineForm";
+      this.requiredLabelClass = 'label-required';
+      this.defaultLblCol = 'sm-2';
+      this.defaultLabelStrategy = 'bootstrap3InlineForm';
       this.labelStrategies = {
 
         //create a bootstrap3 style label
-        bootstrap3InlineForm: function (element, labelText, isRequired) {
+        bootstrap3InlineForm: function (element, labelText, isRequired, $injector) {
 
-          var col = element.attr('aa-lbl-col') || "sm-2";
+          //this will resolve aa-lbl-... from the current element or the closest parent element
+          var col = findClosestEleWithAttr(element, 'aa-lbl-col') || self.defaultLblCol;
+          var class_ = findClosestEleWithAttr(element, 'aa-lbl-class') || '';
 
           var label = angular.element('<label>')
             .attr('for', element[0].id)
-            .addClass('col-' + col + ' control-label')
+            .addClass('col-' + col + ' control-label ' + class_)
+            .addClass(isRequired ? self.requiredLabelClass : '')
             .html(labelText + (isRequired ? '&nbsp;*' : ''));
 
 
@@ -1199,10 +1238,11 @@ angular
         },
 
         //create a no-frills label directly before the element
-        simple: function (ele, labelText, isRequired) {
+        simple: function (ele, labelText, isRequired, $injector) {
           ele[0].parentNode.insertBefore(
             angular.element('<label>')
               .attr('for', ele[0].id)
+              .addClass(isRequired ? self.requiredLabelClass : '')
               .html(labelText + (isRequired ? '&nbsp;*' : ''))[0],
             ele[0]);
         }
@@ -1212,29 +1252,30 @@ angular
 
 
       //AUTO FIELD GROUP STRATEGIES
+      this.defaultCol = 'sm-3';
       this.defaultFieldGroupStrategy = "bootstrap3InlineForm";
       this.fieldGroupStrategies = {
-        bootstrap3InlineForm: function (element) {
+        bootstrap3InlineForm: function (element, $injector) {
 
           //add form-control if it is missing
           if (!element.prop('class')) {
             element.addClass('form-control');
           }
 
-          var col = element.attr('aa-col') || "sm-3";
+          var col = findClosestEleWithAttr(element, 'aa-col') || self.defaultCol;
 
-          wrap(element, '<div class="form-group"><div class="col-' + col + '"></div></div>');
+          wrap(element, '<div class="form-group aaFieldGroup"><div class="col-' + col + '"></div></div>');
         },
-        bootstrap3BasicFormWithSize: function (element) {
+        bootstrap3BasicFormWithSize: function (element, $injector) {
 
           //add form-control if it is missing
           if (!element.prop('class')) {
             element.addClass('form-control');
           }
 
-          var col = element.attr('aa-col') || "sm-3";
+          var col = findClosestEleWithAttr(element, 'aa-col') || self.defaultCol;
 
-          wrap(element, '<div class="form-group col-' + col + '"></div>');
+          wrap(element, '<div class="form-group aaFieldGroup col-' + col + '"></div>');
         }
       };
 
@@ -1243,7 +1284,7 @@ angular
       this.defaultValMsgPlacementStrategy = 'below-field';
       this.valMsgPlacementStrategies = {
 
-        'below-field': function (formFieldElement, formName, formFieldName) {
+        'below-field': function (formFieldElement, formName, formFieldName, scope, $injector) {
 
           var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}"></div>', formName, formFieldName));
           var fieldType = formFieldElement[0].type;
@@ -1253,6 +1294,9 @@ angular
             //radios tend to be wrapped, go up a few levels (of course you can customize this with your own strategy)
             formFieldElement.parent().parent().append(msgElement);
 
+          } else if (formFieldElement.parent().hasClass("input-group")) {
+            //if we have element inside input-group, then messages should be placed bellow it
+            formFieldElement.parent().after(msgElement);
           } else {
             formFieldElement.after(msgElement);
           }
@@ -1260,7 +1304,7 @@ angular
           return msgElement;
         },
 
-        'hover': function (formFieldElement, formName, formFieldName, scope) {
+        'hover': function (formFieldElement, formName, formFieldName, scope, $injector) {
           var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}" ng-show="showMessages && isHovered && errorMessages.length > 0"></div>', formName, formFieldName));
 
           formFieldElement.on('mouseenter', function () {
@@ -1294,7 +1338,7 @@ angular
       //aaSpinnerClick strategies
       this.defaultSpinnerClickStrategy = "fontAwesomeInsideButton";
       this.spinnerClickStrategies = {
-        fontAwesomeInsideButton: function (buttonElement) {
+        fontAwesomeInsideButton: function (buttonElement, $injector) {
 
           var loading = angular.element('<i style="margin-left: 5px;" class="fa fa-spinner fa-spin"></i>');
 
@@ -1324,7 +1368,7 @@ angular
         //VERY basic. For the love of everything holy please do something better with UI Bootstrap modal or something!
         //requires >= v0.2.10!
         confirmUiRouterAndDom: function (rootFormScope, rootForm, $injector) {
-          var confirmationMessage  = 'You have unsaved changes are you sure you want to navigate away?';
+          var confirmationMessage = 'You have unsaved changes are you sure you want to navigate away?';
 
           //ANGULAR UI ROUTER
           rootFormScope.$on('$stateChangeStart', function (event) {
@@ -1349,12 +1393,15 @@ angular
           angular.element(window).on('beforeunload', beforeUnload);
 
           rootFormScope.$on('$destroy', function () {
-			angular.element(window).off('beforeunload', beforeUnload);
+            angular.element(window).off('beforeunload', beforeUnload);
           });
 
         },
         none: angular.noop
       };
+
+
+      this.defaultFieldName = "This field";
 
 
       //VALIDATION MESSAGES
@@ -1367,8 +1414,9 @@ angular
         max: "{0} must be at most {1}.",
         pattern: "{0} is invalid.",
         url: "{0} must be a valid URL.",
-        number: "{0} must be number.",
-        unknown: "{0} is invalid."
+        number: "{0} must be a number.",
+        unknown: "{0} is invalid.",
+        validationTitle: 'There are some validation errors'
       };
 
       this.valMsgForTemplate = '<div class="validation-errors">' +
@@ -1377,6 +1425,10 @@ angular
         '<div class="notch"></div>' +
         '</div>';
 
+      //hook for localization, if needed
+      this.fieldNameCustomizer = function(fieldName, $injector) {
+        return fieldName;
+      };
 
       this.confirmResetStrategy = function () {
         //this can be a promise or immediate like below
@@ -1424,6 +1476,9 @@ angular
         messageOnBlur: true
       };
 
+      this.aaIsLoadingDoneDebounceMS = 500; //wait Xms before considered done loading to avoid avoid flickering
+      this.aaIsLoadingIgnoreTemplate = false; //should a template load trigger an aa loading
+
       this.$get = function () {
         return {
 
@@ -1435,6 +1490,9 @@ angular
 
           validIconStrategy: self.validIconStrategy,
           validationMessages: self.validationMessages,
+          fieldNameCustomizer: self.fieldNameCustomizer,
+
+          defaultFieldName: self.defaultFieldName,
 
           valMsgForTemplate: self.valMsgForTemplate,
 
@@ -1456,10 +1514,40 @@ angular
           availableForms: [], //all available ngForms in the application that could have errors *right now*
 
           //todo wire up
-          globalSettings: self.globalSettings
+          globalSettings: self.globalSettings,
+
+          aaIsLoadingDoneDebounceMS: self.aaIsLoadingDoneDebounceMS,
+          aaIsLoadingIgnoreTemplate: self.aaIsLoadingIgnoreTemplate
+
         };
       };
     });
+
+  //recurse up document tree starting with the current element to try to find
+  //and element with a given attribute. if found return it.
+  function findClosestEleWithAttr(ele, attr) {
+
+    var attrVal;
+
+    attrVal = ele.attr(attr);
+    if(attrVal) {
+      return attrVal;
+    }
+
+    var parent = ele.parent();
+
+    if(!parent.length) {
+      return;
+    }
+
+    attrVal = parent.attr(attr);
+    if(attrVal) {
+      return attrVal;
+    }
+
+    return findClosestEleWithAttr(parent, attr);
+  }
+
 
   function wrap(elms, wrapper) {
     var wrapperDiv = document.createElement('div');
@@ -1549,6 +1637,14 @@ angular
         },
 
         ensureaaFormExtensionsFieldExists: function (form, fieldName) {
+          if(!form) {
+            throw new Error('Form was ' + form);
+          }
+
+          if(!fieldName) {
+            throw new Error('Form was ' + fieldName);
+          }
+
           if (!form.$aaFormExtensions[fieldName]) {
             form.$aaFormExtensions[fieldName] = {
               showErrorReasons: [],
@@ -1602,6 +1698,127 @@ angular
           });
 
           form.$aaFormExtensions.$changed = hasAnyChangedField;
+        },
+
+        //https://github.com/lodash/lodash/blob/3.7.0/lodash.src.js#L7841
+        debounce: function (func, wait, options) {
+          /* jshint ignore:start */
+          var args,
+            maxTimeoutId,
+            result,
+            stamp,
+            thisArg,
+            timeoutId,
+            trailingCall,
+            lastCalled = 0,
+            maxWait = false,
+            trailing = true;
+
+          function now() {
+            return new Date().getTime();
+          }
+
+          if (typeof func != 'function') {
+            throw new TypeError(FUNC_ERROR_TEXT);
+          }
+          wait = wait < 0 ? 0 : (+wait || 0);
+          if (options === true) {
+            var leading = true;
+            trailing = false;
+          } else if (angular.isObject(options)) {
+            leading = options.leading;
+            maxWait = 'maxWait' in options && nativeMax(+options.maxWait || 0, wait);
+            trailing = 'trailing' in options ? options.trailing : trailing;
+          }
+
+          function cancel() {
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+            }
+            if (maxTimeoutId) {
+              clearTimeout(maxTimeoutId);
+            }
+            maxTimeoutId = timeoutId = trailingCall = undefined;
+          }
+
+          function delayed() {
+            var remaining = wait - (now() - stamp);
+            if (remaining <= 0 || remaining > wait) {
+              if (maxTimeoutId) {
+                clearTimeout(maxTimeoutId);
+              }
+              var isCalled = trailingCall;
+              maxTimeoutId = timeoutId = trailingCall = undefined;
+              if (isCalled) {
+                lastCalled = now();
+                result = func.apply(thisArg, args);
+                if (!timeoutId && !maxTimeoutId) {
+                  args = thisArg = null;
+                }
+              }
+            } else {
+              timeoutId = setTimeout(delayed, remaining);
+            }
+          }
+
+          function maxDelayed() {
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+            }
+            maxTimeoutId = timeoutId = trailingCall = undefined;
+            if (trailing || (maxWait !== wait)) {
+              lastCalled = now();
+              result = func.apply(thisArg, args);
+              if (!timeoutId && !maxTimeoutId) {
+                args = thisArg = null;
+              }
+            }
+          }
+
+          function debounced() {
+            args = arguments;
+            stamp = now();
+            thisArg = this;
+            trailingCall = trailing && (timeoutId || !leading);
+
+            if (maxWait === false) {
+              var leadingCall = leading && !timeoutId;
+            } else {
+              if (!maxTimeoutId && !leading) {
+                lastCalled = stamp;
+              }
+              var remaining = maxWait - (stamp - lastCalled),
+                isCalled = remaining <= 0 || remaining > maxWait;
+
+              if (isCalled) {
+                if (maxTimeoutId) {
+                  maxTimeoutId = clearTimeout(maxTimeoutId);
+                }
+                lastCalled = stamp;
+                result = func.apply(thisArg, args);
+              }
+              else if (!maxTimeoutId) {
+                maxTimeoutId = setTimeout(maxDelayed, remaining);
+              }
+            }
+            if (isCalled && timeoutId) {
+              timeoutId = clearTimeout(timeoutId);
+            }
+            else if (!timeoutId && wait !== maxWait) {
+              timeoutId = setTimeout(delayed, wait);
+            }
+            if (leadingCall) {
+              isCalled = true;
+              result = func.apply(thisArg, args);
+            }
+            if (isCalled && !timeoutId && !maxTimeoutId) {
+              args = thisArg = null;
+            }
+            return result;
+          }
+          debounced.cancel = cancel;
+          return debounced;
+          /* jshint ignore:end */
         }
       };
     });
@@ -1654,7 +1871,9 @@ angular
             element.attr('aa-label', aaUtils.toTitleCase(aaUtils.splitCamelCase(lastPartOfName)));
           }
 
-          element.attr("aa-val-msg", "");
+          if (attrs.aaNoValMsg === undefined){
+            element.attr("aa-val-msg", "");
+          }
 
           element.removeAttr('aa-field');
 
@@ -1679,7 +1898,7 @@ angular
   'use strict';
 
   angular.module('aa.formExtensions')
-    .directive('aaFieldGroup', ['$compile', 'aaFormExtensions', function ($compile, aaFormExtensions) {
+    .directive('aaFieldGroup', ['$compile', 'aaFormExtensions', '$injector', function ($compile, aaFormExtensions, $injector) {
       return {
         restrict: 'A',
         scope: false,
@@ -1692,7 +1911,7 @@ angular
           element.attr("aa-field", attrs.aaFieldGroup);
 
           var strat = aaFormExtensions.fieldGroupStrategies[attrs.aaFieldGroupStrategy || aaFormExtensions.defaultFieldGroupStrategy];
-          strat(element);
+          strat(element, $injector);
 
           return function (scope, element) {
             $compile(element)(scope);
@@ -1714,31 +1933,9 @@ angular
 
   angular.module('aa.formExtensions')
     //generate a label for an input generating an ID for it if it doesn't already exist
-    .directive('aaLabel', ['aaFormExtensions', 'aaUtils', '$compile', function (aaFormExtensions, aaUtils, $compile) {
+    .directive('aaLabel', ['aaFormExtensions', 'aaUtils', '$compile', '$injector', function (aaFormExtensions, aaUtils, $compile, $injector) {
       return {
         compile: function (element, attrs) {
-
-          //add default option if specified
-          //if this is a select with a default-option attribute add a default option (per ng spec)
-          if (element.prop('tagName').toUpperCase() === 'SELECT' && attrs.defaultOption !== undefined) {
-
-            var msg = attrs.defaultOption;
-
-            if (msg === null || msg === "") {
-
-              //gen one
-              msg = 'Select';
-
-              if (attrs.aaLabel) {
-                msg += ' a ' + attrs.aaLabel;
-              }
-
-              msg += '...';
-            }
-
-            element.append(angular.element('<option value=""></option>').html(msg));
-          }
-
           return function (scope, element, attrs) {
             var strategy = aaFormExtensions.labelStrategies[attrs.aaLabelStrategy];
 
@@ -1762,7 +1959,7 @@ angular
               element[0].id = aaUtils.guid();
             }
 
-            var label = strategy(element, attrs.aaLabel, isRequiredField);
+            var label = strategy(element, attrs.aaLabel, isRequiredField, $injector);
             if (label) {
                 $compile(label)(scope);
             }
@@ -1785,7 +1982,7 @@ angular
     //perform an ng-click that watches for a $q promise
     //showing a loading indicator using the default spinnerClickStrategy
     //or a specified (inline on the directive) spinner-click-strategy="myStrategy"
-    .directive('aaSpinnerClick', ['$q', 'aaFormExtensions', function ($q, aaFormExtensions) {
+    .directive('aaSpinnerClick', ['$q', 'aaFormExtensions', '$injector', function ($q, aaFormExtensions, $injector) {
       return {
         link: function (scope, element, attrs) {
 
@@ -1798,7 +1995,7 @@ angular
           element.on('click', function () {
             scope.$apply(function () {
 
-              var elementStrategy = strategy(element);
+              var elementStrategy = strategy(element, $injector);
 
               elementStrategy.before();
 
@@ -1825,7 +2022,7 @@ angular
   'use strict';
 
   angular.module('aa.formExtensions')
-    .directive('aaSubmitForm', ['aaFormExtensions', '$q', function (aaFormExtensions, $q) {
+    .directive('aaSubmitForm', ['aaFormExtensions', '$q', '$injector', function (aaFormExtensions, $q, $injector) {
       return {
         scope: {
           aaSubmitForm: '&'
@@ -1840,12 +2037,17 @@ angular
             if (ngForm.$valid) {
 
               var spinnerClickStrategy = aaFormExtensions.spinnerClickStrategies[attrs.spinnerClickStrategy || aaFormExtensions.defaultSpinnerClickStrategy];
-              var eleSpinnerClickStrategy = spinnerClickStrategy(element);
+              var eleSpinnerClickStrategy = spinnerClickStrategy(element, $injector);
               eleSpinnerClickStrategy.before();
 
               //if this isn't a promise it will resolve immediately
-              $q.when(scope.aaSubmitForm())
-                ["finally"](function (result) {
+              $q.when(scope.aaSubmitForm()).then(function(){
+                ngForm.$setSubmitted();
+              })
+              .catch(function(result){
+                  // If the promise is rejected, just catch the error to solve the unhandled rejection error in angular >=1.59
+              })
+              .finally(function (result) {
                 eleSpinnerClickStrategy.after();
                 return result;
               });
@@ -1877,7 +2079,7 @@ angular
   angular.module('aa.formExtensions')
     //place on an element with ngModel to generate validation messages for it
     //will use the default configured validation message placement strategy unless a custom strategy is passed in
-    .directive('aaValMsg', ['$compile', 'aaFormExtensions', function ($compile, aaFormExtensions) {
+    .directive('aaValMsg', ['$compile', 'aaFormExtensions', '$injector', function ($compile, aaFormExtensions, $injector) {
       return {
         require: ['ngModel', '^form'],
         link: function (scope, element, attrs, ctrls) {
@@ -1892,7 +2094,7 @@ angular
           var newScope = scope.$new(); //allow strategy to muck with scope in an isolated manner
 
           var msgElement = aaFormExtensions.valMsgPlacementStrategies[attrs.aaValMsg || aaFormExtensions.defaultValMsgPlacementStrategy](
-            element, form.$name, attrs.name, newScope
+            element, form.$name, attrs.name, newScope, $injector
           );
 
           $compile(msgElement)(newScope);
@@ -1907,53 +2109,74 @@ angular
  * @description
  * Description place holder.
  **/
-(function () {
+(function() {
   'use strict';
 
   angular.module('aa.formExtensions')
     //if used directly rather than passively with aaValMsg allows for direct placement of validation messages
     //for a given form field. ex. pass "myForm.myFieldName"
-    .directive('aaValMsgFor', ['aaFormExtensions', 'aaUtils', function (aaFormExtensions, aaUtils) {
+    .directive('aaValMsgFor', ['aaFormExtensions', 'aaUtils', '$timeout', function(aaFormExtensions, aaUtils, $timeout) {
       //generate the validation message for a particular form field here
       return {
         require: ['^form'],
         priority: 1,
         scope: true,
-        link: function ($scope, element, attrs) {
+        link: function($scope, element, attrs) {
 
-          var fullFieldPath = attrs.aaValMsgFor,
-            fieldInForm = $scope.$eval(fullFieldPath),
-            formObj = $scope.$eval(fullFieldPath.substring(0, fullFieldPath.indexOf('.')));
+          $timeout(function() { //if referring to fields created in other directives give them time to render before trying to look for them. ex ng-repeat
 
-          //TODO: if this is inside an isolate scope and the form is outside the isolate scope this doesn't work
-          //could nest multiple forms so can't trust directive require and have to eval to handle edge cases...
-          aaUtils.ensureaaFormExtensionsFieldExists(formObj, fieldInForm.$name);
-          var fieldInFormExtensions = $scope.$eval(fullFieldPath.replace('.', '.$aaFormExtensions.'));
+            var fullFieldPath = attrs.aaValMsgFor;
+            var fieldInForm, formObj;
 
-          $scope.$watchCollection(
-            function () {
-              return fieldInFormExtensions.$errorMessages;
-            },
-            function (val) {
-              $scope.errorMessages = val;
+            var innerScope = $scope;
+            var parts = fullFieldPath.split(".");
+            var formName = parts.shift();
+            var fieldPath = "['" + parts.join(".") + "']"; // filed path without form name, as array accessor
+            var fieldFormPath = formName + fieldPath;
+
+            while ((!fieldInForm || !formObj) && innerScope) {
+              fieldInForm = innerScope.$eval(fieldFormPath);
+              formObj = innerScope.$eval(formName);
+
+              if ((!fieldInForm || !formObj)) {
+                innerScope = innerScope.$parent;
+              }
             }
-          );
 
-          $scope.$watch(
-            function () {
-              return [
-                formObj.$aaFormExtensions.$invalidAttempt,
-                fieldInFormExtensions.showErrorReasons
-              ];
-            },
-            function (watches) {
-              var invalidAttempt = watches[0],
-                showErrorReasons = watches[1];
+            //TODO: if this is inside an isolate scope and the form is outside the isolate scope this doesn't work
+            //could nest multiple forms so can't trust directive require and have to eval to handle edge cases...
+            aaUtils.ensureaaFormExtensionsFieldExists(formObj, fieldInForm.$name);
+            $scope.fieldInFormExtensions = innerScope.$eval(formName + ".$aaFormExtensions" + fieldPath);
 
-              $scope.showMessages = invalidAttempt || showErrorReasons.length;
-            },
-            true
-          );
+            $scope.$watchCollection(
+              function() {
+                return $scope.fieldInFormExtensions.$errorMessages;
+              },
+              function(val) {
+                $scope.errorMessages = val;
+              }
+            );
+
+            $scope.$watch(
+              function() {
+                return [
+                  formObj.$aaFormExtensions.$invalidAttempt,
+                  $scope.fieldInFormExtensions.showErrorReasons
+                ];
+              },
+              function() {
+                var invalidAttempt = formObj.$aaFormExtensions.$invalidAttempt,
+                  showErrorReasons = $scope.fieldInFormExtensions.showErrorReasons;
+
+                if(invalidAttempt === undefined || showErrorReasons === undefined) {
+                  return;
+                }
+
+                $scope.showMessages = invalidAttempt || showErrorReasons.length > 0;
+              },
+              true
+            );
+          });
         },
         template: aaFormExtensions.valMsgForTemplate,
         replace: true
@@ -2007,6 +2230,56 @@ angular
 })();
 ;/**
  * @ngdoc directive
+ * @name defaultOption
+ *
+ * @description
+ * Directive allowing to place a default option on select elements.
+ **/
+(function () {
+  'use strict';
+
+  angular.module('aa.formExtensions')
+    //generate a label for an input generating an ID for it if it doesn't already exist
+    .directive('defaultOption', ['aaFormExtensions', 'aaUtils', '$compile', '$injector', function (aaFormExtensions, aaUtils, $compile, $injector) {
+      return {
+          priority: 1,
+          compile: function (element, attrs) {
+            return {
+                pre: function (scope, element, attrs) {
+                    //add default option if specified
+                  //if this is a select with a default-option attribute add a default option (per ng spec)
+                  if (element.prop('tagName').toUpperCase() === 'SELECT' && attrs.defaultOption !== undefined) {
+
+                    var msg = attrs.defaultOption;
+
+                    if (msg === null || msg === "") {
+
+                      //gen one
+                      msg = 'Select';
+
+                      if (attrs.aaLabel) {
+                        msg += ' a ' + attrs.aaLabel;
+                      }
+
+                      msg += '...';
+                    }
+
+                      var options = element.children('option[value=""]');
+
+                      if(!options.length) {
+                        element.append(angular.element('<option value=""></option>').html(msg));
+
+                      element.removeAttr('default-option');
+                      }
+                  }
+                }
+            };
+          }
+          
+      };
+    }]);
+})();;/**
+ * @ngdoc directive
  * @name ngForm
  *
  * @description
@@ -2023,6 +2296,10 @@ angular
         return {
           pre: function (scope, element, attrs, thisForm) {
 
+            function nullFormRenameControl(control, name) {
+              control.$name = name;
+            }
+
             function setAttemptRecursively(form, isInvalid) {
               form.$aaFormExtensions.$invalidAttempt = isInvalid;
 
@@ -2031,8 +2308,34 @@ angular
               });
             }
 
-            //have to manually find parent forms '?^form' doesn't appear to work in this case (as it is very funky)
-            var parentForm = element.parent().controller('form');
+            var parentForm;
+
+            if(attrs.isolatedForm === undefined) {
+              //have to manually find parent forms '?^form' doesn't appear to work in this case (as it is very funky)
+              parentForm = element.parent().controller('form');
+            } else {
+              thisForm.$$parentForm.$removeControl(thisForm);
+
+              var nullFormCtrl = {
+                $addControl: angular.noop,
+                $$renameControl: nullFormRenameControl,
+                $removeControl: angular.noop,
+                $setValidity: angular.noop,
+                $setDirty: angular.noop,
+                $setPristine: angular.noop,
+                $setSubmitted: angular.noop
+              };
+
+              var parentFormController = element.parent().controller('form');
+              var currentSetValidity = thisForm.$setValidity;
+              thisForm.$$parentForm = nullFormCtrl;
+
+              thisForm.$setValidity = function ( validationToken, isValid, control ) {
+                currentSetValidity( validationToken, isValid, control );
+                parentFormController.$setValidity( validationToken, true, thisForm );
+              };
+            }
+
 
             thisForm.$aaFormExtensions = {
               $onSubmitAttempt: function () {
@@ -2211,7 +2514,12 @@ angular
               });
             }
 
-            function $reset(runAfterFunc) {
+            function $reset(shouldNotConfirmReset) {
+
+              if(!angular.isFunction(shouldNotConfirmReset) && shouldNotConfirmReset){
+                reset();
+                return;
+              }
 
               return $q.when(aaFormExtensions.confirmResetStrategy())
                 .then(function (resp) {
@@ -2223,10 +2531,20 @@ angular
                 });
 
               function reset() {
+                if(!scope.$$phase && !scope.$root.$$phase){
+                  scope.$apply(reset);
+                  return;
+                }
+
                 angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function (dep) {
                   if (dep.field && dep.field.$ngModel.$modelValue !== dep.initialValue) {
                     dep.field.$ngModel.$setViewValue(dep.initialValue);
                     dep.field.$ngModel.$render();
+                    dep.field.showErrorReasons.length = 0;
+                    dep.field.$ngModel.$setPristine();
+                    if(dep.field.$ngModel.$setUntouched) {
+                      dep.field.$ngModel.$setUntouched();
+                    }
                   }
 
                   if (dep.expr) {
@@ -2243,51 +2561,65 @@ angular
                   }
                 });
 
-                $clearErrors(runAfterFunc);
+                $clearErrors();
+
+                //breaking API change, make it hidden, for now
+                if(angular.isFunction(shouldNotConfirmReset)) {
+                  shouldNotConfirmReset();
+                }
               }
             }
 
-            function $resetChanged(runAfterFunc) {
-              //schedule reset to run AFTER any ng-model binds may occur (after current stack frame)
-              $timeout(function () {
-                angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function (dep) {
-                  dep.isChanged = false;
+            function $resetChanged() {
+              if(!scope.$$phase && !scope.$root.$$phase){
+                scope.$apply($resetChanged);
+                return;
+              }
 
-                  if (dep.field) {
-                    dep.initialValue = dep.field.$ngModel.$modelValue;
-                    aaUtils.checkAndSetFormChanged(dep.field.$form);
-                  }
+              angular.forEach(thisForm.$aaFormExtensions.$changeDependencies, function (dep) {
+                dep.isChanged = false;
 
-                  if (dep.expr) {
-                    dep.initialValue = angular.copy(scope.$eval(dep.expr));
-                    aaUtils.checkAndSetFormChanged(dep.$form);
-                  }
-                });
+                if (dep.field) {
+                  dep.initialValue = dep.field.$ngModel.$modelValue;
+                  aaUtils.checkAndSetFormChanged(dep.field.$form);
+                }
 
-                aaUtils.checkAndSetFormChanged(thisForm);
-
-                if (angular.isFunction(runAfterFunc)) {
-                  runAfterFunc();
+                if (dep.expr) {
+                  dep.initialValue = angular.copy(scope.$eval(dep.expr));
+                  aaUtils.checkAndSetFormChanged(dep.$form);
                 }
               });
+
+              aaUtils.checkAndSetFormChanged(thisForm);
             }
 
-            function $clearErrors(runAfterFunc) {
-              //this should be able to use $evalAsync, figure it out...
-              $timeout(function () {
-                setAttemptRecursively(thisForm, false);
+            function $clearErrors() {
+              if(!scope.$$phase && !scope.$root.$$phase){
+                scope.$apply($clearErrors);
+                return;
+              }
 
-                angular.forEach(thisForm.$aaFormExtensions.$allValidationErrors, function (err) {
-                  if (err.field) {
-                    err.field.showErrorReasons.length = 0;
-                    err.field.$element.removeClass('aa-had-focus');
-                    //this makes sense i think, maybe make configurable
-                    err.field.$ngModel.$setPristine();
+              setAttemptRecursively(thisForm, false);
+              thisForm.$setPristine();
+              if(thisForm.$setUntouched) {
+                thisForm.$setUntouched();
+              }
+
+              angular.forEach(thisForm.$aaFormExtensions.$allValidationErrors, function (err) {
+                if (err.field) {
+                  err.field.showErrorReasons.length = 0;
+                  err.field.$element.removeClass('aa-had-focus');
+                  err.field.$ngModel.$setPristine();
+                  if(err.field.$ngModel.$setUntouched) {
+                    err.field.$ngModel.$setUntouched();
                   }
-                });
+                }
+              });
 
-                if (angular.isFunction(runAfterFunc)) {
-                  runAfterFunc();
+              var notifyTargetName = scope.$eval(attrs.notifyTarget) || aaFormExtensions.defaultNotifyTarget;
+              angular.forEach(scope.notifications, function (notification) {
+                if (notification && notification.template && notification.template === "aaNotifyTemplate-aaFormExtensionsValidationErrors") {
+                  aaNotify.remove(notification.messageHandle, notifyTargetName);
                 }
               });
             }
@@ -2431,6 +2763,9 @@ angular
                 if (!notifyHandle && shouldDisplay) {
                   notifyHandle = aaNotify.add({
                     validationErrorsToDisplay: validationErrorsToDisplay,
+                    getValidationTitle: function () {
+                      return aaFormExtensions.validationMessages.validationTitle;
+                    },
                     onClose: function () {
                       notifyHandle = null; //it'll come back on next error!
                     }
@@ -2496,15 +2831,15 @@ angular
     //constructs myForm.$aaFormExtensions.myFieldName object
     //including validation messages for all ngModels at form.$aaFormExtensions.
     //messages can be used there manually or emitted automatically with aaValMsg
-    .directive('ngModel', ['aaFormExtensions', '$document', 'aaLoadingWatcher', '$timeout', 'aaUtils',
-      function (aaFormExtensions, $document, aaLoadingWatcher, $timeout, aaUtils) {
+    .directive('ngModel', ['aaFormExtensions', '$document', 'aaLoadingWatcher', '$timeout', 'aaUtils', '$injector',
+      function (aaFormExtensions, $document, aaLoadingWatcher, $timeout, aaUtils, $injector) {
         return {
           require: ['ngModel', '?^form'],
           priority: 1,
           link: function (scope, element, attrs, controllers) {
             var ngModel = controllers[0],
               ngForm = controllers[1],
-              fieldName = "This field";
+              fieldName = aaFormExtensions.defaultFieldName;
 
             if (!ngForm || !ngModel.$name) {
               //only for validation with forms
@@ -2522,7 +2857,8 @@ angular
 
             if (attrs.aaLabel || attrs.aaFieldName) {
               //use default label
-              fieldName = attrs.aaLabel || attrs.aaFieldName;
+              fieldName = aaFormExtensions.fieldNameCustomizer(attrs.aaLabel || attrs.aaFieldName, $injector);
+
 
             } else if (element[0].id) {
               //is there a label for this field?
@@ -2607,6 +2943,9 @@ angular
 
             //start watching for changed efficiently
             function setupChanged() {
+              if(attrs.aaIgnoreChanges === '' || attrs.aaIgnoreChanges === 'true') {
+                return;
+              }
 
               fieldChangeDependency.initialValue = ngModel.$modelValue;
 
@@ -2652,6 +2991,7 @@ angular
 
             function calcErrorMessages() {
               var fieldErrorMessages = field.$errorMessages,
+                newFieldErrorMessages = {},
                 msg;
 
               //clear out the validation messages that exist on *just the field*
@@ -2676,10 +3016,10 @@ angular
                     msg = aaUtils.stringFormat(attrs.maxMsg || aaFormExtensions.validationMessages.max, fieldName, attrs.max);
                   } else if (key === 'pattern') {
                     msg = aaUtils.stringFormat(attrs.ngPatternMsg || aaFormExtensions.validationMessages.pattern, fieldName);
-                  } else if (key === 'required' && element[0].type === 'number') {
+                  } else if (key === 'required' && element[0].type === 'number' && ngModel.$error.number) {
                     //angular doesn't correctly flag numbers as invalid rather as required when something wrong is filled in
-                    //hack around it
-                    msg = aaUtils.stringFormat(attrs.numberMsg || aaFormExtensions.validationMessages.number, fieldName);
+                    //this is fixed in 1.3 but this hack maintains backward/forward compatibility
+                    continue;
                   } else if (aaFormExtensions.validationMessages[key]) {
                     //globally registered custom message
                     msg = aaUtils.stringFormat(aaFormExtensions.validationMessages[key], fieldName);
@@ -2690,8 +3030,12 @@ angular
                     msg = aaUtils.stringFormat(aaFormExtensions.validationMessages.unknown, fieldName);
                   }
 
-                  fieldErrorMessages.push(msg);
+                  newFieldErrorMessages[msg] = true;
                 }
+              }
+
+              for (var k in newFieldErrorMessages) {
+                fieldErrorMessages.push(k);
               }
 
               clearAndUpdateValidationMessages(ngForm, fieldErrorMessages);

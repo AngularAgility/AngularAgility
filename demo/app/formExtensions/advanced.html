@@ -17,7 +17,7 @@
         <p>Sets the state of the form back to it's original state&dagger;:</p>
         <div syntax-highligher-for="javascript">
             <script type="syntaxhighlighter"><![CDATA[
-                personForm.$aaFormExtensions.$reset(/*optional runAfterFunc(){ }*/);
+                personForm.$aaFormExtensions.$reset(/*optional shouldNotConfirmReset*/);
             ]]>
             </script>
         </div>
@@ -26,7 +26,7 @@
         <p>The current state of the form will be considered it's initial state (any changes from here are now $changed):</p>
         <div syntax-highligher-for="javascript">
             <script type="syntaxhighlighter"><![CDATA[
-                personForm.$aaFormExtensions.$resetChanged(/*optional runAfterFunc(){ }*/);
+                personForm.$aaFormExtensions.$resetChanged();
             ]]>
             </script>
         </div>
@@ -53,7 +53,7 @@ $rootScope.aaIsLoading = {{ aaIsLoading }}
             Then register your own custom strategy:
             <div syntax-highligher-for="javascript">
                 <script type="syntaxhighlighter"><![CDATA[
-                    aaFormExtensionsProvider.myCustomStrategy = function(rootFormScope, rootForm, $injector){/*...*/};
+                    aaFormExtensionsProvider.onNavigateAwayStrategies.myCustomStrategy = function(rootFormScope, rootForm, $injector){/*...*/};
 
                     aaFormExtensionsProvider.defaultOnNavigateAwayStrategy = 'myCustomStrategy';
                 ]]>
@@ -214,4 +214,26 @@ addressForm.$aaFormExtensions.$invalidAttempt = {{ addressForm.$aaFormExtensions
         </div>
     </div>
     <div aa-notify style="position: fixed; top: 60px; right: 25px;"></div>
+
+<div class="well">
+	<p class="lead">Customizing Labels</p>
+	<p>You can customize label sizes and add classes to them
+  <div syntax-highligher-for="html">
+    <script type="syntaxhighlighter"><![CDATA[
+                    <input aa-field-group="car.model" aa-lbl-col="md-3" aa-lbl-class="blue">
+                ]]>
+                </script>
+  </div>
+
+  </p>
+</div>
+	<div class="form-horizontal">
+
+		<!-- FIRST FORM STARTS HERE! -->
+		<div ng-form="carForm" class="highlight-form">
+			<h2>Car</h2>
+			<input aa-field-group="car.make" required>
+			<input aa-field-group="car.model" aa-lbl-col="md-3" aa-lbl-class="blue">
+			</div>
+		</div>
 </div>

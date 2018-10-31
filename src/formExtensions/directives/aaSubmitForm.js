@@ -9,7 +9,7 @@
   'use strict';
 
   angular.module('aa.formExtensions')
-    .directive('aaSubmitForm', ['aaFormExtensions', '$q', function (aaFormExtensions, $q) {
+    .directive('aaSubmitForm', ['aaFormExtensions', '$q', '$injector', function (aaFormExtensions, $q, $injector) {
       return {
         scope: {
           aaSubmitForm: '&'
@@ -24,12 +24,17 @@
             if (ngForm.$valid) {
 
               var spinnerClickStrategy = aaFormExtensions.spinnerClickStrategies[attrs.spinnerClickStrategy || aaFormExtensions.defaultSpinnerClickStrategy];
-              var eleSpinnerClickStrategy = spinnerClickStrategy(element);
+              var eleSpinnerClickStrategy = spinnerClickStrategy(element, $injector);
               eleSpinnerClickStrategy.before();
 
               //if this isn't a promise it will resolve immediately
-              $q.when(scope.aaSubmitForm())
-                ["finally"](function (result) {
+              $q.when(scope.aaSubmitForm()).then(function(){
+                ngForm.$setSubmitted();
+              })
+              .catch(function(result){
+                  // If the promise is rejected, just catch the error to solve the unhandled rejection error in angular >=1.59
+              })
+              .finally(function (result) {
                 eleSpinnerClickStrategy.after();
                 return result;
               });

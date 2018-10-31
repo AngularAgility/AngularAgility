@@ -12,15 +12,15 @@
     //constructs myForm.$aaFormExtensions.myFieldName object
     //including validation messages for all ngModels at form.$aaFormExtensions.
     //messages can be used there manually or emitted automatically with aaValMsg
-    .directive('ngModel', ['aaFormExtensions', '$document', 'aaLoadingWatcher', '$timeout', 'aaUtils',
-      function (aaFormExtensions, $document, aaLoadingWatcher, $timeout, aaUtils) {
+    .directive('ngModel', ['aaFormExtensions', '$document', 'aaLoadingWatcher', '$timeout', 'aaUtils', '$injector',
+      function (aaFormExtensions, $document, aaLoadingWatcher, $timeout, aaUtils, $injector) {
         return {
           require: ['ngModel', '?^form'],
           priority: 1,
           link: function (scope, element, attrs, controllers) {
             var ngModel = controllers[0],
               ngForm = controllers[1],
-              fieldName = "This field";
+              fieldName = aaFormExtensions.defaultFieldName;
 
             if (!ngForm || !ngModel.$name) {
               //only for validation with forms
@@ -38,7 +38,8 @@
 
             if (attrs.aaLabel || attrs.aaFieldName) {
               //use default label
-              fieldName = attrs.aaLabel || attrs.aaFieldName;
+              fieldName = aaFormExtensions.fieldNameCustomizer(attrs.aaLabel || attrs.aaFieldName, $injector);
+
 
             } else if (element[0].id) {
               //is there a label for this field?
@@ -123,6 +124,9 @@
 
             //start watching for changed efficiently
             function setupChanged() {
+              if(attrs.aaIgnoreChanges === '' || attrs.aaIgnoreChanges === 'true') {
+                return;
+              }
 
               fieldChangeDependency.initialValue = ngModel.$modelValue;
 
@@ -168,6 +172,7 @@
 
             function calcErrorMessages() {
               var fieldErrorMessages = field.$errorMessages,
+                newFieldErrorMessages = {},
                 msg;
 
               //clear out the validation messages that exist on *just the field*
@@ -192,10 +197,10 @@
                     msg = aaUtils.stringFormat(attrs.maxMsg || aaFormExtensions.validationMessages.max, fieldName, attrs.max);
                   } else if (key === 'pattern') {
                     msg = aaUtils.stringFormat(attrs.ngPatternMsg || aaFormExtensions.validationMessages.pattern, fieldName);
-                  } else if (key === 'required' && element[0].type === 'number') {
+                  } else if (key === 'required' && element[0].type === 'number' && ngModel.$error.number) {
                     //angular doesn't correctly flag numbers as invalid rather as required when something wrong is filled in
-                    //hack around it
-                    msg = aaUtils.stringFormat(attrs.numberMsg || aaFormExtensions.validationMessages.number, fieldName);
+                    //this is fixed in 1.3 but this hack maintains backward/forward compatibility
+                    continue;
                   } else if (aaFormExtensions.validationMessages[key]) {
                     //globally registered custom message
                     msg = aaUtils.stringFormat(aaFormExtensions.validationMessages[key], fieldName);
@@ -206,8 +211,12 @@
                     msg = aaUtils.stringFormat(aaFormExtensions.validationMessages.unknown, fieldName);
                   }
 
-                  fieldErrorMessages.push(msg);
+                  newFieldErrorMessages[msg] = true;
                 }
+              }
+
+              for (var k in newFieldErrorMessages) {
+                fieldErrorMessages.push(k);
               }
 
               clearAndUpdateValidationMessages(ngForm, fieldErrorMessages);

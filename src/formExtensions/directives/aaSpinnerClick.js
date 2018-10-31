@@ -12,7 +12,7 @@
     //perform an ng-click that watches for a $q promise
     //showing a loading indicator using the default spinnerClickStrategy
     //or a specified (inline on the directive) spinner-click-strategy="myStrategy"
-    .directive('aaSpinnerClick', ['$q', 'aaFormExtensions', function ($q, aaFormExtensions) {
+    .directive('aaSpinnerClick', ['$q', 'aaFormExtensions', '$injector', function ($q, aaFormExtensions, $injector) {
       return {
         link: function (scope, element, attrs) {
 
@@ -25,7 +25,7 @@
           element.on('click', function () {
             scope.$apply(function () {
 
-              var elementStrategy = strategy(element);
+              var elementStrategy = strategy(element, $injector);
 
               elementStrategy.before();
 

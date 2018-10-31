@@ -5,7 +5,13 @@
  * @name aaFormExtensions
  *
  * @description
- * Description place holder.
+ * Anything in here can be customized by injecting in aaFormExtensionsProvider during config
+ *
+ * EXAMPLE
+ * angular.module('myApp', ['aa.formExtensions'])
+ *  .config(function(aaFormExtensionsProvider) {
+ *     aaFormExtensionsProvider.defaultLblCol = 'xs-3'
+ *  })
  **/
 
 (function () {
@@ -17,17 +23,22 @@
       var self = this;
 
       //LABEL STRATEGIES
-      this.defaultLabelStrategy = "bootstrap3InlineForm";
+      this.requiredLabelClass = 'label-required';
+      this.defaultLblCol = 'sm-2';
+      this.defaultLabelStrategy = 'bootstrap3InlineForm';
       this.labelStrategies = {
 
         //create a bootstrap3 style label
-        bootstrap3InlineForm: function (element, labelText, isRequired) {
+        bootstrap3InlineForm: function (element, labelText, isRequired, $injector) {
 
-          var col = element.attr('aa-lbl-col') || "sm-2";
+          //this will resolve aa-lbl-... from the current element or the closest parent element
+          var col = findClosestEleWithAttr(element, 'aa-lbl-col') || self.defaultLblCol;
+          var class_ = findClosestEleWithAttr(element, 'aa-lbl-class') || '';
 
           var label = angular.element('<label>')
             .attr('for', element[0].id)
-            .addClass('col-' + col + ' control-label')
+            .addClass('col-' + col + ' control-label ' + class_)
+            .addClass(isRequired ? self.requiredLabelClass : '')
             .html(labelText + (isRequired ? '&nbsp;*' : ''));
 
 
@@ -44,10 +55,11 @@
         },
 
         //create a no-frills label directly before the element
-        simple: function (ele, labelText, isRequired) {
+        simple: function (ele, labelText, isRequired, $injector) {
           ele[0].parentNode.insertBefore(
             angular.element('<label>')
               .attr('for', ele[0].id)
+              .addClass(isRequired ? self.requiredLabelClass : '')
               .html(labelText + (isRequired ? '&nbsp;*' : ''))[0],
             ele[0]);
         }
@@ -57,29 +69,30 @@
 
 
       //AUTO FIELD GROUP STRATEGIES
+      this.defaultCol = 'sm-3';
       this.defaultFieldGroupStrategy = "bootstrap3InlineForm";
       this.fieldGroupStrategies = {
-        bootstrap3InlineForm: function (element) {
+        bootstrap3InlineForm: function (element, $injector) {
 
           //add form-control if it is missing
           if (!element.prop('class')) {
             element.addClass('form-control');
           }
 
-          var col = element.attr('aa-col') || "sm-3";
+          var col = findClosestEleWithAttr(element, 'aa-col') || self.defaultCol;
 
-          wrap(element, '<div class="form-group"><div class="col-' + col + '"></div></div>');
+          wrap(element, '<div class="form-group aaFieldGroup"><div class="col-' + col + '"></div></div>');
         },
-        bootstrap3BasicFormWithSize: function (element) {
+        bootstrap3BasicFormWithSize: function (element, $injector) {
 
           //add form-control if it is missing
           if (!element.prop('class')) {
             element.addClass('form-control');
           }
 
-          var col = element.attr('aa-col') || "sm-3";
+          var col = findClosestEleWithAttr(element, 'aa-col') || self.defaultCol;
 
-          wrap(element, '<div class="form-group col-' + col + '"></div>');
+          wrap(element, '<div class="form-group aaFieldGroup col-' + col + '"></div>');
         }
       };
 
@@ -88,7 +101,7 @@
       this.defaultValMsgPlacementStrategy = 'below-field';
       this.valMsgPlacementStrategies = {
 
-        'below-field': function (formFieldElement, formName, formFieldName) {
+        'below-field': function (formFieldElement, formName, formFieldName, scope, $injector) {
 
           var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}"></div>', formName, formFieldName));
           var fieldType = formFieldElement[0].type;
@@ -98,6 +111,9 @@
             //radios tend to be wrapped, go up a few levels (of course you can customize this with your own strategy)
             formFieldElement.parent().parent().append(msgElement);
 
+          } else if (formFieldElement.parent().hasClass("input-group")) {
+            //if we have element inside input-group, then messages should be placed bellow it
+            formFieldElement.parent().after(msgElement);
           } else {
             formFieldElement.after(msgElement);
           }
@@ -105,7 +121,7 @@
           return msgElement;
         },
 
-        'hover': function (formFieldElement, formName, formFieldName, scope) {
+        'hover': function (formFieldElement, formName, formFieldName, scope, $injector) {
           var msgElement = angular.element(stringFormat('<div aa-val-msg-for="{0}.{1}" ng-show="showMessages && isHovered && errorMessages.length > 0"></div>', formName, formFieldName));
 
           formFieldElement.on('mouseenter', function () {
@@ -139,7 +155,7 @@
       //aaSpinnerClick strategies
       this.defaultSpinnerClickStrategy = "fontAwesomeInsideButton";
       this.spinnerClickStrategies = {
-        fontAwesomeInsideButton: function (buttonElement) {
+        fontAwesomeInsideButton: function (buttonElement, $injector) {
 
           var loading = angular.element('<i style="margin-left: 5px;" class="fa fa-spinner fa-spin"></i>');
 
@@ -169,7 +185,7 @@
         //VERY basic. For the love of everything holy please do something better with UI Bootstrap modal or something!
         //requires >= v0.2.10!
         confirmUiRouterAndDom: function (rootFormScope, rootForm, $injector) {
-          var confirmationMessage  = 'You have unsaved changes are you sure you want to navigate away?';
+          var confirmationMessage = 'You have unsaved changes are you sure you want to navigate away?';
 
           //ANGULAR UI ROUTER
           rootFormScope.$on('$stateChangeStart', function (event) {
@@ -194,12 +210,15 @@
           angular.element(window).on('beforeunload', beforeUnload);
 
           rootFormScope.$on('$destroy', function () {
-			angular.element(window).off('beforeunload', beforeUnload);
+            angular.element(window).off('beforeunload', beforeUnload);
           });
 
         },
         none: angular.noop
       };
+
+
+      this.defaultFieldName = "This field";
 
 
       //VALIDATION MESSAGES
@@ -212,8 +231,9 @@
         max: "{0} must be at most {1}.",
         pattern: "{0} is invalid.",
         url: "{0} must be a valid URL.",
-        number: "{0} must be number.",
-        unknown: "{0} is invalid."
+        number: "{0} must be a number.",
+        unknown: "{0} is invalid.",
+        validationTitle: 'There are some validation errors'
       };
 
       this.valMsgForTemplate = '<div class="validation-errors">' +
@@ -222,6 +242,10 @@
         '<div class="notch"></div>' +
         '</div>';
 
+      //hook for localization, if needed
+      this.fieldNameCustomizer = function(fieldName, $injector) {
+        return fieldName;
+      };
 
       this.confirmResetStrategy = function () {
         //this can be a promise or immediate like below
@@ -269,6 +293,9 @@
         messageOnBlur: true
       };
 
+      this.aaIsLoadingDoneDebounceMS = 500; //wait Xms before considered done loading to avoid avoid flickering
+      this.aaIsLoadingIgnoreTemplate = false; //should a template load trigger an aa loading
+
       this.$get = function () {
         return {
 
@@ -280,6 +307,9 @@
 
           validIconStrategy: self.validIconStrategy,
           validationMessages: self.validationMessages,
+          fieldNameCustomizer: self.fieldNameCustomizer,
+
+          defaultFieldName: self.defaultFieldName,
 
           valMsgForTemplate: self.valMsgForTemplate,
 
@@ -301,10 +331,40 @@
           availableForms: [], //all available ngForms in the application that could have errors *right now*
 
           //todo wire up
-          globalSettings: self.globalSettings
+          globalSettings: self.globalSettings,
+
+          aaIsLoadingDoneDebounceMS: self.aaIsLoadingDoneDebounceMS,
+          aaIsLoadingIgnoreTemplate: self.aaIsLoadingIgnoreTemplate
+
         };
       };
     });
+
+  //recurse up document tree starting with the current element to try to find
+  //and element with a given attribute. if found return it.
+  function findClosestEleWithAttr(ele, attr) {
+
+    var attrVal;
+
+    attrVal = ele.attr(attr);
+    if(attrVal) {
+      return attrVal;
+    }
+
+    var parent = ele.parent();
+
+    if(!parent.length) {
+      return;
+    }
+
+    attrVal = parent.attr(attr);
+    if(attrVal) {
+      return attrVal;
+    }
+
+    return findClosestEleWithAttr(parent, attr);
+  }
+
 
   function wrap(elms, wrapper) {
     var wrapperDiv = document.createElement('div');

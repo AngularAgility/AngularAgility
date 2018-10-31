@@ -1,0 +1,52 @@
+<html>
+    <head>
+        <title>Angular Agility Simple Example</title>
+        <link rel="stylesheet" href="aa.formExtensionsOptional.css"/>
+    </head>
+    <body>
+        <div ng-app="angularAgilitySimpleExample" ng-controller="indexCtrl">
+            <div ng-form="exampleForm">
+                <input type="email" aa-field-group="person.email" required/>
+                <input type="text" required ng-minlength="2" ng-maxlength="30" aa-field="person.firstName"/>
+                <input type="text" name="lastName" ng-model="person.lastName" required ng-minlength="2" ng-maxlength="30" aa-label="Last Name Custom" aa-val-msg aa-valid-icon/>
+                <input type="number" aa-field-group="person.favoriteNumber">
+                <input type="number" aa-field-group="person.age" min="0" max="140" required>
+                <input type="text" aa-field-group="person.favoriteLetter" maxlength="1" ng-pattern="/^[A-Za-z]$/" ng-pattern-msg="{0} must be a letter." required>
+                <input type="url" aa-field-group="person.favoriteWebsite" required>
+                <select aa-field-group="person.favoriteColor" ng-options="c.name for c in colors" required>
+                    <option value="">Select...</option>
+                </select>
+                <label>Gender *</label>
+                <div>
+                    <label>
+                        <input type="radio" name="gender" required aa-val-msg ng-model="person.gender" value="male"> Male
+                    </label>
+                    <label>
+                        <input type="radio" name="gender" required ng-model="person.gender" value="female"> Female
+                    </label>
+                </div>
+
+                <button aa-submit-form="save()" class="btn btn-default">Save</button>
+            </div>
+        </div>
+
+        <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.0-rc.1/angular.min.js"></script>
+        <script type="text/javascript" src="../dist/angular-agility.min.js"></script>
+        <script type="text/javascript">
+            angular
+                .module('angularAgilitySimpleExample', ['aa.formExtensions', 'aa.notify'])
+                .controller('indexCtrl', ['$scope', function ($scope) {
+                    $scope.colors = [
+                        { name: 'black' },
+                        { name: 'white' },
+                        { name: 'red' },
+                        { name: 'blue' },
+                        { name: 'yellow' }
+                    ];
+                    $scope.save = function () {
+                        alert('save button pushed - all fields passed validation!');
+                    };
+                }]);
+        </script>
+    </body>
+</html>

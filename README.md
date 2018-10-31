@@ -1,58 +1,80 @@
-#AngularAgility
+# AngularAgility
+
 [![Build Status][2]][1]
 [1]: https://travis-ci.org/AngularAgility/AngularAgility
 [2]: https://travis-ci.org/AngularAgility/AngularAgility.png (Build Status)
 
-A set of useful Angular extensions to improve productivity
+A set of useful Angular extensions to improve productivity.
 
-###[Live demo of this exact source here](http://angularagility.herokuapp.com/)
-###[API Docs](https://github.com/AngularAgility/AngularAgility/wiki/)
-
-Note all JavaScript/CSS that you might want to use is located in /src/*.*
-
-or
-
-```
-bower install angular-agility
-```
+### [Live demo of this exact source here](http://angularagility.herokuapp.com/)
+### [API Docs](https://github.com/AngularAgility/AngularAgility/wiki/)
 
 ## Installation
 
+Note all JavaScript/CSS that you might want to use is located in `/src/**/*`.
+
+Or install with:
+
+```
+npm install -S angular-agility
+```
+
+or:
+
+```
+bower install -S angular-agility
+```
+
+For TypeScript 2.0+ type definitions, use:
+```
+npm install -D @types/angular-agility
+```
+
 AngularJS is the only dependency.
 
-Add the AngularAgility dependencies to your Angular module definition:
+For example for FormExtensions add the following dependencies to your Angular module definition. (aaNotify is baked in and allows for notifications. Disableable, see provider.js)
 
 ```javascript
 angular.module('myModule', ['aa.formExtensions', 'aa.notify']);
 ```
 
-#Form Extensions
+# Form Extensions
 [Blog Posts](http://johnculviner.com/category/form-extensions/) |
 [Source](https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.formExtensions.js) |
 [API Docs](https://github.com/AngularAgility/AngularAgility/wiki/Form-Extensions-API-Docs) |
 [Live Demo](http://angularagility.herokuapp.com/#/formExtensions/formExtensions/basic)
 
-Angular.js form validation is likely one of the best takes on form validation out there. Unfortunately it can often be a little TOO flexible for many applications where you want basic error message display and generation
+AngularJS form validation is likely one of the best takes on form validation out there. Unfortunately it can often be a little TOO flexible for many applications where you want basic error message display and generation
 without having to dive into the form object model and manually construct basic messages for each field.
 
-This is where Form Extensions comes in. It **works with built in Angular.js validation** to:
-* Drastically reduce the amount of boilerplate, repetitive, error-prone HTML required to produce forms, labels and validation messages.
-* Automatically generate Angular.js fields for use in form validation, their error messages AND labels.
+This is where Form Extensions comes in. It **works with built in AngularJS validation and TBS3 (by default)** to:
+* Drastically reduce the amount of boilerplate, repetitive, error-prone HTML required to produce forms, labels and validation messages. Comes with support for Twitter Bootstrap 3 baked in but free to do whatever you want (see last bullet).
+* Automatically generate AngularJS fields for use in form validation, their error messages AND labels.
 * On blur and on invalid submit attempt showing of validation messages.
-* Form extensions programatically extends forms at myForm.$aaFormExtensions = {...}
+* Form extensions programatically extends forms at `myForm.$aaFormExtensions = {...}`.
 * Code is cleaner and easier to read. Form Extensions is DSL that distills your HTML down to only what is required.
 * Feel free to use full blown markup whenever you want complete control.
 * Mix and match the directive components of Form Extensions to get exactly what you'd like for each situation.
-* It does exactly what you want: Everything is overridable on a global and per-instance basis through a rich provider model.
+* It does exactly what you want: *EVERYTHING* is overridable on a global and per-instance basis through a rich provider model. AKA if you don't like how it looks right now you can change it. Heck you don't even need to use Twitter Bootstrap even.
+    * Any of the [strategies in provider.js](https://github.com/AngularAgility/AngularAgility/blob/master/src/formExtensions/provider.js) can be readily customized doing something like this:
+```
+myApp.config(function(aaFormExtensionsProvider) {
+    aaFormExtensionsProvider.onNavigateAwayStrategies.myCustomStrategy = function(rootFormScope, rootForm, $injector){/*...*/};
+    aaFormExtensionsProvider.defaultOnNavigateAwayStrategy = 'myCustomStrategy';
+    //etc, look at provider.js to see what is available
+})
+```
 
-###Demo
+Note all of the strategies include an `$injector` as the last argument so that you can bring in your own Angular dependencies (or perhaps even do a `$compile` if you wanted inside).
+
+### Demo
 * [Live demo of this exact source](http://angularagility.herokuapp.com/)
-* Local demo: Download the source code, go to the demo folder and run "npm install" then "node server.js".
+* Local demo: Download the source code, go to the demo folder and run `npm install` then `node server.js`.
 * [Basic demo BEFORE Form Extensions](http://plnkr.co/edit/PS0sNo?p=preview)
 * [Basic demo AFTER Form Extensions](http://plnkr.co/edit/e8YiZ0?p=preview)
 
-###In a nutshell
-####With Form Extensions:
+### In a nutshell
+#### With Form Extensions:
 
 ```html
 <div ng-form="exampleForm" class="form-horizontal">
@@ -60,7 +82,7 @@ This is where Form Extensions comes in. It **works with built in Angular.js vali
 </div>
 ```
 
-####Without Form Extensions:
+#### Without Form Extensions:
 
 ```html
 <div ng-form="exampleForm" class="form-horizontal">
@@ -69,9 +91,9 @@ This is where Form Extensions comes in. It **works with built in Angular.js vali
             Age *
         </label>
         <div class="col-sm-3">
-            <input type="number" class="form-control" ng-model="person.age" 
+            <input type="number" class="form-control" ng-model="person.age"
             name="age" id="age" min="0" max="140" required />
-    
+
             <div class="validation-error" ng-show="(exampleForm.age.$dirty || invalidSubmitAttempt) && exampleForm.age.$error.number">
                 Age must be a number
             </div>
@@ -117,41 +139,43 @@ var app = angular.module('app', ['aa.formExternalConfiguration', 'aa.notify'])
 ```
 
 
-#Advanced Form Extensions
+# Advanced Form Extensions
 [Blog Posts](http://johnculviner.com/category/form-extensions/) |
 [Source](https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.formExtensions.js) |
 [API Docs](https://github.com/AngularAgility/AngularAgility/wiki/Form-Extensions-API-Docs) |
 [Live Demo](http://angularagility.herokuapp.com/#/formExtensions/formExtensions/advanced)
-###Form changed tracking
+### Form changed tracking
 Form changed tracking means deviation from the initial state of the form† indicates that a form changed. You can change a field and set it back to it's initial state and aaFormExtensions considers the field AND the form no longer changed (all values are equal to their init state†).
 
 Angular considers the field/form dirty still since it was touched (yet changed back to initial state).
 
-###Form reset
+### Form reset
 Sets the state of the form back to it's original state†:
 ```javascript
-personForm.$aaFormExtensions.$reset(/*optional runAfterFunc(){ }*/);
+personForm.$aaFormExtensions.$reset(/*optional shouldNotConfirmReset*/);
 ```
 †AFTER AJAX. All native Angular AJAX requests are counted by aaLoadingWatcher and a form isn't considered loaded until pending AJAX requests have completed. If you have other types of loading to account for simply use aaLoadingWatcher.increment()/.decrement() API to count them.
 
-###Reset initial form state
-The current state of the form will be considered it's initial state (any changes from here are now $changed):
+### Reset initial form state
+The current state of the form will be considered it's initial state (any changes from here are now `$changed`):
 
 ```javascript
-personForm.$aaFormExtensions.$resetChanged(/*optional runAfterFunc(){ }*/);
+personForm.$aaFormExtensions.$resetChanged();
 ```
 
-###Loading indicators
+### Loading indicators
 isLoading boolean is available from aaLoadingWatcher.isLoading factory or:
 $rootScope.aaIsLoading = false
 
-###On-navigate away handling
-Includes (by default, overridable) detection of Angular UI Router $stateChangeStart. If the root form in the view is myForm.$aaFormExtensions.$changed it will block with a JavaScript confirm. Please customize this with however you are doing modals. I would recommend Angular UI Modal. Then register your own custom strategy:
+### On-navigate away handling
+Includes (by default, overridable) detection of AngularUI Router `$stateChangeStart`. If the root form in the view is `myForm.$aaFormExtensions.$changed` it will block with a JavaScript confirm. Please customize this with however you are doing modals. I would recommend AngularUI Modal. Then register your own custom strategy:
 
-```javascript
-aaFormExtensionsProvider.myCustomStrategy = function(rootFormScope, rootForm, $injector){/*...*/};
- 
-aaFormExtensionsProvider.defaultOnNavigateAwayStrategy = 'myCustomStrategy';
+```js
+myApp.config(function(aaFormExtensionsProvider) {
+    aaFormExtensionsProvider.onNavigateAwayStrategies.myCustomStrategy = function(rootFormScope, rootForm, $injector){/*...*/};
+    aaFormExtensionsProvider.defaultOnNavigateAwayStrategy = 'myCustomStrategy';
+    //etc, look at provider.js to see what is available
+})
 ```
 Use to ignore on a per form basis (if you registered a global default):
 
@@ -159,20 +183,20 @@ Use to ignore on a per form basis (if you registered a global default):
 <div ng-form="myForm" on-navigate-away-strategy="none">...</div>
 ```
 
-#Notify
-###Fully customizable/configurable growl, toastr style notifications done right
+# Notify
+### Fully customizable/configurable growl, toastr style notifications done right
 [Blog Posts](http://johnculviner.com/) |
 [Source](https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.notify.js) |
 [API Docs](https://github.com/AngularAgility/AngularAgility/wiki/Notify-API-Docs) |
 [Live Demo](http://angularagility.herokuapp.com/#/notify)
 
-###1. Put a notification directive somewhere in the DOM with the markup for how you want it positioned
+### 1. Put a notification directive somewhere in the DOM with the markup for how you want it positioned
 ```html
 <!-- probably use a CSS class IRL but you get the point-->
 <div aa-notify style="position: fixed; bottom: 25px; right: 25px;"></div>
 ```
 
-###2. Call it from your code!
+### 2. Call it from your code!
 ```javascript
 angular.module('myApp')
 .controller('myController', function($scope, aaNotify, $timeout) {
@@ -217,19 +241,19 @@ angular.module('myApp')
 })
 ```
 
-####It does much more than this, advanced demos coming soon!
+#### It does much more than this, advanced demos coming soon!
 
-#Select 2
+# Select 2
 [Blog Posts](http://johnculviner.com/) |
 [Source](https://github.com/AngularAgility/AngularAgility/blob/master/src/aa.select2.js) |
 [API Docs](https://github.com/AngularAgility/AngularAgility/wiki/Select2-Docs) |
 [Live Demo](http://angularagility.herokuapp.com/#/select2)
-###Headache free use of Select2 with Angular for most common tasks
-First off, there are a few other Select2 directives out there. This one is different in that it is specifically designed to easily work with binding ids, objects, arrays, AJAX queries etc. for some pretty common use cases (see examples!)
+### Headache free use of Select2 with Angular for most common tasks
+First off, there are a few other Select2 directives out there. This one is different in that it is specifically designed to easily work with binding ids, objects, arrays, AJAX queries, etc. for some pretty common use cases (see examples!).
 
 It abstracts away the complicated Select2 API (lots of examples below!) and should make it pretty easy to do a lot of things without writing a bunch of hacks. You can still always call the select2 API directly if you want. See examples below!
 
-It offers no support for the basic 'replace a <select> list and <option>' functionality: This is desgined for working with JavaScript object data (as you generally do with Angular). Not what you want? Take a look at the AngularUI one.
+It offers no support for the basic 'replace a `<select>` list and `<option>`' functionality: This is designed for working with JavaScript object data (as you generally do with Angular). Not what you want? Take a look at the AngularUI one.
 
 Interactive demos here:
 [Demos](http://angularagility.herokuapp.com/#/select2)  

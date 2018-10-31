@@ -10,31 +10,9 @@
 
   angular.module('aa.formExtensions')
     //generate a label for an input generating an ID for it if it doesn't already exist
-    .directive('aaLabel', ['aaFormExtensions', 'aaUtils', '$compile', function (aaFormExtensions, aaUtils, $compile) {
+    .directive('aaLabel', ['aaFormExtensions', 'aaUtils', '$compile', '$injector', function (aaFormExtensions, aaUtils, $compile, $injector) {
       return {
         compile: function (element, attrs) {
-
-          //add default option if specified
-          //if this is a select with a default-option attribute add a default option (per ng spec)
-          if (element.prop('tagName').toUpperCase() === 'SELECT' && attrs.defaultOption !== undefined) {
-
-            var msg = attrs.defaultOption;
-
-            if (msg === null || msg === "") {
-
-              //gen one
-              msg = 'Select';
-
-              if (attrs.aaLabel) {
-                msg += ' a ' + attrs.aaLabel;
-              }
-
-              msg += '...';
-            }
-
-            element.append(angular.element('<option value=""></option>').html(msg));
-          }
-
           return function (scope, element, attrs) {
             var strategy = aaFormExtensions.labelStrategies[attrs.aaLabelStrategy];
 
@@ -58,7 +36,7 @@
               element[0].id = aaUtils.guid();
             }
 
-            var label = strategy(element, attrs.aaLabel, isRequiredField);
+            var label = strategy(element, attrs.aaLabel, isRequiredField, $injector);
             if (label) {
                 $compile(label)(scope);
             }
